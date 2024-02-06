@@ -1,10 +1,10 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Button, Field, Input, useStyles2, FieldSet, SecretInput } from '@grafana/ui';
 import { PluginConfigPageProps, AppPluginMeta, PluginMeta, GrafanaTheme2 } from '@grafana/data';
-import { getBackendSrv, locationService } from '@grafana/runtime';
+import {FetchResponse, getBackendSrv, locationService} from '@grafana/runtime';
 import { css } from '@emotion/css';
 import { testIds } from '../testIds';
-import { lastValueFrom } from 'rxjs';
+import {lastValueFrom, Observable} from "rxjs";
 
 export type JsonData = {
   apiUrl?: string;
@@ -187,7 +187,7 @@ export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) 
     url: `/api/plugins/${pluginId}/settings`,
     method: 'POST',
     data,
-  });
+  }) as unknown as Observable<FetchResponse>;
 
   const dataResponse = await lastValueFrom(response);
 
