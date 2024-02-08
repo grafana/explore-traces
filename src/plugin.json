@@ -23,7 +23,7 @@
       "name": "Explore",
       "path": "/a/%PLUGIN_ID%/",
       "role": "Viewer",
-      "addToNav": false,
+      "addToNav": true,
       "defaultNav": true
     }
   ],

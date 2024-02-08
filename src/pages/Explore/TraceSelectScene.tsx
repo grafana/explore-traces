@@ -2,7 +2,6 @@ import { css } from '@emotion/css';
 import React from 'react';
 
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
-import { InlineSelect } from '@grafana/experimental';
 import {
   SceneObjectState,
   SceneObjectBase,
@@ -18,7 +17,7 @@ import { useStyles2, Tab, TabsBar } from '@grafana/ui';
 import { SelectServiceNameAction } from './SelectServiceName';
 import { explorationDS } from './shared';
 import { getColorByIndex } from './utils';
-import {ByFrameRepeater} from "./TracesTabs/ByFrameRepeater";
+import { ByFrameRepeater } from './TracesTabs/ByFrameRepeater';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -69,7 +68,7 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
                 .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
                 .setOption('legend', { showLegend: false })
                 .setCustomFieldConfig('fillOpacity', 9)
-                .setHeaderActions(new SelectServiceNameAction({ frame }))
+                .setHeaderActions(new SelectServiceNameAction({ value: getLabelValue(frame) }))
                 .build(),
             });
           },
@@ -89,18 +88,18 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <InlineSelect
-            label="Function"
-            options={[
-              { value: 'rate', label: 'Rate' },
-              { value: 'count', label: 'Count' },
-              { value: 'avg', label: 'Avg Duration' },
-              { value: 'max', label: 'Max Duration' },
-            ]}
-            value={'rate'}
-            onChange={model.onTogglePreviews}
-            width={30}
-          />
+          {/*<InlineSelect*/}
+          {/*  label="Function"*/}
+          {/*  options={[*/}
+          {/*    { value: 'rate', label: 'Rate' },*/}
+          {/*    { value: 'count', label: 'Count' },*/}
+          {/*    { value: 'avg', label: 'Avg Duration' },*/}
+          {/*    { value: 'max', label: 'Max Duration' },*/}
+          {/*  ]}*/}
+          {/*  value={'rate'}*/}
+          {/*  onChange={model.onTogglePreviews}*/}
+          {/*  width={30}*/}
+          {/*/>*/}
         </div>
         <TabsBar>
           {['Service Name', 'Cluster', 'Namespace'].map((tab, index) => {
@@ -114,12 +113,18 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
 }
 
 function getLabelValue(frame: DataFrame) {
-  const name = frame.fields[1]?.name;
+  const labels = frame.fields[1]?.labels;
 
-  if (!name) {
-    return 'No name';
+  if (!labels) {
+    return 'No labels';
   }
-  return name;
+
+  const keys = Object.keys(labels);
+  if (keys.length === 0) {
+    return 'No labels';
+  }
+
+  return labels[keys[0]];
 }
 
 function buildQuery() {

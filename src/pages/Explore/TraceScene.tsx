@@ -20,7 +20,6 @@ import {
 } from '@grafana/scenes';
 import { Box, Stack, Tab, TabsBar, ToolbarButton, useStyles2 } from '@grafana/ui';
 
-
 import { ShareExplorationButton } from './ShareExplorationButton';
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
 import { buildTracesListScene } from './TracesTabs/TracesListScene';
@@ -32,7 +31,7 @@ import {
   explorationDS,
   VAR_FILTERS,
   VAR_TRACE_Q,
-  VAR_TRACE_Q_EXP,
+  VAR_FILTERS_EXPR,
 } from './shared';
 import { getExplorationFor } from './utils';
 
@@ -66,14 +65,6 @@ export class TraceScene extends SceneObjectBase<TraceSceneState> {
     if (this.state.actionView === undefined) {
       this.setActionView('overview');
     }
-
-    const variable = sceneGraph.lookupVariable('filters', this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
-    }
-    variable.state.set.state.filters.push({ key: 'span.beast', value: '', operator: '=', condition: '' });
-    variable.state.set.state.filters.push({ key: 'span.http.status_code', value: '', operator: '=', condition: '' });
-    variable.state.set.forceRender();
   }
 
   private onReferencedVariableValueChanged() {
@@ -220,7 +211,7 @@ const MAIN_PANEL_MAX_HEIGHT = '30%';
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_TRACE_Q_EXP}} | select(status)`,
+    query: `{${VAR_FILTERS_EXPR}} | select(status)`,
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,

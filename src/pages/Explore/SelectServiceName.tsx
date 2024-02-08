@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { DataFrame } from '@grafana/data';
 import {
   SceneObjectState,
   SceneObjectBase,
@@ -13,7 +12,7 @@ import { Button } from '@grafana/ui';
 import { ServiceNameSelectedEvent } from './shared';
 
 export interface SelectServiceNameActionState extends SceneObjectState {
-  frame: DataFrame;
+  value: string;
 }
 
 export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameActionState> {
@@ -23,8 +22,7 @@ export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameAc
       return;
     }
 
-    const name = this.state.frame.fields[1]?.name;
-    if (!name || name.length === 0) {
+    if (!this.state.value) {
       return;
     }
 
@@ -34,7 +32,14 @@ export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameAc
         {
           key: 'resource.service.name',
           operator: '=',
-          value: name,
+          value: this.state.value,
+          condition: '',
+        },
+        {
+          key: 'span.http.method',
+          operator: '=',
+          value: 'GET',
+          condition: '',
         },
       ],
     });

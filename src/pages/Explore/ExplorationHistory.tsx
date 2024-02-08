@@ -47,19 +47,6 @@ export class ExplorationHistory extends SceneObjectBase<DataExplorationsHistoryS
       this.addExplorationStep(exploration, 'start');
     }
 
-    exploration.subscribeToState((newState, oldState) => {
-      if (newState.metric !== oldState.metric) {
-        if (this.state.steps.length === 1) {
-          // For the first step we want to update the starting state so that it contains data
-          this.state.steps[0].explorationState = sceneUtils.cloneSceneObjectState(oldState, { history: this });
-        }
-
-        if (newState.metric) {
-          this.addExplorationStep(exploration, 'metric');
-        }
-      }
-    });
-
     exploration.subscribeToEvent(SceneVariableValueChangedEvent, (evt) => {
       if (evt.payload.state.name === VAR_FILTERS) {
         this.addExplorationStep(exploration, 'filters');
@@ -108,7 +95,6 @@ export class ExplorationHistory extends SceneObjectBase<DataExplorationsHistoryS
     return (
       <Stack direction="column">
         <div>{step.type}</div>
-        {step.type === 'metric' && <div>{step.explorationState.metric}</div>}
       </Stack>
     );
   }
@@ -139,7 +125,7 @@ export class ExplorationHistory extends SceneObjectBase<DataExplorationsHistoryS
 
     return (
       <div className={styles.container}>
-        <div className={styles.heading}>Exploration</div>
+        <div className={styles.heading}>History</div>
         {steps.map((step, index) => (
           <Tooltip content={() => model.renderStepTooltip(step)} key={index}>
             <button

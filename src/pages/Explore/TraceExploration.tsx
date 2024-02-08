@@ -26,12 +26,7 @@ import { useStyles2 } from '@grafana/ui';
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TraceScene } from './TraceScene';
 import { TraceSelectScene } from './TraceSelectScene';
-import {
-  ServiceNameSelectedEvent,
-  explorationDS,
-  VAR_DATASOURCE,
-  VAR_FILTERS,
-} from './shared';
+import { ServiceNameSelectedEvent, explorationDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getUrlForExploration } from './utils';
 
 export interface TraceExplorationState extends SceneObjectState {
@@ -43,18 +38,15 @@ export interface TraceExplorationState extends SceneObjectState {
   // just for for the starting data source
   initialDS?: string;
   initialFilters?: AdHocVariableFilter[];
-
-  // Synced with url
-  metric?: string;
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metric', 'explorationType'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: [] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
-      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
+      $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
@@ -115,10 +107,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       getUrlSyncManager().cleanUp(this);
     }
 
-    if (!step.explorationState.metric) {
-      step.explorationState.metric = undefined;
-    }
-
     this.setState(step.explorationState);
 
     if (!this.state.embedded) {
@@ -140,7 +128,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { };
+    return {};
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -176,11 +164,7 @@ function getTopSceneForTrace(variable: AdHocFiltersVariable) {
   return new TraceScene({});
 }
 
-function getVariableSet(
-  initialDS?: string,
-  metric?: string,
-  initialFilters?: AdHocVariableFilter[]
-) {
+function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
       new DataSourceVariable({
@@ -194,9 +178,18 @@ function getVariableSet(
         datasource: explorationDS,
         layout: 'vertical',
         filters: initialFilters ?? [],
+        expressionBuilder: renderTraceQLLabelFilters,
       }),
     ],
   });
+}
+
+export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
+  return filters.map((filter) => renderFilter(filter)).join('&&');
+}
+
+function renderFilter(filter: AdHocVariableFilter) {
+  return `${filter.key}${filter.operator}"${filter.value}"`;
 }
 
 function getStyles(theme: GrafanaTheme2) {
@@ -207,6 +200,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
       minHeight: '100%',
       flexDirection: 'column',
+      padding: theme.spacing(2),
     }),
     body: css({
       flexGrow: 1,
