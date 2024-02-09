@@ -12,8 +12,6 @@ export const EXPLORATIONS_ROUTE = '/explore/metrics/exploration';
 
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
-export const VAR_TRACE_Q = 'traceQ';
-export const VAR_TRACE_Q_EXP = '${traceQ}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 

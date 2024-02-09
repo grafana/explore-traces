@@ -19,10 +19,10 @@ import {
 } from '@grafana/scenes';
 import { useStyles2, Tab, TabsBar, Select } from '@grafana/ui';
 
-import { SelectServiceNameAction } from './SelectServiceName';
-import { explorationDS } from './shared';
+import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
+import { explorationDS, VAR_FILTERS_EXPR } from './shared';
 import { getColorByIndex } from './utils';
-import { ByFrameRepeater } from './TracesTabs/ByFrameRepeater';
+import { ByFrameRepeater } from './ByFrameRepeater';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -36,12 +36,12 @@ export interface TraceSelectSceneState extends SceneObjectState {
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
-const VAR_GROUPBY = 'groupBy';
+export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
 const VAR_METRIC_FN = 'fn';
 const VAR_METRIC_FN_EXPR = '${fn}';
 
-export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
+export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_GROUPBY, VAR_METRIC_FN],
   });
@@ -86,7 +86,7 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
                 .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
                 .setOption('legend', { showLegend: false })
                 .setCustomFieldConfig('fillOpacity', 9)
-                .setHeaderActions(new SelectServiceNameAction({ value: getLabelValue(frame) }))
+                .setHeaderActions(new SelectAttributeWithValueAction({ value: getLabelValue(frame) }))
                 .build(),
             });
           },
@@ -126,7 +126,7 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
     metricFnVariable.changeValueTo(value);
   };
 
-  public static Component = ({ model }: SceneComponentProps<TraceSelectScene>) => {
+  public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
@@ -140,7 +140,7 @@ export class TraceSelectScene extends SceneObjectBase<TraceSelectSceneState> {
             options={metricFnOptions}
             value={metricFnValue}
             onChange={(value) => model.onChangeMetricsFn(value.value)}
-            width={30}
+            width={20}
             placeholder={'Select function'}
           />
         </div>
@@ -206,7 +206,7 @@ function getVariableSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
+    query: `{${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
     queryType: 'traceql',
     filters: [],
   };

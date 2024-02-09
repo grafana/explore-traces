@@ -6,16 +6,18 @@ import {
   SceneComponentProps,
   sceneGraph,
   AdHocFiltersVariable,
+  CustomVariable,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
 import { ServiceNameSelectedEvent } from './shared';
+import { VAR_GROUPBY } from './SelectStartingPointScene';
 
-export interface SelectServiceNameActionState extends SceneObjectState {
+export interface SelectAttributeWithValueActionState extends SceneObjectState {
   value: string;
 }
 
-export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameActionState> {
+export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttributeWithValueActionState> {
   public onClick = () => {
     const variable = sceneGraph.lookupVariable('filters', this);
     if (!(variable instanceof AdHocFiltersVariable)) {
@@ -26,25 +28,25 @@ export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameAc
       return;
     }
 
+    const groupByVariable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
+    if (!(groupByVariable instanceof CustomVariable)) {
+      return;
+    }
+
     variable.state.set.setState({
       filters: [
         ...variable.state.set.state.filters,
         {
-          key: 'resource.service.name',
+          key: groupByVariable.getValue().toString(),
           operator: '=',
           value: this.state.value,
-        },
-        {
-          key: 'span.http.method',
-          operator: '=',
-          value: 'GET',
         },
       ],
     });
     this.publishEvent(new ServiceNameSelectedEvent(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SelectServiceNameAction>) => {
+  public static Component = ({ model }: SceneComponentProps<SelectAttributeWithValueAction>) => {
     return (
       <Button variant="primary" size="sm" fill="text" onClick={model.onClick}>
         Select

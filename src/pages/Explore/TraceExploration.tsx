@@ -24,8 +24,8 @@ import {
 import { useStyles2 } from '@grafana/ui';
 
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
-import { TraceScene } from './TraceScene';
-import { TraceSelectScene } from './TraceSelectScene';
+import { TracesByServiceScene } from './TracesByService/TracesByServiceScene';
+import { SelectStartingPointScene } from './SelectStartingPointScene';
 import { ServiceNameSelectedEvent, explorationDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getUrlForExploration } from './utils';
 
@@ -35,7 +35,7 @@ export interface TraceExplorationState extends SceneObjectState {
   controls: SceneObject[];
   history: ExplorationHistory;
 
-  // just for for the starting data source
+  // just for the starting data source
   initialDS?: string;
   initialFilters?: AdHocVariableFilter[];
 }
@@ -159,9 +159,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
 function getTopSceneForTrace(variable: AdHocFiltersVariable) {
   if (variable.state.set.state.filters.length === 0) {
-    return new TraceSelectScene({});
+    return new SelectStartingPointScene({});
   }
-  return new TraceScene({});
+  return new TracesByServiceScene({});
 }
 
 function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {

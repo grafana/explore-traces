@@ -3,9 +3,7 @@ import React from 'react';
 
 import { DashboardCursorSync, GrafanaTheme2 } from '@grafana/data';
 import {
-  AdHocFiltersVariable,
   behaviors,
-  CustomVariable,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
@@ -15,41 +13,32 @@ import {
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
   SceneQueryRunner,
-  SceneVariableSet,
-  VariableDependencyConfig,
 } from '@grafana/scenes';
 import { Box, Stack, Tab, TabsBar, ToolbarButton, useStyles2 } from '@grafana/ui';
 
-import { ShareExplorationButton } from './ShareExplorationButton';
+import { ShareExplorationButton } from '../ShareExplorationButton';
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
-import { buildTracesListScene } from './TracesTabs/TracesListScene';
+import { buildTracesListScene } from './Tabs/TracesListScene';
 import {
   ActionViewDefinition,
   ActionViewType,
   MakeOptional,
   OpenEmbeddedExplorationEvent,
   explorationDS,
-  VAR_FILTERS,
-  VAR_TRACE_Q,
   VAR_FILTERS_EXPR,
-} from './shared';
-import { getExplorationFor } from './utils';
+} from '../shared';
+import { getExplorationFor } from '../utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   actionView?: string;
 }
 
-export class TraceScene extends SceneObjectBase<TraceSceneState> {
+export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERS],
-    onReferencedVariableValueChanged: this.onReferencedVariableValueChanged.bind(this),
-  });
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
-      $variables: state.$variables ?? getVariableSet(),
       body: state.body ?? buildGraphScene(),
       $data: new SceneQueryRunner({
         datasource: explorationDS,
@@ -65,29 +54,6 @@ export class TraceScene extends SceneObjectBase<TraceSceneState> {
     if (this.state.actionView === undefined) {
       this.setActionView('overview');
     }
-  }
-
-  private onReferencedVariableValueChanged() {
-    this.updateQuery();
-  }
-
-  private updateQuery() {
-    console.log('updateQuery');
-    const variable = sceneGraph.lookupVariable('filters', this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
-    }
-    const traceQvar = sceneGraph.lookupVariable(VAR_TRACE_Q, this);
-    if (!(traceQvar instanceof CustomVariable)) {
-      return;
-    }
-    console.log('updateQuery', variable.state.set.state.filters, traceQvar.state);
-    traceQvar.changeValueTo(
-      variable.state.set.state.filters
-        .filter((f) => f.value)
-        .map((f) => `${f.key}${f.operator}"${f.value}"`)
-        .join(' && ')
-    );
   }
 
   getUrlState() {
@@ -124,7 +90,7 @@ export class TraceScene extends SceneObjectBase<TraceSceneState> {
     }
   }
 
-  static Component = ({ model }: SceneComponentProps<TraceScene>) => {
+  static Component = ({ model }: SceneComponentProps<TracesByServiceScene>) => {
     const { body } = model.useState();
     return <body.Component model={body} />;
   };
@@ -146,7 +112,7 @@ export class TracesActionBar extends SceneObjectBase<TracesActionBarState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<TracesActionBar>) => {
-    const metricScene = sceneGraph.getAncestor(model, TraceScene);
+    const metricScene = sceneGraph.getAncestor(model, TracesByServiceScene);
     const styles = useStyles2(getStyles);
     const exploration = getExplorationFor(model);
     const { actionView } = metricScene.useState();
@@ -191,18 +157,6 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
   };
-}
-
-function getVariableSet() {
-  return new SceneVariableSet({
-    variables: [
-      new CustomVariable({
-        name: VAR_TRACE_Q,
-        value: '',
-        text: '',
-      }),
-    ],
-  });
 }
 
 const MAIN_PANEL_MIN_HEIGHT = 200;
