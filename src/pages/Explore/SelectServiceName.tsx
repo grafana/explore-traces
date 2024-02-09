@@ -33,13 +33,11 @@ export class SelectServiceNameAction extends SceneObjectBase<SelectServiceNameAc
           key: 'resource.service.name',
           operator: '=',
           value: this.state.value,
-          condition: '',
         },
         {
           key: 'span.http.method',
           operator: '=',
           value: 'GET',
-          condition: '',
         },
       ],
     });
