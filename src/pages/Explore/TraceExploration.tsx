@@ -9,7 +9,6 @@ import {
   getUrlSyncManager,
   SceneComponentProps,
   SceneControlsSpacer,
-  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -26,14 +25,17 @@ import { useStyles2 } from '@grafana/ui';
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from './TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
-import { ServiceNameSelectedEvent, explorationDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
+import { StartingPointSelectedEvent, explorationDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getUrlForExploration } from './utils';
+
+type TraceExplorationMode = 'start' | 'traces';
 
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
-  embedded?: boolean;
   controls: SceneObject[];
   history: ExplorationHistory;
+
+  mode?: TraceExplorationMode;
 
   // just for the starting data source
   initialDS?: string;
@@ -41,7 +43,7 @@ export interface TraceExplorationState extends SceneObjectState {
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: [] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode'] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -61,16 +63,12 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   public _onActivate() {
-    const variable = sceneGraph.lookupVariable('filters', this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
-    }
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopSceneForTrace(variable) });
+      this.setState({ topScene: getTopScene(this.state.mode) });
     }
 
     // Some scene elements publish this
-    this.subscribeToEvent(ServiceNameSelectedEvent, this._handleServiceNameSelectedEvent.bind(this));
+    this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
 
     // Pay attention to changes in history (i.e., changing the step)
     this.state.history.subscribeToState((newState, oldState) => {
@@ -96,43 +94,36 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     });
 
     return () => {
-      if (!this.state.embedded) {
-        getUrlSyncManager().cleanUp(this);
-      }
+      getUrlSyncManager().cleanUp(this);
     };
   }
 
   private goBackToStep(step: ExplorationHistoryStep) {
-    if (!this.state.embedded) {
-      getUrlSyncManager().cleanUp(this);
-    }
+    getUrlSyncManager().cleanUp(this);
 
     this.setState(step.explorationState);
 
-    if (!this.state.embedded) {
-      locationService.replace(getUrlForExploration(this));
+    locationService.replace(getUrlForExploration(this));
 
-      getUrlSyncManager().initSync(this);
-    }
+    getUrlSyncManager().initSync(this);
   }
 
-  private _handleServiceNameSelectedEvent(evt: ServiceNameSelectedEvent) {
-    const variable = sceneGraph.lookupVariable('filters', this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
-    }
-    console.log('_handleServiceNameSelectedEvent', variable);
-    if (variable.state.set.state.filters.length > 0) {
-      this.setState({ topScene: getTopSceneForTrace(variable) });
-    }
+  private _handleStartingPointSelected(evt: StartingPointSelectedEvent) {
+    locationService.partial({ mode: 'traces' });
   }
 
   getUrlState() {
-    return {};
+    return { mode: this.state.mode };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
     const stateUpdate: Partial<TraceExplorationState> = {};
+
+    if (values.mode !== this.state.mode) {
+      const mode: TraceExplorationMode = (values.mode as TraceExplorationMode) ?? 'start';
+      stateUpdate.mode = mode;
+      stateUpdate.topScene = getTopScene(mode);
+    }
 
     this.setState(stateUpdate);
   }
@@ -157,11 +148,11 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   };
 }
 
-function getTopSceneForTrace(variable: AdHocFiltersVariable) {
-  if (variable.state.set.state.filters.length === 0) {
-    return new SelectStartingPointScene({});
+function getTopScene(mode?: TraceExplorationMode) {
+  if (mode === 'traces') {
+    return new TracesByServiceScene({});
   }
-  return new TracesByServiceScene({});
+  return new SelectStartingPointScene({});
 }
 
 function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {
@@ -173,7 +164,7 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
         value: initialDS,
         pluginId: 'tempo',
       }),
-      AdHocFiltersVariable.create({
+      new AdHocFiltersVariable({
         name: VAR_FILTERS,
         datasource: explorationDS,
         layout: 'vertical',

@@ -19,10 +19,6 @@ export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-export class ServiceNameSelectedEvent extends BusEventBase {
-  public static type = 'service-name-selected-event';
-}
-
-export class OpenEmbeddedExplorationEvent extends BusEventBase {
-  public static type = 'open-embedded-exploration-event';
+export class StartingPointSelectedEvent extends BusEventBase {
+  public static type = 'start-point-selected-event';
 }

@@ -10,7 +10,7 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { ServiceNameSelectedEvent } from './shared';
+import { StartingPointSelectedEvent } from './shared';
 import { VAR_GROUPBY } from './SelectStartingPointScene';
 
 export interface SelectAttributeWithValueActionState extends SceneObjectState {
@@ -33,9 +33,9 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
       return;
     }
 
-    variable.state.set.setState({
+    variable.setState({
       filters: [
-        ...variable.state.set.state.filters,
+        ...variable.state.filters,
         {
           key: groupByVariable.getValue().toString(),
           operator: '=',
@@ -43,7 +43,7 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
         },
       ],
     });
-    this.publishEvent(new ServiceNameSelectedEvent(), true);
+    this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
   public static Component = ({ model }: SceneComponentProps<SelectAttributeWithValueAction>) => {

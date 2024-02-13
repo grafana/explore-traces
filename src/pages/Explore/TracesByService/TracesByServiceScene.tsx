@@ -14,19 +14,12 @@ import {
   SceneObjectUrlValues,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import { Box, Stack, Tab, TabsBar, ToolbarButton, useStyles2 } from '@grafana/ui';
+import { Box, Stack, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { ShareExplorationButton } from '../ShareExplorationButton';
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
 import { buildTracesListScene } from './Tabs/TracesListScene';
-import {
-  ActionViewDefinition,
-  ActionViewType,
-  MakeOptional,
-  OpenEmbeddedExplorationEvent,
-  explorationDS,
-  VAR_FILTERS_EXPR,
-} from '../shared';
+import { ActionViewDefinition, ActionViewType, MakeOptional, explorationDS, VAR_FILTERS_EXPR } from '../shared';
 import { getExplorationFor } from '../utils';
 
 export interface TraceSceneState extends SceneObjectState {
@@ -107,10 +100,6 @@ const actionViewsDefinitions: ActionViewDefinition[] = [
 export interface TracesActionBarState extends SceneObjectState {}
 
 export class TracesActionBar extends SceneObjectBase<TracesActionBarState> {
-  public onOpenExploration = () => {
-    this.publishEvent(new OpenEmbeddedExplorationEvent(), true);
-  };
-
   public static Component = ({ model }: SceneComponentProps<TracesActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, TracesByServiceScene);
     const styles = useStyles2(getStyles);
@@ -122,11 +111,6 @@ export class TracesActionBar extends SceneObjectBase<TracesActionBarState> {
         <div className={styles.actions}>
           <Stack gap={2}>
             <ShareExplorationButton exploration={exploration} />
-            {exploration.state.embedded && (
-              <ToolbarButton variant={'canvas'} onClick={model.onOpenExploration}>
-                Open
-              </ToolbarButton>
-            )}
           </Stack>
         </div>
 

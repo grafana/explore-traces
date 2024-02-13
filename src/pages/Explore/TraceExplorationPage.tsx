@@ -1,10 +1,12 @@
-import React, {useEffect} from 'react';
-import {newTracesExploration} from "./utils";
-import {TraceExploration} from "./TraceExploration";
-import {getUrlSyncManager} from "@grafana/scenes";
+import React, { useEffect, useState } from 'react';
+import { newTracesExploration } from './utils';
+import { TraceExploration } from './TraceExploration';
+import { getUrlSyncManager } from '@grafana/scenes';
 
 export const TraceExplorationPage = () => {
-  return <TraceExplorationView exploration={newTracesExploration()}/>
+  const [exploration] = useState(newTracesExploration());
+
+  return <TraceExplorationView exploration={exploration} />;
 };
 
 export function TraceExplorationView({ exploration }: { exploration: TraceExploration }) {
