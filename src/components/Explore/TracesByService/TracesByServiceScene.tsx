@@ -16,11 +16,17 @@ import {
 } from '@grafana/scenes';
 import { Box, Stack, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
-import { ShareExplorationButton } from '../ShareExplorationButton';
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
 import { buildTracesListScene } from './Tabs/TracesListScene';
-import { ActionViewDefinition, ActionViewType, MakeOptional, explorationDS, VAR_FILTERS_EXPR } from '../shared';
-import { getExplorationFor } from '../utils';
+import {
+  ActionViewDefinition,
+  ActionViewType,
+  MakeOptional,
+  explorationDS,
+  VAR_FILTERS_EXPR,
+} from '../../../utils/shared';
+import { getExplorationFor } from '../../../utils/utils';
+import { ShareExplorationButton } from './ShareExplorationButton';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;

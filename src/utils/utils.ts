@@ -2,7 +2,7 @@ import { urlUtil } from '@grafana/data';
 import { config, getDataSourceSrv } from '@grafana/runtime';
 import { getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
 
-import { TraceExploration } from './TraceExploration';
+import { TraceExploration } from '../pages/Explore';
 import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR } from './shared';
 
 export function getExplorationFor(model: SceneObject): TraceExploration {

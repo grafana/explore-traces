@@ -10,7 +10,7 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent } from './shared';
+import { StartingPointSelectedEvent } from '../../utils/shared';
 import { VAR_GROUPBY } from './SelectStartingPointScene';
 
 export interface SelectAttributeWithValueActionState extends SceneObjectState {

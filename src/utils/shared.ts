@@ -22,3 +22,7 @@ export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K
 export class StartingPointSelectedEvent extends BusEventBase {
   public static type = 'start-point-selected-event';
 }
+
+export class DetailsSceneUpdated extends BusEventBase {
+  public static type = 'details-scene-updated';
+}

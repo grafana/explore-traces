@@ -14,8 +14,8 @@ import {
 import { useStyles2, Tooltip, Stack } from '@grafana/ui';
 
 import { TraceExploration, TraceExplorationState } from './TraceExploration';
-import { VAR_FILTERS } from './shared';
-import { getExplorationFor } from './utils';
+import { VAR_FILTERS } from '../../utils/shared';
+import { getExplorationFor } from '../../utils/utils';
 
 export interface DataExplorationsHistoryState extends SceneObjectState {
   currentStep: number;

@@ -1,6 +1,6 @@
-# Grafana Scenes App Plugin Template
+# Grafana Traces app
 
-This template is a starting point for building an app plugin with [scenes](https://grafana.com/developers/scenes) for Grafana.
+Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.
 
 ## What are Grafana app plugins?
 

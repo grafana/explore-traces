@@ -20,9 +20,9 @@ import {
 import { useStyles2, Tab, TabsBar, Select } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import { explorationDS, VAR_FILTERS_EXPR } from './shared';
-import { getColorByIndex } from './utils';
-import { ByFrameRepeater } from './ByFrameRepeater';
+import { explorationDS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { getColorByIndex } from '../../utils/utils';
+import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;

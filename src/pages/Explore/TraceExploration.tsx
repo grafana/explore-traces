@@ -9,6 +9,8 @@ import {
   getUrlSyncManager,
   SceneComponentProps,
   SceneControlsSpacer,
+  SceneFlexItem,
+  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -18,15 +20,23 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  SplitLayout,
   VariableValueSelectors,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Button, Stack, useStyles2 } from '@grafana/ui';
 
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
-import { TracesByServiceScene } from './TracesByService/TracesByServiceScene';
+import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
-import { StartingPointSelectedEvent, explorationDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
-import { getUrlForExploration } from './utils';
+import {
+  StartingPointSelectedEvent,
+  explorationDS,
+  VAR_DATASOURCE,
+  VAR_FILTERS,
+  DetailsSceneUpdated,
+} from '../../utils/shared';
+import { getUrlForExploration } from '../../utils/utils';
+import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -34,8 +44,11 @@ export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
   history: ExplorationHistory;
+  body: SplitLayout;
 
   mode?: TraceExplorationMode;
+  detailsScene: DetailsScene;
+  showDetails?: boolean;
 
   // just for the starting data source
   initialDS?: string;
@@ -56,6 +69,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
         new SceneRefreshPicker({}),
       ],
       history: state.history ?? new ExplorationHistory({}),
+      body: buildSplitLayout(),
+      detailsScene: new DetailsScene({}),
       ...state,
     });
 
@@ -69,6 +84,17 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
     // Some scene elements publish this
     this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
+    this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
+
+    this.subscribeToState((newState, oldState) => {
+      if (newState.showDetails !== oldState.showDetails) {
+        if (newState.showDetails) {
+          this.state.body.setState({ secondary: this.state.detailsScene });
+        } else {
+          this.state.body.setState({ secondary: undefined });
+        }
+      }
+    });
 
     // Pay attention to changes in history (i.e., changing the step)
     this.state.history.subscribeToState((newState, oldState) => {
@@ -112,6 +138,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     locationService.partial({ mode: 'traces' });
   }
 
+  private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
+    this.setState({ showDetails: true });
+  }
+
   getUrlState() {
     return { mode: this.state.mode };
   }
@@ -129,12 +159,36 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
-    const { controls, topScene, history } = model.useState();
+    const { body } = model.useState();
     const styles = useStyles2(getStyles);
+
+    return <div className={styles.bodyContainer}> {body && <body.Component model={body} />} </div>;
+  };
+}
+
+export class TraceExplorationScene extends SceneObjectBase {
+  static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
+    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
+    const { history, controls, topScene, showDetails } = traceExploration.useState();
+    const styles = useStyles2(getStyles);
+
+    const toggleDetails = () => {
+      traceExploration.setState({ showDetails: !showDetails });
+    };
 
     return (
       <div className={styles.container}>
-        <history.Component model={history} />
+        <Stack gap={2} justifyContent={'space-between'}>
+          <history.Component model={history} />
+          <Button
+            variant={'secondary'}
+            icon={showDetails ? 'arrow-to-right' : 'arrow-from-right'}
+            className={showDetails ? undefined : styles.rotateIcon}
+            onClick={() => toggleDetails()}
+          >
+            Details
+          </Button>
+        </Stack>
         {controls && (
           <div className={styles.controls}>
             {controls.map((control) => (
@@ -146,6 +200,16 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       </div>
     );
   };
+}
+
+function buildSplitLayout() {
+  return new SplitLayout({
+    direction: 'row',
+    initialSize: 0.6,
+    primary: new SceneFlexItem({
+      body: new TraceExplorationScene({}),
+    }),
+  });
 }
 
 function getTopScene(mode?: TraceExplorationMode) {
@@ -185,6 +249,12 @@ function renderFilter(filter: AdHocVariableFilter) {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    bodyContainer: css({
+      flexGrow: 1,
+      display: 'flex',
+      minHeight: '100%',
+      flexDirection: 'column',
+    }),
     container: css({
       flexGrow: 1,
       display: 'flex',
@@ -204,6 +274,9 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
       alignItems: 'flex-end',
       flexWrap: 'wrap',
+    }),
+    rotateIcon: css({
+      svg: { transform: 'rotate(180deg)' },
     }),
   };
 }

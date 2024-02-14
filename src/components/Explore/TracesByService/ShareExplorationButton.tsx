@@ -3,8 +3,8 @@ import { useLocation } from 'react-use';
 
 import { ToolbarButton } from '@grafana/ui';
 
-import { TraceExploration } from './TraceExploration';
-import { getUrlForExploration } from './utils';
+import { TraceExploration } from '../../../pages/Explore';
+import { getUrlForExploration } from '../../../utils/utils';
 
 interface ShareExplorationButtonState {
   exploration: TraceExploration;

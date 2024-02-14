@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { newTracesExploration } from './utils';
+import { newTracesExploration } from '../../utils/utils';
 import { TraceExploration } from './TraceExploration';
 import { getUrlSyncManager } from '@grafana/scenes';
 
