@@ -47,7 +47,7 @@ export interface TraceExplorationState extends SceneObjectState {
   body: SplitLayout;
 
   mode?: TraceExplorationMode;
-  detailsScene: DetailsScene;
+  detailsScene?: DetailsScene;
   showDetails?: boolean;
 
   // just for the starting data source
@@ -89,9 +89,11 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToState((newState, oldState) => {
       if (newState.showDetails !== oldState.showDetails) {
         if (newState.showDetails) {
-          this.state.body.setState({ secondary: this.state.detailsScene });
+          this.state.body.setState({ secondary: new DetailsScene(this.state.detailsScene?.state || {}) });
+          this.setState({ detailsScene: undefined });
         } else {
           this.state.body.setState({ secondary: undefined });
+          this.setState({ detailsScene: new DetailsScene({}) });
         }
       }
     });

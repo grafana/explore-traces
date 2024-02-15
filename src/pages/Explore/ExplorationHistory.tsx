@@ -76,7 +76,10 @@ export class ExplorationHistory extends SceneObjectBase<DataExplorationsHistoryS
         {
           description: 'Test',
           type,
-          explorationState: sceneUtils.cloneSceneObjectState(exploration.state, { history: this }),
+          explorationState: sceneUtils.cloneSceneObjectState(
+            { ...exploration.state, detailsScene: undefined },
+            { history: this }
+          ),
           parentIndex,
         },
       ],

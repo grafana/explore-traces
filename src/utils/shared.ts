@@ -1,7 +1,7 @@
 import { BusEventBase } from '@grafana/data';
 import { SceneObject } from '@grafana/scenes';
 
-export type ActionViewType = 'overview' | 'breakdown' | 'logs' | 'related' | 'other';
+export type ActionViewType = 'spans' | 'services';
 export interface ActionViewDefinition {
   displayName: string;
   value: ActionViewType;

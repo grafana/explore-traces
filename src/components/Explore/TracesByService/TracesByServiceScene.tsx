@@ -51,7 +51,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView('overview');
+      this.setActionView('spans');
     }
   }
 
@@ -96,11 +96,8 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Traces', value: 'overview', getScene: buildTracesListScene },
-  { displayName: 'Services', value: 'logs', getScene: buildTracesListScene },
-  { displayName: 'Group By', value: 'breakdown', getScene: buildTracesListScene },
-  { displayName: 'Metrics', value: 'related', getScene: buildTracesListScene },
-  { displayName: 'Outliers', value: 'other', getScene: buildTracesListScene },
+  { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
+  { displayName: 'Services', value: 'services', getScene: buildTracesListScene },
 ];
 
 export interface TracesActionBarState extends SceneObjectState {}
