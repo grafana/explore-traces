@@ -171,7 +171,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { history, controls, topScene, showDetails } = traceExploration.useState();
+    const { history, controls, topScene, showDetails, mode } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 
     const toggleDetails = () => {
@@ -182,14 +182,16 @@ export class TraceExplorationScene extends SceneObjectBase {
       <div className={styles.container}>
         <Stack gap={2} justifyContent={'space-between'}>
           <history.Component model={history} />
-          <Button
-            variant={'secondary'}
-            icon={showDetails ? 'arrow-to-right' : 'arrow-from-right'}
-            className={showDetails ? undefined : styles.rotateIcon}
-            onClick={() => toggleDetails()}
-          >
-            Details
-          </Button>
+          {mode === 'traces' && (
+            <Button
+              variant={'secondary'}
+              icon={showDetails ? 'arrow-to-right' : 'arrow-from-right'}
+              className={showDetails ? undefined : styles.rotateIcon}
+              onClick={() => toggleDetails()}
+            >
+              Details
+            </Button>
+          )}
         </Stack>
         {controls && (
           <div className={styles.controls}>
