@@ -1,28 +1,30 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, GrafanaTheme2, reduceField, ReducerID } from '@grafana/data';
 import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
-  PanelBuilders,
-  SceneCSSGridLayout,
-  SceneCSSGridItem,
-  SceneQueryRunner,
-  SceneDataNode,
-  SceneVariableSet,
-  sceneGraph,
-  VariableDependencyConfig,
   CustomVariable,
+  PanelBuilders,
+  SceneComponentProps,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
+  SceneDataNode,
+  SceneDataTransformer,
+  sceneGraph,
+  SceneObjectBase,
+  SceneObjectState,
+  SceneQueryRunner,
+  SceneVariableSet,
+  VariableDependencyConfig,
   VariableValue,
 } from '@grafana/scenes';
-import { useStyles2, Tab, TabsBar, Select } from '@grafana/ui';
+import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
 import { explorationDS, VAR_FILTERS_EXPR } from '../../utils/shared';
 import { getColorByIndex } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
+import { map, Observable } from 'rxjs';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -69,9 +71,23 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     return new SceneCSSGridLayout({
       children: [
         new ByFrameRepeater({
-          $data: new SceneQueryRunner({
-            datasource: explorationDS,
-            queries: [buildQuery()],
+          $data: new SceneDataTransformer({
+            $data: new SceneQueryRunner({
+              datasource: explorationDS,
+              queries: [buildQuery()],
+            }),
+            transformations: [
+              () => (source: Observable<DataFrame[]>) => {
+                return source.pipe(
+                  map((data: DataFrame[]) => {
+                    data.forEach((a) => reduceField({ field: a.fields[1], reducers: [ReducerID.max] }));
+                    return data.sort((a, b) => {
+                      return (b.fields[1].state?.calcs?.max || 0) - (a.fields[1].state?.calcs?.max || 0);
+                    });
+                  })
+                );
+              },
+            ],
           }),
           body: new SceneCSSGridLayout({
             templateColumns: GRID_TEMPLATE_COLUMNS,
@@ -156,7 +172,9 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             );
           })}
         </TabsBar>
-        <model.state.body.Component model={model.state.body} />
+        <div className={styles.bodyWrapper}>
+          <model.state.body.Component model={model.state.body} />
+        </div>
       </div>
     );
   };
@@ -228,6 +246,14 @@ function getStyles(theme: GrafanaTheme2) {
       right: 0,
       top: '4px',
       zIndex: 2,
+    }),
+    bodyWrapper: css({
+      flexGrow: 1,
+      display: 'flex',
+
+      '& > div': {
+        overflow: 'scroll',
+      },
     }),
   };
 }

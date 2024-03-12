@@ -27,6 +27,7 @@ import {
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
+import { buildServicesTabScene } from './Tabs/ServicesTabScene';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -97,7 +98,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
-  { displayName: 'Services', value: 'services', getScene: buildTracesListScene },
+  { displayName: 'Services', value: 'services', getScene: buildServicesTabScene },
 ];
 
 export interface TracesActionBarState extends SceneObjectState {}
