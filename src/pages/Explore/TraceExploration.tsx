@@ -4,7 +4,6 @@ import React from 'react';
 import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import {
-  AdHocFiltersVariable,
   DataSourceVariable,
   getUrlSyncManager,
   SceneComponentProps,
@@ -30,13 +29,12 @@ import { TracesByServiceScene } from '../../components/Explore/TracesByService/T
 import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
   StartingPointSelectedEvent,
-  explorationDS,
   VAR_DATASOURCE,
-  VAR_FILTERS,
   DetailsSceneUpdated,
 } from '../../utils/shared';
 import { getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
+import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -230,13 +228,9 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
         value: initialDS,
         pluginId: 'tempo',
       }),
-      new AdHocFiltersVariable({
-        name: VAR_FILTERS,
-        datasource: explorationDS,
-        layout: 'vertical',
-        filters: initialFilters ?? [],
-        expressionBuilder: renderTraceQLLabelFilters,
-      }),
+      new FilterByVariable({
+        initialFilters,
+      })
     ],
   });
 }
