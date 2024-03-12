@@ -104,7 +104,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
-              <Field label="By label">
+              <Field label="By attribute">
                 <BreakdownLabelSelector
                   options={getAttributesAsOptions(attributes)}
                   value={variable.getValueText()}
