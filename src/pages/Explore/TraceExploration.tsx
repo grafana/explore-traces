@@ -237,14 +237,6 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
   });
 }
 
-export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
-  return filters.map((filter) => renderFilter(filter)).join('&&');
-}
-
-function renderFilter(filter: AdHocVariableFilter) {
-  return `${filter.key}${filter.operator}"${filter.value}"`;
-}
-
 function getStyles(theme: GrafanaTheme2) {
   return {
     bodyContainer: css({

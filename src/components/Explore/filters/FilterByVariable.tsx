@@ -24,14 +24,15 @@ export class FilterByVariable extends AdHocFiltersVariable {
       datasource: explorationDS,
       layout: 'horizontal',
       filters: initialFilters ?? [],
-      expressionBuilder: (filters => {
-        if (filters.length === 0) {
-          return '';
-        }
-        return filters.map(filter => {
-          return `${filter.key}${filter.operator}"${filter.value}"`;
-        }).join(' && ');
-      })
+      expressionBuilder: renderTraceQLLabelFilters,
     });
   }
+}
+
+export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
+  return filters.map((filter) => renderFilter(filter)).join('&&');
+}
+
+function renderFilter(filter: AdHocVariableFilter) {
+  return `${filter.key}${filter.operator}"${filter.value}"`;
 }
