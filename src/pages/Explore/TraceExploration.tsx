@@ -248,7 +248,7 @@ export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
 }
 
 function renderFilter(filter: AdHocVariableFilter) {
-  return `${filter.key}${filter.operator}"${filter.value}"`;
+  return `${filter.key}${filter.operator}${filter.value}`;
 }
 
 function getStyles(theme: GrafanaTheme2) {

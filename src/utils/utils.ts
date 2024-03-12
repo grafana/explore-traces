@@ -12,7 +12,7 @@ export function getExplorationFor(model: SceneObject): TraceExploration {
 export function newTracesExploration(initialDS?: string): TraceExploration {
   return new TraceExploration({
     initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
+    $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
   });
 }
 

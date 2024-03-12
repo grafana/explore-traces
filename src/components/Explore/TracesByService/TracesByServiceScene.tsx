@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DashboardCursorSync, GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
   behaviors,
   SceneComponentProps,
@@ -24,14 +24,19 @@ import {
   MakeOptional,
   explorationDS,
   VAR_FILTERS_EXPR,
+  VAR_DATASOURCE_EXPR,
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
 import { buildServicesTabScene } from './Tabs/ServicesTabScene';
+import { getDataSourceSrv } from '@grafana/runtime';
+import { buildAttributesBreakdownActionScene } from './Tabs/AttributesBreakdown';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   actionView?: string;
+
+  attributes?: string[];
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
@@ -54,6 +59,23 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     if (this.state.actionView === undefined) {
       this.setActionView('spans');
     }
+
+    this.updateAttributes();
+  }
+
+  private async updateAttributes() {
+    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this } });
+
+    if (!ds) {
+      return;
+    }
+
+    ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
+      const attributes = tagKeys.map((l) => l.text);
+      if (attributes !== this.state.attributes) {
+        this.setState({ attributes });
+      }
+    });
   }
 
   getUrlState() {
@@ -98,6 +120,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
+  { displayName: 'Attributes', value: 'attributes', getScene: buildAttributesBreakdownActionScene },
   { displayName: 'Services', value: 'services', getScene: buildServicesTabScene },
 ];
 
