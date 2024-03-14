@@ -1,7 +1,7 @@
 import { BusEventBase } from '@grafana/data';
 import { SceneObject } from '@grafana/scenes';
 
-export type ActionViewType = 'spans' | 'services';
+export type ActionViewType = 'spans' | 'attributes' | 'services';
 export interface ActionViewDefinition {
   displayName: string;
   value: ActionViewType;
@@ -14,6 +14,7 @@ export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
+export const VAR_ATTRIBUTE_GROUP_BY = 'attributeBy';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
