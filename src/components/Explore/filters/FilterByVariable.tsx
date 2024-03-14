@@ -34,5 +34,12 @@ export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
 }
 
 function renderFilter(filter: AdHocVariableFilter) {
-  return `${filter.key}${filter.operator}"${filter.value}"`;
+  let val = filter.value;
+  // Add quotes if it's coming from the filter input and it's not already quoted. 
+  // Adding a filter from a time series graph already has quotes. This should be handled better.
+  if (typeof val === 'string' && !val.startsWith('"') && !val.endsWith('"')) {
+    val = `"${val}"`;
+  }
+  
+  return `${filter.key}${filter.operator}${val}`;
 }
