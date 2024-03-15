@@ -2,19 +2,10 @@
 # (For more information, see https://github.com/grafana/plugin-actions/blob/main/build-plugin/README.md)
 name: Release
 
-#on:
-#  push:
-#    tags:
-#      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
-
 on:
-  workflow_dispatch:
-    inputs:
-      release:
-        description: 'Release a new version of the app plugin'
-        required: true
-        default: false
-        type: 'boolean'
+  push:
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
 
 permissions:
   contents: write
