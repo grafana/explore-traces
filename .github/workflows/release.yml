@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/plugin-actions/build-plugin@release
+      - uses: grafana/plugin-actions/build-plugin@main
         id: build-release
         with:
           policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
