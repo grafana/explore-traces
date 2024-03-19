@@ -25,8 +25,7 @@ jobs:
         run: |
           sudo apt-get install jq
     
-          ls
-          export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
+          export GRAFANA_PLUGIN_ID=$(cat src/plugin.json | jq -r .id)
           export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-latest.zip
     
           echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
