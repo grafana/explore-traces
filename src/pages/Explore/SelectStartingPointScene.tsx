@@ -21,7 +21,7 @@ import {
 import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { explorationDS, VAR_DURATION_EXPR, VAR_FILTERS_EXPR } from '../../utils/shared';
 import { getColorByIndex } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
@@ -224,7 +224,7 @@ function getVariableSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
+    query: `{${VAR_DURATION_EXPR}${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
     queryType: 'traceql',
     filters: [],
   };

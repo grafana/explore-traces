@@ -12,6 +12,8 @@ export const EXPLORATIONS_ROUTE = '/explore/metrics/exploration';
 
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
+export const VAR_DURATION = 'duration';
+export const VAR_DURATION_EXPR = '${duration}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_ATTRIBUTE_GROUP_BY = 'attributeBy';

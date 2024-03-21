@@ -25,6 +25,7 @@ import {
   explorationDS,
   VAR_FILTERS_EXPR,
   VAR_DATASOURCE_EXPR,
+  VAR_DURATION_EXPR,
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
@@ -176,7 +177,7 @@ const MAIN_PANEL_MAX_HEIGHT = '30%';
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | select(status)`,
+    query: `{${VAR_DURATION_EXPR}${VAR_FILTERS_EXPR}} | select(status)`,
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,

@@ -36,6 +36,7 @@ import {
 import { getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
+import { DurationVariable } from 'components/Explore/filters/DurationVariable';
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -232,6 +233,7 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
         value: initialDS,
         pluginId: 'tempo',
       }),
+      new DurationVariable(),
       new FilterByVariable({
         initialFilters,
       })

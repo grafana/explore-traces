@@ -30,7 +30,8 @@ export class FilterByVariable extends AdHocFiltersVariable {
 }
 
 export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
-  return filters.map((filter) => renderFilter(filter)).join('&&');
+  const prefix = filters.length ? ' && ' : ''; // Add '&&' if there are filters to separate from the rest of the query.
+  return prefix + filters.map((filter) => renderFilter(filter)).join('&&');
 }
 
 function renderFilter(filter: AdHocVariableFilter) {
