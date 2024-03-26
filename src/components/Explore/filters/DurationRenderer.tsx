@@ -19,6 +19,7 @@ export function DurationRenderer({ model }: SceneComponentProps<FilterByVariable
       <RangeSlider
         min={0}
         max={1000}
+        step={10}
         value={[fromValue, toValue]}
         onAfterChange={(v) => {
           if (v) {
