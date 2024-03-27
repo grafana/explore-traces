@@ -6,10 +6,11 @@ import {
   SceneComponentProps,
   PanelBuilders,
   SceneFlexItem,
-  SceneDataTransformer,
   SceneFlexLayout,
+  SceneQueryRunner,
 } from '@grafana/scenes';
 import { GraphDrawStyle, ScaleDistribution } from '@grafana/schema/dist/esm/common/common.gen';
+import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
 
 export interface TraceTimeSeriesPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -17,7 +18,13 @@ export interface TraceTimeSeriesPanelState extends SceneObjectState {
 
 export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelState> {
   constructor(state: TraceTimeSeriesPanelState) {
-    super(state);
+    super({
+      $data: new SceneQueryRunner({
+        datasource: explorationDS,
+        queries: [buildQuery()],
+      }),
+      ...state
+    });
 
     this.addActivationHandler(this._onActivate.bind(this));
   }
@@ -35,59 +42,30 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: PanelBuilders.timeseries() //
-            .setTitle('Spans')
-            .setOption('legend', { showLegend: false })
-            .setCustomFieldConfig('drawStyle', GraphDrawStyle.Points)
-            .setCustomFieldConfig('fillOpacity', 9)
+          body: PanelBuilders.timeseries()
+            .setTitle('Requests over time')
+            .setCustomFieldConfig('drawStyle', GraphDrawStyle.Bars)
             .setCustomFieldConfig('scaleDistribution', {
               type: ScaleDistribution.Log,
               log: 2,
             })
-            .setOverrides((b) =>
-              b
-                .matchFieldsWithName('error')
+            .setOverrides((c) =>
+              c
+                .matchFieldsWithName('"error"')
                 .overrideColor({
                   mode: 'fixed',
                   fixedColor: 'red',
                 })
-                .overrideCustomFieldConfig('pointSize', 7)
-                .matchFieldsWithName('ok')
+                .matchFieldsWithName('"ok"')
                 .overrideColor({
                   mode: 'fixed',
                   fixedColor: 'green',
                 })
-                .matchFieldsWithName('unset')
+                .matchFieldsWithName('"unset"')
                 .overrideColor({
                   mode: 'fixed',
                   fixedColor: 'green',
                 })
-            )
-            .setData(
-              new SceneDataTransformer({
-                transformations: [
-                  {
-                    id: 'groupingToMatrix',
-                    options: {
-                      columnField: 'status',
-                      rowField: 'Start time',
-                      valueField: 'Duration',
-                    },
-                  },
-                  {
-                    id: 'convertFieldType',
-                    options: {
-                      fields: {},
-                      conversions: [
-                        {
-                          targetField: 'Start time\\status',
-                          destinationType: 'time',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              })
             )
             .build(),
         }),
@@ -103,5 +81,17 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
     }
 
     return <panel.Component model={panel} />;
+  };
+}
+
+function buildQuery() {
+  return {
+    refId: 'A',
+    query: `{${VAR_FILTERS_EXPR}} | rate() by (status)`,
+    queryType: 'traceql',
+    tableType: 'spans',
+    limit: 100,
+    spss: 10,
+    filters: [],
   };
 }
