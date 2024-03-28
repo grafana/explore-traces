@@ -18,7 +18,6 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  SceneTimeRangeCompare,
   SceneVariableSet,
   SplitLayout,
   VariableValueSelectors,
@@ -28,11 +27,7 @@ import { Button, Stack, useStyles2 } from '@grafana/ui';
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
-import {
-  StartingPointSelectedEvent,
-  VAR_DATASOURCE,
-  DetailsSceneUpdated,
-} from '../../utils/shared';
+import { StartingPointSelectedEvent, VAR_DATASOURCE, DetailsSceneUpdated } from '../../utils/shared';
 import { getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
@@ -65,7 +60,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
         new SceneTimePicker({}),
-        new SceneTimeRangeCompare({ key: 'top' }),
         new SceneRefreshPicker({}),
       ],
       history: state.history ?? new ExplorationHistory({}),
@@ -234,7 +228,7 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       }),
       new FilterByVariable({
         initialFilters,
-      })
+      }),
     ],
   });
 }

@@ -182,7 +182,6 @@ function buildQuery(tagKey: string) {
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 function buildNormalLayout(variable: CustomVariable) {
-  console.log('variable.getValueText()', variable.getValueText(), variable);
   const query = buildQuery(variable.getValueText());
 
   return new LayoutSwitcher({
@@ -204,6 +203,7 @@ function buildNormalLayout(variable: CustomVariable) {
           children: [],
         }),
         getLayoutChild: getLayoutChild(getLabelValue),
+        groupBy: variable.getValueText(),
       }),
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
@@ -212,6 +212,7 @@ function buildNormalLayout(variable: CustomVariable) {
           children: [],
         }),
         getLayoutChild: getLayoutChild(getLabelValue),
+        groupBy: variable.getValueText(),
       }),
     ],
   });

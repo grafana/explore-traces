@@ -1,18 +1,20 @@
 import React from 'react';
 
-import { LoadingState, PanelData, DataFrame } from '@grafana/data';
+import { DataFrame, LoadingState, PanelData } from '@grafana/data';
 import {
-  SceneObjectState,
-  SceneFlexItem,
-  SceneObjectBase,
-  sceneGraph,
-  SceneComponentProps,
   SceneByFrameRepeater,
+  SceneComponentProps,
+  SceneFlexItem,
+  sceneGraph,
   SceneLayout,
+  SceneObjectBase,
+  SceneObjectState,
 } from '@grafana/scenes';
+import { groupSeriesBy } from '../../utils/panels';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
+  groupBy?: string;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneFlexItem;
 }
 
@@ -39,9 +41,14 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
 
   private performRepeat(data: PanelData) {
     const newChildren: SceneFlexItem[] = [];
+    let frames = data.series;
 
-    for (let seriesIndex = 0; seriesIndex < data.series.length; seriesIndex++) {
-      const layoutChild = this.state.getLayoutChild(data, data.series[seriesIndex], seriesIndex);
+    if (this.state.groupBy) {
+      frames = groupSeriesBy(data, this.state.groupBy);
+    }
+
+    for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
+      const layoutChild = this.state.getLayoutChild(data, frames[frameIndex], frameIndex);
       newChildren.push(layoutChild);
     }
 
