@@ -4,9 +4,11 @@ import React from 'react';
 import { DataFrame, GrafanaTheme2, reduceField, ReducerID } from '@grafana/data';
 import {
   CustomVariable,
+  PanelBuilders,
   SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
+  SceneDataNode,
   SceneDataTransformer,
   sceneGraph,
   SceneObjectBase,
@@ -18,10 +20,11 @@ import {
 } from '@grafana/scenes';
 import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
+import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
 import { explorationDS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { getColorByIndex } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
-import { HomepageCard } from '../../components/Explore/HomepageCard';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -33,7 +36,7 @@ export interface TraceSelectSceneState extends SceneObjectState {
   metricFn: string;
 }
 
-const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, 100%)';
+const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
@@ -65,9 +68,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private buildBody() {
-    const variable = this.getGroupByVariable();
     return new SceneCSSGridLayout({
-      isLazy: true,
       children: [
         new ByFrameRepeater({
           $data: new SceneDataTransformer({
@@ -88,18 +89,21 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
               },
             ],
           }),
-          groupBy: variable.getValue().toString(),
           body: new SceneCSSGridLayout({
             templateColumns: GRID_TEMPLATE_COLUMNS,
             autoRows: '200px',
             children: [],
           }),
-          getLayoutChild: (data, frame) => {
+          getLayoutChild: (data, frame, frameIndex) => {
             return new SceneCSSGridItem({
-              body: new HomepageCard({
-                panelData: data,
-                frame,
-              }),
+              body: PanelBuilders.timeseries()
+                .setTitle(getLabelValue(frame))
+                .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
+                .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
+                .setOption('legend', { showLegend: false })
+                .setCustomFieldConfig('fillOpacity', 9)
+                .setHeaderActions(new SelectAttributeWithValueAction({ value: getLabelValue(frame) }))
+                .build(),
             });
           },
         }),
@@ -176,6 +180,21 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   };
 }
 
+function getLabelValue(frame: DataFrame) {
+  const labels = frame.fields[1]?.labels;
+
+  if (!labels) {
+    return 'No labels';
+  }
+
+  const keys = Object.keys(labels);
+  if (keys.length === 0) {
+    return 'No labels';
+  }
+
+  return labels[keys[0]];
+}
+
 const groupByOptions = [
   { label: 'Service Name', value: 'resource.service.name' },
   { label: 'HTTP URL', value: 'span.http.url' },
@@ -205,7 +224,7 @@ function getVariableSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR}, name, status)`,
+    query: `{${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
     queryType: 'traceql',
     filters: [],
   };
