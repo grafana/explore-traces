@@ -25,7 +25,13 @@ import { Button, Stack, useStyles2 } from '@grafana/ui';
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
-import { StartingPointSelectedEvent, VAR_DATASOURCE, DetailsSceneUpdated, VAR_FILTERS } from '../../utils/shared';
+import {
+  StartingPointSelectedEvent,
+  VAR_DATASOURCE,
+  DetailsSceneUpdated,
+  VAR_FILTERS,
+  DATASOURCE_LS_KEY,
+} from '../../utils/shared';
 import { getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
@@ -74,6 +80,12 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
     this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
 
+    const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
+    datasourceVar.subscribeToState((newState) => {
+      if (newState.value) {
+        localStorage.setItem(DATASOURCE_LS_KEY, newState.value.toString());
+      }
+    });
     this.subscribeToState((newState, oldState) => {
       if (newState.showDetails !== oldState.showDetails) {
         if (newState.showDetails) {

@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { newTracesExploration } from '../../utils/utils';
 import { TraceExploration } from './TraceExploration';
 import { getUrlSyncManager } from '@grafana/scenes';
+import { DATASOURCE_LS_KEY } from '../../utils/shared';
 
 export const TraceExplorationPage = () => {
-  const [exploration] = useState(newTracesExploration());
+  const initialDs = localStorage.getItem(DATASOURCE_LS_KEY) || '';
+  const [exploration] = useState(newTracesExploration(initialDs));
 
   return <TraceExplorationView exploration={exploration} />;
 };

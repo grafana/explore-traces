@@ -9,6 +9,7 @@ export interface ActionViewDefinition {
 }
 
 export const EXPLORATIONS_ROUTE = '/explore/metrics/exploration';
+export const DATASOURCE_LS_KEY = 'grafana.traces.explore.datasource';
 
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
