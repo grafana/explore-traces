@@ -21,6 +21,7 @@ export function AddFilter({ model }: Props) {
         title={'Add filter'}
         aria-label="Add filter"
         onClick={() => model._addWip()}
+        size={'sm'}
       >
         Filter
       </Button>

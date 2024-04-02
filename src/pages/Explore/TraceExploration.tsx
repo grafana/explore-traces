@@ -7,7 +7,6 @@ import {
   DataSourceVariable,
   getUrlSyncManager,
   SceneComponentProps,
-  SceneControlsSpacer,
   SceneFlexItem,
   sceneGraph,
   SceneObject,
@@ -18,21 +17,15 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  SceneTimeRangeCompare,
   SceneVariableSet,
   SplitLayout,
-  VariableValueSelectors,
 } from '@grafana/scenes';
 import { Button, Stack, useStyles2 } from '@grafana/ui';
 
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
-import {
-  StartingPointSelectedEvent,
-  VAR_DATASOURCE,
-  DetailsSceneUpdated,
-} from '../../utils/shared';
+import { StartingPointSelectedEvent, VAR_DATASOURCE, DetailsSceneUpdated, VAR_FILTERS } from '../../utils/shared';
 import { getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
@@ -42,6 +35,7 @@ type TraceExplorationMode = 'start' | 'traces';
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
+
   history: ExplorationHistory;
   body: SplitLayout;
 
@@ -61,13 +55,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
-      controls: state.controls ?? [
-        new VariableValueSelectors({ layout: 'vertical' }),
-        new SceneControlsSpacer(),
-        new SceneTimePicker({}),
-        new SceneTimeRangeCompare({ key: 'top' }),
-        new SceneRefreshPicker({}),
-      ],
+      controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
       history: state.history ?? new ExplorationHistory({}),
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
@@ -174,6 +162,9 @@ export class TraceExplorationScene extends SceneObjectBase {
     const { history, controls, topScene, showDetails, mode } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 
+    const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, traceExploration);
+
     const toggleDetails = () => {
       traceExploration.setState({ showDetails: !showDetails });
     };
@@ -181,7 +172,10 @@ export class TraceExplorationScene extends SceneObjectBase {
     return (
       <div className={styles.container}>
         <Stack gap={2} justifyContent={'space-between'}>
-          <history.Component model={history} />
+          <Stack gap={2}>
+            {dsVariable && <dsVariable.Component model={dsVariable} />}
+            <history.Component model={history} />
+          </Stack>
           {mode === 'traces' && (
             <Button
               variant={'secondary'}
@@ -195,6 +189,7 @@ export class TraceExplorationScene extends SceneObjectBase {
         </Stack>
         {controls && (
           <div className={styles.controls}>
+            {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
@@ -234,7 +229,7 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       }),
       new FilterByVariable({
         initialFilters,
-      })
+      }),
     ],
   });
 }

@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { AdHocVariableFilter, GrafanaTheme2, SelectableValue, toOption } from '@grafana/data';
-import { Button, Select, useStyles2 } from '@grafana/ui';
+import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 
@@ -42,13 +42,13 @@ export function FilterRenderer({ filter, model }: Props) {
   }, [filter, key, model, state]);
 
   const keySelect = (
-    <Select
-      width='auto'
+    <BaseSelect
       value={key}
-      placeholder={'Select label'}
+      placeholder={'Select attribute'}
       options={state.keys}
       onChange={(v) => model._updateFilter(filter, 'key', v.value)}
       isLoading={state.isKeysLoading}
+      className={styles.key}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
         const keys = await model._getKeys(filter.key);
@@ -58,8 +58,7 @@ export function FilterRenderer({ filter, model }: Props) {
   );
 
   const valueSelect = (
-    <Select
-      width='auto'
+    <BaseSelect
       value={value}
       placeholder={'value'}
       options={state.values}
@@ -74,10 +73,9 @@ export function FilterRenderer({ filter, model }: Props) {
   );
 
   return (
-    <>
+    <div className={styles.wrapper}>
       {keySelect}
-      <Select
-        width='auto'
+      <BaseSelect
         value={filter.operator}
         disabled={model.state.readOnly}
         options={operators}
@@ -85,20 +83,74 @@ export function FilterRenderer({ filter, model }: Props) {
       />
       {valueSelect}
       <Button
-        variant='secondary'
-        aria-label='Remove filter'
-        title='Remove filter'
+        variant="secondary"
+        aria-label="Remove filter"
+        title="Remove filter"
         className={styles.removeButton}
-        icon='times'
+        icon="times"
         onClick={() => model._removeFilter(filter)}
       />
-    </>
+    </div>
   );
 }
 
+const BaseSelect = (props: SelectBaseProps<string>) => {
+  const styles = useStyles2(getStyles);
+  return (
+    <Select
+      width="auto"
+      {...props}
+      className={css(styles.control, props.className)}
+      components={{
+        IndicatorsContainer: () => null,
+        IndicatorSeparator: () => null,
+      }}
+    />
+  );
+};
+
 const getStyles = (theme: GrafanaTheme2) => ({
   removeButton: css({
-    paddingLeft: theme.spacing(1.5),
-    paddingRight: theme.spacing(1.5),
+    padding: '2px',
+    height: 'fit-content',
+
+    '& > svg': {
+      margin: 0,
+    },
+  }),
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+
+    '> div, > button': {
+      borderRadius: 0,
+    },
+    '> div:first-child': {
+      borderRadius: `${theme.shape.radius.default} 0 0 ${theme.shape.radius.default}`,
+    },
+    '> button': {
+      borderRadius: `0 ${theme.shape.radius.default} ${theme.shape.radius.default} 0`,
+    },
+  }),
+  control: css({
+    padding: 0,
+    border: `1px solid ${theme.colors.border.weak}`,
+    background: '#CCCCDC0D',
+    fontSize: 12,
+    minHeight: 'auto',
+    height: '22px',
+    lineHeight: '18px',
+    boxSizing: 'border-box',
+    boxShadow: 'none',
+
+    '& > div': {
+      paddingLeft: '8px',
+      paddingRight: '8px',
+    },
+  }),
+  key: css({
+    fontWeight: 500,
+    background: theme.colors.border.weak,
+    color: '#ffffff',
   }),
 });
