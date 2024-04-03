@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2, reduceField, ReducerID } from '@grafana/data';
+import { DataFrame, GrafanaTheme2, MetricFindValue, reduceField, ReducerID } from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
@@ -16,15 +16,15 @@ import {
   SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
-  VariableValue,
 } from '@grafana/scenes';
 import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from '../../utils/shared';
 import { getColorByIndex } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
+import { getDataSourceSrv } from '@grafana/runtime';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -32,20 +32,21 @@ export interface TraceSelectSceneState extends SceneObjectState {
   searchQuery?: string;
   showPreviews?: boolean;
 
+  attributes?: string[];
+
   groupBy: string;
-  metricFn: string;
 }
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
-const VAR_METRIC_FN = 'fn';
-const VAR_METRIC_FN_EXPR = '${fn}';
+const VAR_PRIMARY_SIGNAL = 'primarySignal';
+const VAR_PRIMARY_SIGNAL_EXPR = '${primarySignal}';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_METRIC_FN],
+    variableNames: [VAR_GROUPBY, VAR_PRIMARY_SIGNAL],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -54,7 +55,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       $variables: state.$variables ?? getVariableSet(),
       showPreviews: true,
       groupBy: state.groupBy ?? 'resource.service.name',
-      metricFn: state.metricFn ?? 'rate()',
       ...state,
     });
 
@@ -62,8 +62,25 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private _onActivate() {
+    this.updateAttributes();
+
     this.setState({
       body: this.buildBody(),
+    });
+  }
+
+  private async updateAttributes() {
+    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this } });
+
+    if (!ds) {
+      return;
+    }
+
+    ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
+      const attributes = tagKeys.map((l) => l.text);
+      if (attributes !== this.state.attributes) {
+        this.setState({ attributes });
+      }
     });
   }
 
@@ -120,54 +137,60 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     return variable;
   }
 
-  public getMetricFnVariable() {
-    const variable = sceneGraph.lookupVariable(VAR_METRIC_FN, this);
+  public getPrimarySignalVariable() {
+    const variable = sceneGraph.lookupVariable(VAR_PRIMARY_SIGNAL, this);
     if (!(variable instanceof CustomVariable)) {
-      throw new Error('Metric function variable not found');
+      throw new Error('Primary signal variable not found');
     }
 
     return variable;
   }
 
-  public onChangeTab = (value: string) => {
+  public onChangeGroupBy = (value?: string) => {
+    if (!value) {
+      return;
+    }
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(value);
   };
 
-  public onChangeMetricsFn = (value?: VariableValue) => {
+  public onChangePrimarySignal = (value?: string) => {
     if (!value) {
       return;
     }
-    const metricFnVariable = this.getMetricFnVariable();
-    metricFnVariable.changeValueTo(value);
+    const variable = this.getPrimarySignalVariable();
+    variable.changeValueTo(value);
   };
 
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
+    const { attributes } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const metricFnVariable = model.getMetricFnVariable();
-    const { value: metricFnValue } = metricFnVariable.useState();
+    const primarySignalVariable = model.getPrimarySignalVariable();
+    const { value: primarySignal } = primarySignalVariable.useState();
 
     return (
       <div className={styles.container}>
         <div className={styles.header}>
+          <div>Group by</div>
           <Select
-            options={metricFnOptions}
-            value={metricFnValue}
-            onChange={(value) => model.onChangeMetricsFn(value.value)}
-            width={20}
-            placeholder={'Select function'}
+            options={getAttributesAsOptions(attributes || [])}
+            value={groupByValue}
+            onChange={(value) => model.onChangeGroupBy(value.value?.toString())}
+            width={'auto'}
+            placeholder={'Select an attribute'}
+            className={styles.select}
           />
         </div>
         <TabsBar>
-          {groupByOptions.map(({ label, value }, index) => {
+          {primarySignalOptions.map(({ label, value }, index) => {
             return (
               <Tab
                 key={index}
                 label={label}
-                active={value === groupByValue}
-                onChangeTab={() => model.onChangeTab(value.toString())}
+                active={value === primarySignal}
+                onChangeTab={() => model.onChangePrimarySignal(value.toString())}
               />
             );
           })}
@@ -178,6 +201,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       </div>
     );
   };
+}
+
+function getAttributesAsOptions(attributes: string[]) {
+  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }
 
 function getLabelValue(frame: DataFrame) {
@@ -195,15 +222,12 @@ function getLabelValue(frame: DataFrame) {
   return labels[keys[0]];
 }
 
-const groupByOptions = [
-  { label: 'Service Name', value: 'resource.service.name' },
-  { label: 'HTTP URL', value: 'span.http.url' },
-  { label: 'HTTP Host', value: 'span.http.host' },
-];
-
-const metricFnOptions = [
-  { label: 'Span Rate', value: 'rate()' },
-  { label: 'Span Count', value: 'count_over_time()' },
+const primarySignalOptions = [
+  { label: 'Trace roots', value: 'nestedSetParent = -1' },
+  { label: 'Server spans', value: 'kind = server' },
+  { label: 'Consumer spans', value: 'kind = consumer' },
+  { label: 'HTTP paths', value: 'span.http.path != ""' },
+  { label: 'Databases', value: 'span.db.name != ""' },
 ];
 
 function getVariableSet() {
@@ -214,8 +238,8 @@ function getVariableSet() {
         value: 'resource.service.name',
       }),
       new CustomVariable({
-        name: VAR_METRIC_FN,
-        value: 'rate()',
+        name: VAR_PRIMARY_SIGNAL,
+        value: 'nestedSetParent = -1',
       }),
     ],
   });
@@ -224,7 +248,7 @@ function getVariableSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | ${VAR_METRIC_FN_EXPR} by (${VAR_GROUPBY_EXPR})`,
+    query: `{${VAR_PRIMARY_SIGNAL_EXPR} ${VAR_FILTERS_EXPR}} | rate() by (${VAR_GROUPBY_EXPR}, status)`,
     queryType: 'traceql',
     filters: [],
   };
@@ -246,6 +270,9 @@ function getStyles(theme: GrafanaTheme2) {
       right: 0,
       top: '4px',
       zIndex: 2,
+      display: 'flex',
+      gap: theme.spacing(1),
+      alignItems: 'center',
     }),
     bodyWrapper: css({
       flexGrow: 1,
@@ -254,6 +281,9 @@ function getStyles(theme: GrafanaTheme2) {
       '& > div': {
         overflow: 'scroll',
       },
+    }),
+    select: css({
+      minWidth: 240,
     }),
   };
 }
