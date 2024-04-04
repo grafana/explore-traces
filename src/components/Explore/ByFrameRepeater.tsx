@@ -10,6 +10,7 @@ import {
   SceneByFrameRepeater,
   SceneLayout,
 } from '@grafana/scenes';
+import { EmptyStateScene } from 'components/emptyState/EmptyStateScene';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -26,7 +27,11 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
       this._subs.add(
         data.subscribeToState((data) => {
           if (data.data?.state === LoadingState.Done) {
-            this.performRepeat(data.data);
+            if (data.data.series.length === 0) {
+              this.state.body.setState({ children: [new SceneFlexItem({ body: new EmptyStateScene({ message: "No data for selected tabs query" }) })] });
+            } else {
+              this.performRepeat(data.data);
+            }
           }
         })
       );
