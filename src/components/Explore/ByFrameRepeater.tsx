@@ -28,7 +28,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
         data.subscribeToState((data) => {
           if (data.data?.state === LoadingState.Done) {
             if (data.data.series.length === 0) {
-              this.state.body.setState({ children: [new SceneFlexItem({ body: new EmptyStateScene({ message: "No data for selected tabs query" }) })] });
+              this.state.body.setState({ children: [new SceneFlexItem({ body: new EmptyStateScene({ message: "No data for selected query" }) })] });
             } else {
               this.performRepeat(data.data);
             }
