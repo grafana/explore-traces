@@ -10,7 +10,7 @@ import {
   SceneByFrameRepeater,
   SceneLayout,
 } from '@grafana/scenes';
-import { EmptyStateScene } from 'components/emptyState/EmptyStateScene';
+import { EmptyStateScene } from 'components/EmptyState/EmptyStateScene';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
