@@ -1,6 +1,7 @@
 name: Build and release main to GCS
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
