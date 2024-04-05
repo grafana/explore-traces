@@ -11,15 +11,15 @@ on:
 
 jobs:
   build:
-    uses: grafana/explore-traces/.github/workflows/build.yml@main
-  release-and-upload:
     runs-on: ubuntu-latest
     steps:
+      - uses: grafana/explore-traces/.github/workflows/build.yml@main
+        id: build
       - id: 'upload-to-gcs'
         name: 'Upload assets to main'
         uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
           path: ./
           destination: 'integration-artifacts/grafana-exploretraces-app/'
-          glob: ${{ jobs.build.outputs.archive }}
+          glob: ${{ steps.build.outputs.archive }}
           parent: false
