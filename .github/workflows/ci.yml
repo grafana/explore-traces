@@ -23,5 +23,5 @@ jobs:
         with:
           path: ./
           destination: 'integration-artifacts/grafana-exploretraces-app/'
-          glob: ${{ jobs.build.outputs.archive }}
+          glob: ${{ needs.build.outputs.archive }}
           parent: false
