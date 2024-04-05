@@ -49,6 +49,6 @@ jobs:
         uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
           path: ./
-          destination: 'integration-artifacts/grafana-traces-app/'
+          destination: 'integration-artifacts/grafana-exploretraces-app/'
           glob: '*.zip'
           parent: false

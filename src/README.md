@@ -2,7 +2,7 @@
 
 Remove any remaining comments before publishing as these may be displayed on Grafana.com -->
 
-# Traces-App
+# Explore Traces
 
 Query less exploration of trace data stored in tempo
 

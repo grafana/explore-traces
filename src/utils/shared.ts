@@ -8,8 +8,8 @@ export interface ActionViewDefinition {
   getScene: () => SceneObject;
 }
 
-export const EXPLORATIONS_ROUTE = '/explore/metrics/exploration';
-export const DATASOURCE_LS_KEY = 'grafana.traces.explore.datasource';
+export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
+export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';

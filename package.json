@@ -1,5 +1,5 @@
 {
-  "name": "traces-app",
+  "name": "exploretraces-app",
   "version": "1.0.15",
   "description": "Query less exploration of trace data stored in tempo",
   "scripts": {

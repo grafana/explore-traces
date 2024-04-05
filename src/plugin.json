@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Traces-App",
-  "id": "grafana-traces-app",
+  "name": "Explore Traces",
+  "id": "grafana-exploretraces-app",
   "info": {
     "keywords": ["app"],
     "description": "Query less exploration of trace data stored in tempo",
