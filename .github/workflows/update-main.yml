@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    uses: grafana/explore-traces/.github/workflows/build.yml@main
+    uses: ./build.yml
   upload:
     runs-on: ubuntu-latest
     needs:

@@ -7,4 +7,4 @@ on:
 
 jobs:
   build:
-    uses: grafana/explore-traces/.github/workflows/build.yml@main
+    uses: ./build.yml
