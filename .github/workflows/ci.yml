@@ -12,4 +12,4 @@ on:
 
 jobs:
   build:
-    uses: grafana/exploretraces-app/.github/workflows/build.yml@main
+    uses: grafana/explore-traces/.github/workflows/build.yml@main
