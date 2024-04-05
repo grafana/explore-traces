@@ -120,6 +120,6 @@ jobs:
       - name: Archive Build
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.metadata.outputs.plugin-id }}
-          path: ${{ steps.metadata.outputs.plugin-id }}
+          name: ${{ steps.metadata.outputs.archive }}
+          path: ${{ steps.metadata.outputs.archive }}
           retention-days: 5
