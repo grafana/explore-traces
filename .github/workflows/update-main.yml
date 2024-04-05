@@ -17,6 +17,10 @@ jobs:
     needs:
       - build
     steps:
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v4
+        with:
+          name: grafana-exploretraces-app
       - id: 'upload-to-gcs'
         name: 'Upload assets to main'
         uses: 'google-github-actions/upload-cloud-storage@v1'
