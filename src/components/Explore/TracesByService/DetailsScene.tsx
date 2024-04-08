@@ -7,11 +7,11 @@ import {
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
   SceneFlexItem,
-  SceneCanvasText,
   SceneFlexLayout,
 } from '@grafana/scenes';
 import { getTraceViewPanel } from '../panels/traceViewPanel';
 import { DetailsSceneUpdated } from '../../../utils/shared';
+import { EmptyStateScene } from 'components/emptyState/EmptyStateScene';
 
 export interface DetailsSceneState extends SceneObjectState {
   traceId?: string;
@@ -67,10 +67,10 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
     } else {
       this.state.body.setState({
         children: [
-          new SceneCanvasText({
-            text: 'No details available',
-            fontSize: 20,
-            align: 'center',
+          new SceneFlexItem({
+            body: new EmptyStateScene({
+              message: "No trace selected" 
+            })
           }),
         ],
       });
