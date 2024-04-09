@@ -17,6 +17,7 @@ inputs:
 
 
 runs:
+  using: 'composite'
   env:
     GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
   steps:
