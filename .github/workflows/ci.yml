@@ -1,4 +1,4 @@
-name: Build and release main to GCS
+name: Build
 
 on:
   pull_request:
