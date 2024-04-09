@@ -3,10 +3,10 @@ name: Build
 outputs:
   plugin-id:
     description: 'The plugin ID'
-    value: ${{ jobs.metadata.outputs.plugin-id }}
+    value: ${{ steps.metadata.outputs.plugin-id }}
   archive:
     description: 'The packaged and signed plugin artifact'
-    value: ${{ jobs.metadata.outputs.archive }}
+    value: ${{ steps.metadata.outputs.archive }}
 
 inputs:
   policy_token:
@@ -17,12 +17,8 @@ inputs:
 
 
 runs:
-  runs-on: ubuntu-latest
   env:
     GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
-  outputs:
-    plugin-id: ${{ steps.metadata.outputs.plugin-id }}
-    archive: ${{ steps.metadata.outputs.archive }}
   steps:
     - uses: actions/checkout@v4
     - name: Setup Node.js environment
