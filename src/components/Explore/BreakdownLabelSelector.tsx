@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText } from '@grafana/ui';
+import {VARIABLE_ALL_VALUE} from "../../constants";
 
 type Props = {
   options: Array<SelectableValue<string>>;
@@ -52,7 +53,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
     <div ref={controlsContainer} className={styles.container}>
       {useHorizontalLabelSelector ? (
         <>
-          <RadioButtonGroup {...{ options: mainOptions, value, onChange }} />
+          <RadioButtonGroup {...{ options: [{value: VARIABLE_ALL_VALUE, label: "All"}, ...mainOptions], value, onChange }} />
           <Select
             {...{ value }}
             placeholder={'Other attributes'}
