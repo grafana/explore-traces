@@ -15,11 +15,8 @@ inputs:
     required: false
     default: ""
 
-
 runs:
   using: 'composite'
-  env:
-    GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
   steps:
     - uses: actions/checkout@v4
     - name: Setup Node.js environment
@@ -98,6 +95,8 @@ runs:
 
     - name: Sign plugin
       run: npm run sign
+      env:
+        GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
       if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
 
     - name: Get plugin metadata
