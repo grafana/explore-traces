@@ -9,7 +9,7 @@ import {
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
-  SceneFlexItem,
+  SceneFlexItem, SceneFlexLayout,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
@@ -192,11 +192,21 @@ function buildNormalLayout(variable: CustomVariable) {
       queries: [query],
     }),
     options: [
+      { value: 'single', label: 'Single' },
       { value: 'grid', label: 'Grid' },
       { value: 'rows', label: 'Rows' },
     ],
     active: 'grid',
     layouts: [
+      new SceneFlexLayout({
+        direction: 'column',
+        children: [
+          new SceneFlexItem({
+            minHeight: 300,
+            body: PanelBuilders.timeseries().build(),
+          }),
+        ],
+      }),
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
           templateColumns: GRID_TEMPLATE_COLUMNS,
