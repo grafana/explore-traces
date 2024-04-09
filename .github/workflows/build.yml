@@ -2,6 +2,12 @@ name: Build
 
 on:
   workflow_call:
+    inputs:
+      policy_token:
+        type: string
+        description: "Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token"
+        required: false
+        default: ""
     outputs:
       plugin-id:
         description: 'The plugin ID'
@@ -10,11 +16,13 @@ on:
         description: 'The packaged and signed plugin artifact'
         value: ${{ jobs.metadata.outputs.archive }}
 
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
+      GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
     outputs:
       plugin-id: ${{ steps.metadata.outputs.plugin-id }}
       archive: ${{ steps.metadata.outputs.archive }}
