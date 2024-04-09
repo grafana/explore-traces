@@ -1,78 +1,75 @@
 name: Build
 
-on:
-  workflow_call:
-    inputs:
-      policy_token:
-        type: string
-        description: "Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token"
-        required: false
-        default: ""
-    outputs:
-      plugin-id:
-        description: 'The plugin ID'
-        value: ${{ jobs.metadata.outputs.plugin-id }}
-      archive:
-        description: 'The packaged and signed plugin artifact'
-        value: ${{ jobs.metadata.outputs.archive }}
+outputs:
+  plugin-id:
+    description: 'The plugin ID'
+    value: ${{ jobs.metadata.outputs.plugin-id }}
+  archive:
+    description: 'The packaged and signed plugin artifact'
+    value: ${{ jobs.metadata.outputs.archive }}
+
+inputs:
+  policy_token:
+    type: string
+    description: "Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token"
+    required: false
+    default: ""
 
 
+runs:
+  runs-on: ubuntu-latest
+  env:
+    GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
+  outputs:
+    plugin-id: ${{ steps.metadata.outputs.plugin-id }}
+    archive: ${{ steps.metadata.outputs.archive }}
+  steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
-    outputs:
-      plugin-id: ${{ steps.metadata.outputs.plugin-id }}
-      archive: ${{ steps.metadata.outputs.archive }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Check types
+      run: npm run typecheck
+    - name: Lint
+      run: npm run lint
+    - name: Unit tests
+      run: npm run test:ci
+    - name: Build frontend
+      run: npm run build
 
-      - name: Check types
-        run: npm run typecheck
-      - name: Lint
-        run: npm run lint
-      - name: Unit tests
-        run: npm run test:ci
-      - name: Build frontend
-        run: npm run build
+    - name: Check for backend
+      id: check-for-backend
+      run: |
+        if [ -f "Magefile.go" ]
+        then
+          echo "has-backend=true" >> $GITHUB_OUTPUT
+        fi
 
-      - name: Check for backend
-        id: check-for-backend
-        run: |
-          if [ -f "Magefile.go" ]
-          then
-            echo "has-backend=true" >> $GITHUB_OUTPUT
-          fi
+    - name: Setup Go environment
+      if: steps.check-for-backend.outputs.has-backend == 'true'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
 
-      - name: Setup Go environment
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
+    - name: Test backend
+      if: steps.check-for-backend.outputs.has-backend == 'true'
+      uses: magefile/mage-action@v3
+      with:
+        version: latest
+        args: coverage
 
-      - name: Test backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: coverage
-
-      - name: Build backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: buildAll
+    - name: Build backend
+      if: steps.check-for-backend.outputs.has-backend == 'true'
+      uses: magefile/mage-action@v3
+      with:
+        version: latest
+        args: buildAll
 
 #      - name: Check for E2E
 #        id: check-for-e2e
@@ -102,32 +99,32 @@ jobs:
 #          path: cypress/videos
 #          retention-days: 5
 
-      - name: Sign plugin
-        run: npm run sign
-        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
+    - name: Sign plugin
+      run: npm run sign
+      if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
 
-      - name: Get plugin metadata
-        id: metadata
-        run: |
-          sudo apt-get install jq
+    - name: Get plugin metadata
+      id: metadata
+      run: |
+        sudo apt-get install jq
 
-          export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
-          export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-latest.zip
+        export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
+        export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-latest.zip
 
-          echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
-          echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
-          
-          echo "archive=${GRAFANA_PLUGIN_ARTIFACT}"
+        echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
+        echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
+        
+        echo "archive=${GRAFANA_PLUGIN_ARTIFACT}"
 
-      - name: Package plugin
-        id: package-plugin
-        run: |
-          mv dist ${{ steps.metadata.outputs.plugin-id }}
-          zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
+    - name: Package plugin
+      id: package-plugin
+      run: |
+        mv dist ${{ steps.metadata.outputs.plugin-id }}
+        zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
 
-      - name: Archive Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.metadata.outputs.archive }}
-          path: ${{ steps.metadata.outputs.archive }}
-          retention-days: 5
+    - name: Archive Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.metadata.outputs.archive }}
+        path: ${{ steps.metadata.outputs.archive }}
+        retention-days: 5
