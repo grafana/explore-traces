@@ -29,7 +29,10 @@ EmptyState.displayName = 'EmptyState';
 function getStyles() {
   return {
     container: css({
-      width: '100%'
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'space-evenly',
+      flexDirection: 'column'
     }),
   };
 }
