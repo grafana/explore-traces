@@ -4,12 +4,12 @@ import React from 'react';
 import { DataFrame, GrafanaTheme2, PanelData } from '@grafana/data';
 import {
   CustomVariable,
-  PanelBuilders,
+  PanelBuilders, PanelOptionsBuilders,
   SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
-  SceneFlexItem, SceneFlexLayout,
+  SceneFlexItem, SceneFlexItemLike, SceneFlexLayout,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
@@ -18,7 +18,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
+import {Button, Field, TooltipDisplayMode, useStyles2} from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
 import { explorationDS, VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
@@ -28,10 +28,14 @@ import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
 import { getColorByIndex } from '../../../../utils/utils';
 import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
+import {VARIABLE_ALL_VALUE} from "../../../../constants";
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
 }
+
+const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
+const ignoredAttributes = ['duration', 'traceDuration'];
 
 export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -45,7 +49,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
         state.$variables ??
         new SceneVariableSet({
           variables: [
-            new CustomVariable({ name: VAR_ATTRIBUTE_GROUP_BY, defaultToAll: false, includeAll: false, text: 'name' }),
+            new CustomVariable({ name: VAR_ATTRIBUTE_GROUP_BY, defaultToAll: true, includeAll: true }),
           ],
         }),
       ...state,
@@ -58,6 +62,10 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
     const variable = this.getVariable();
 
     variable.subscribeToState(() => {
+      this.updateBody(variable);
+    });
+
+    sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
       this.updateBody(variable);
     });
 
@@ -75,12 +83,17 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
 
   private onReferencedVariableValueChanged() {
     const variable = this.getVariable();
-    variable.changeValueTo('name');
+    variable.changeValueTo(VARIABLE_ALL_VALUE);
     this.updateBody(variable);
   }
 
+  private getAttributes() {
+    const allAttributes = sceneGraph.getAncestor(this, TracesByServiceScene).state.attributes;
+    return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
+  }
+
   private async updateBody(variable: CustomVariable) {
-    this.setState({ body: buildNormalLayout(variable) });
+    this.setState({ body: (variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE) ? buildAllLayout(this.getAttributes()): buildNormalLayout(variable) });
   }
 
   public onChange = (value?: string) => {
@@ -182,7 +195,6 @@ function buildQuery(tagKey: string) {
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 function buildNormalLayout(variable: CustomVariable) {
-  console.log('variable.getValueText()', variable.getValueText(), variable);
   const query = buildQuery(variable.getValueText());
 
   return new LayoutSwitcher({
@@ -227,6 +239,69 @@ function buildNormalLayout(variable: CustomVariable) {
   });
 }
 
+function buildAllLayout(attributes?: string[]) {
+  const children: SceneFlexItemLike[] = [];
+
+  if (!attributes) {
+    return new SceneFlexLayout({ children });
+  }
+
+  for (const attribute of attributes) {
+    if (children.length === MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN) {
+      break;
+    }
+
+    const vizPanel = PanelBuilders.timeseries()
+        .setTitle(attribute)
+        .setData(
+            new SceneQueryRunner({
+              maxDataPoints: 250,
+              datasource: explorationDS,
+              queries: [
+                buildQuery(attribute),
+              ],
+            })
+        )
+        .setHeaderActions(new SelectAttributeAction({ attribute: attribute }))
+        .build();
+
+    vizPanel.addActivationHandler(() => {
+      vizPanel.onOptionsChange(PanelOptionsBuilders.timeseries()
+          .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
+          .setOption('legend', { showLegend: false })
+          .build());
+    });
+
+    children.push(
+        new SceneCSSGridItem({
+          body: vizPanel,
+        })
+    );
+  }
+  return new LayoutSwitcher({
+    active: 'grid',
+    options: [
+      { value: 'grid', label: 'Grid' },
+      { value: 'rows', label: 'Rows' },
+    ],
+    layouts: [
+      new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: '200px',
+        children: children,
+        isLazy: true,
+      }),
+      new SceneCSSGridLayout({
+        templateColumns: '1fr',
+        autoRows: '200px',
+        // Clone children since a scene object can only have one parent at a time
+        children: children.map((c) => c.clone()),
+        isLazy: true,
+      }),
+    ],
+  });
+}
+
 function getLabelValue(frame: DataFrame) {
   const labels = frame.fields[1]?.labels;
 
@@ -254,6 +329,25 @@ export function getLayoutChild(getTitle: (df: DataFrame) => string) {
     return new SceneCSSGridItem({
       body: panel.build(),
     });
+  };
+}
+
+
+interface SelectAttributeActionState extends SceneObjectState {
+  attribute: string;
+}
+export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
+  public onClick = () => {
+    const attributesBreakdownScene = sceneGraph.getAncestor(this, AttributesBreakdown);
+    attributesBreakdownScene.onChange(this.state.attribute);
+  };
+
+  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+    return (
+        <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+          Select
+        </Button>
+    );
   };
 }
 
