@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Call shared build action
-        uses: ./.github/workflows/build.yml
+        uses: ./.github/actions/build
         with:
           policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
   upload:

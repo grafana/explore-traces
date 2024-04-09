@@ -7,4 +7,8 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Call shared build action
+        uses: ./.github/actions/build
