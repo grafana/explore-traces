@@ -37,7 +37,7 @@ export interface TraceSelectSceneState extends SceneObjectState {
   groupBy: string;
 }
 
-const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
+export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
