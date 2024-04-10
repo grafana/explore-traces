@@ -52,7 +52,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                   children: [
                     new SkeletonScene({ 
                       item: SkeletonItem,
-                      repeat: 4,
+                      repeat: 8,
                     }),
                   ],
                 })
