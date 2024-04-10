@@ -99,14 +99,14 @@ const SkeletonItem = () => {
         </div>
       </div>
       <div className={styles.yAxis}>
-        {[...Array(3)].map((_, i) => (
+        {[...Array(2)].map((_, i) => (
           <div className={styles.yAxisItem} key={i}>
             <Skeleton count={1} />
           </div>
         ))}
       </div>
       <div className={styles.xAxis}>
-        {[...Array(3)].map((_, i) => (
+        {[...Array(2)].map((_, i) => (
           <div className={styles.xAxisItem} key={i}>
             <Skeleton count={1} />
           </div>
@@ -137,11 +137,11 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-around',
-      marginTop: '10px',
+      marginTop: '35px',
     }),
     yAxisItem: css({
       width: '60px',
-      height: '45px',
+      height: '55px',
     }),
     xAxis: css({
       display: 'flex',
