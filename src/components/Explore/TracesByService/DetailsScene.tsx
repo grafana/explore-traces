@@ -9,9 +9,9 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
 } from '@grafana/scenes';
-import { getTraceViewPanel } from '../panels/traceViewPanel';
 import { DetailsSceneUpdated } from '../../../utils/shared';
 import { EmptyStateScene } from 'components/emptyState/EmptyStateScene';
+import { TraceViewPanelScene } from '../panels/TraceViewPanelScene';
 
 export interface DetailsSceneState extends SceneObjectState {
   traceId?: string;
@@ -59,9 +59,7 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
     if (this.state.traceId) {
       this.state.body.setState({
         children: [
-          new SceneFlexItem({
-            body: getTraceViewPanel(this.state.traceId),
-          }),
+          new TraceViewPanelScene({ traceId: this.state.traceId }),
         ],
       });
     } else {
