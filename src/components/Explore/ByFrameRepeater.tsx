@@ -16,6 +16,7 @@ import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { SkeletonScene } from 'components/LoadingState/SkeletonScene';
+import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -51,8 +52,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 new SceneCSSGridLayout({
                   children: [
                     new SkeletonScene({ 
-                      item: SkeletonItem,
-                      repeat: 8,
+                      component: SkeletonComponent,
                     }),
                   ],
                 })
@@ -85,33 +85,37 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   };
 }
 
-const SkeletonItem = () => {
+const SkeletonComponent = () => {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.title}>
-          <Skeleton count={1} />
-        </div>
-        <div className={styles.action}>
-          <Skeleton count={1} />
-        </div>
-      </div>
-      <div className={styles.yAxis}>
-        {[...Array(2)].map((_, i) => (
-          <div className={styles.yAxisItem} key={i}>
-            <Skeleton count={1} />
+      {[...Array(8)].map((_, i) => (
+        <div className={styles.itemContainer} key={i}>
+          <div className={styles.header}>
+            <div className={styles.title}>
+              <Skeleton count={1} />
+            </div>
+            <div className={styles.action}>
+              <Skeleton count={1} />
+            </div>
           </div>
-        ))}
-      </div>
-      <div className={styles.xAxis}>
-        {[...Array(2)].map((_, i) => (
-          <div className={styles.xAxisItem} key={i}>
-            <Skeleton count={1} />
+          <div className={styles.yAxis}>
+            {[...Array(2)].map((_, i) => (
+              <div className={styles.yAxisItem} key={i}>
+                <Skeleton count={1} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <div className={styles.xAxis}>
+            {[...Array(2)].map((_, i) => (
+              <div className={styles.xAxisItem} key={i}>
+                <Skeleton count={1} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 };
@@ -119,6 +123,13 @@ const SkeletonItem = () => {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
+      display: 'grid',
+      gridTemplateColumns: GRID_TEMPLATE_COLUMNS,
+      gridAutoRows: '200px',
+      rowGap: theme.spacing(1),
+      columnGap: theme.spacing(1),
+    }),
+    itemContainer: css({
       backgroundColor: theme.colors.background.primary,
       border: `1px solid ${theme.colors.background.secondary}`,
       padding: '5px',
