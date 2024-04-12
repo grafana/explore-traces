@@ -37,14 +37,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   public _onActivate() {
     this.state.$data?.subscribeToState((state) => {
-      console.log(state, state.data);
+
       if(state.data?.state === LoadingState.Done){
         const frame = state.data?.series[0].fields[0].values[0];
         if(frame){
           const response = JSON.parse(frame) as TraceSearchMetadata[];
           const merged = mergeTraces(response);
           this.setState({tree: merged})
-          console.log(dumpTree(merged, 0));
         }
       }
     });

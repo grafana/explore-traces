@@ -18,7 +18,7 @@ describe('mergeTraces', () => {
         const mockResponse = serviceStructResponse as SearchResponse;
         const tree = mergeTraces(mockResponse.traces);
         const treeDump = dumpTree(tree, 0);
-        console.log(treeDump);
+
         expect(treeDump).toMatch("root 0\n" +
             "  Service-A:HTTP POST 11\n" +
             "    Service-B:cardinality_estimation 1\n" +
