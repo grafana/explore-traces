@@ -12,7 +12,7 @@ import {
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2 } from '@grafana/data';
 import { explorationDS } from 'utils/shared';
-import { SkeletonScene } from 'components/LoadingState/SkeletonScene';
+import { SkeletonScene } from 'components/states/LoadingState/SkeletonScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
@@ -37,7 +37,20 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
 
       this._subs.add(
         data.subscribeToState((data) => {
-          if (data.data?.state === LoadingState.Loading) {
+          if (data.data?.state === LoadingState.Done) {
+            this.setState({
+              panel: new SceneFlexLayout({
+                direction: 'row',
+                children: [
+                  new SceneFlexItem({
+                    body: PanelBuilders.traces()
+                      .setTitle('Trace')
+                      .build(),
+                  }),
+                ],
+              })
+            });
+          } else if (data.data?.state === LoadingState.Loading) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'row',
@@ -48,26 +61,9 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
                 ],
               })
             });         
-          } else if (data.data?.state === LoadingState.Done) {
-            this.setState({
-              panel: this.getVizPanel(),
-            });
           }
         })
       );
-    });
-  }
-
-  private getVizPanel() {
-    return new SceneFlexLayout({
-      direction: 'row',
-      children: [
-        new SceneFlexItem({
-          body: PanelBuilders.traces()
-            .setTitle('Trace')
-            .build(),
-        }),
-      ],
     });
   }
 

@@ -10,7 +10,7 @@ import {
   SceneFlexLayout,
 } from '@grafana/scenes';
 import { DetailsSceneUpdated } from '../../../utils/shared';
-import { EmptyStateScene } from 'components/emptyState/EmptyStateScene';
+import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { TraceViewPanelScene } from '../panels/TraceViewPanelScene';
 
 export interface DetailsSceneState extends SceneObjectState {
