@@ -47,18 +47,6 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
             } else {
               this.performRepeat(data.data);
             }
-          } else if (data.data?.state === LoadingState.Loading) {
-            this.state.body.setState({
-              children: [
-                new SceneCSSGridLayout({
-                  children: [
-                    new SkeletonScene({ 
-                      component: SkeletonComponent,
-                    }),
-                  ],
-                })
-              ],
-            });
           } else if (data.data?.state === LoadingState.Error) {
             console.log('error', data.data);
             this.state.body.setState({
@@ -67,6 +55,18 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                   children: [
                     new ErrorStateScene({ 
                       message: data.data.error?.message ?? 'An error occurred in the query',
+                    }),
+                  ],
+                })
+              ],
+            });
+          } else if (data.data?.state === LoadingState.Loading) {
+            this.state.body.setState({
+              children: [
+                new SceneCSSGridLayout({
+                  children: [
+                    new SkeletonScene({ 
+                      component: SkeletonComponent,
                     }),
                   ],
                 })
