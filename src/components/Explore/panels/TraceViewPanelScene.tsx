@@ -12,7 +12,7 @@ import {
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2 } from '@grafana/data';
 import { explorationDS } from 'utils/shared';
-import { SkeletonScene } from 'components/states/LoadingState/SkeletonScene';
+import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
@@ -55,7 +55,7 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
               panel: new SceneFlexLayout({
                 direction: 'row',
                 children: [
-                  new SkeletonScene({ 
+                  new LoadingStateScene({ 
                     component: SkeletonComponent,
                   }),
                 ],

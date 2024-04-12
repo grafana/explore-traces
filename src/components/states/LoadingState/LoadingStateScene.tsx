@@ -4,12 +4,12 @@ import { useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
-interface SkeletonSceneState extends SceneObjectState {
+interface LoadingStateSceneState extends SceneObjectState {
   component: () => React.JSX.Element;
 }
 
-export class SkeletonScene extends SceneObjectBase<SkeletonSceneState> {
-  public static Component = ({ model }: SceneComponentProps<SkeletonScene>) => {
+export class LoadingStateScene extends SceneObjectBase<LoadingStateSceneState> {
+  public static Component = ({ model }: SceneComponentProps<LoadingStateScene>) => {
     const theme = useTheme2();
     const styles = useStyles2(getStyles);
     const { component } = model.useState();

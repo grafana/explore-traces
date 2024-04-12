@@ -15,7 +15,7 @@ import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
-import { SkeletonScene } from 'components/states/LoadingState/SkeletonScene';
+import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 
@@ -65,7 +65,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
               children: [
                 new SceneCSSGridLayout({
                   children: [
-                    new SkeletonScene({ 
+                    new LoadingStateScene({ 
                       component: SkeletonComponent,
                     }),
                   ],
