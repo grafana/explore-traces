@@ -20,7 +20,7 @@ import {
 import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from '../../utils/shared';
+import {explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR} from '../../utils/shared';
 import { getColorByIndex } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
@@ -46,7 +46,7 @@ const VAR_PRIMARY_SIGNAL_EXPR = '${primarySignal}';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_PRIMARY_SIGNAL],
+    variableNames: [VAR_GROUPBY, VAR_PRIMARY_SIGNAL, VAR_FILTERS],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
