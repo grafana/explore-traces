@@ -11,12 +11,12 @@ describe('mergeTraces', () => {
 
     it('should not throw an error when a trace has exactly one span set', () => {
         const mockResponse = serviceStructResponse as SearchResponse;
-        expect(() => mergeTraces(mockResponse)).not.toThrow();
+        expect(() => mergeTraces(mockResponse.traces)).not.toThrow();
     });
 
     it('should correctly output a tree', () => {
         const mockResponse = serviceStructResponse as SearchResponse;
-        const tree = mergeTraces(mockResponse);
+        const tree = mergeTraces(mockResponse.traces);
         const treeDump = dumpTree(tree, 0);
         console.log(treeDump);
         expect(treeDump).toMatch("root 0\n" +

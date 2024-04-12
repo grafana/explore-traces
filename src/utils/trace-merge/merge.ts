@@ -1,8 +1,8 @@
-import {SearchResponse} from "../../types";
+import {TraceSearchMetadata} from "../../types";
 import {createNode, TreeNode} from "./tree-node";
 import {nestedSetLeft} from "./utils";
 
-export function mergeTraces(resp: SearchResponse):TreeNode {
+export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
     const tree = new TreeNode({
         name: 'root',
         left: Number.MIN_SAFE_INTEGER,
@@ -10,7 +10,7 @@ export function mergeTraces(resp: SearchResponse):TreeNode {
         spans: [],
     });
 
-    for (const trace of resp.traces) {
+    for (const trace of traces) {
         if (trace.spanSets?.length !== 1) {
             throw new Error('there should be only 1 spanset!');
         }
@@ -50,7 +50,7 @@ export function mergeTraces(resp: SearchResponse):TreeNode {
     return tree;
 }
 
-export function dumpTree(t: TreeNode, depth: number):string {
+export function dumpTree(t: TreeNode, depth: number): string {
     let result = '';
     const space = ' '.repeat(depth * 2);
 
