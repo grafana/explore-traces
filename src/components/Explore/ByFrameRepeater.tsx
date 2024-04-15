@@ -48,7 +48,6 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
               this.performRepeat(data.data);
             }
           } else if (data.data?.state === LoadingState.Error) {
-            console.log('error', data.data);
             this.state.body.setState({
               children: [
                 new SceneCSSGridLayout({
