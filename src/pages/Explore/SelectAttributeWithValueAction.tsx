@@ -33,16 +33,14 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
       return;
     }
 
-    variable.setState({
-      filters: [
-        ...variable.state.filters,
-        {
-          key: groupByVariable.getValue().toString(),
-          operator: '=',
-          value: this.state.value,
-        },
-      ],
+    let newFilters = variable.state.filters;
+    newFilters.push({
+      key: groupByVariable.getValue().toString(),
+      operator: '=',
+      value: this.state.value,
     });
+
+    variable.setState({filters: newFilters});
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 

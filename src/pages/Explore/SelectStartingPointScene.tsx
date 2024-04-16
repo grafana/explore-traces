@@ -1,7 +1,13 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2, MetricFindValue, reduceField, ReducerID } from '@grafana/data';
+import {
+  DataFrame,
+  GrafanaTheme2,
+  MetricFindValue,
+  reduceField,
+  ReducerID,
+} from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
@@ -21,10 +27,11 @@ import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
 import {explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR} from '../../utils/shared';
-import { getColorByIndex } from '../../utils/utils';
+import {getColorByIndex, getExplorationFor} from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
-import { map, Observable } from 'rxjs';
+import {map, Observable} from 'rxjs';
 import { getDataSourceSrv } from '@grafana/runtime';
+import {primarySignalOptions} from "./primary-signals";
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -33,20 +40,16 @@ export interface TraceSelectSceneState extends SceneObjectState {
   showPreviews?: boolean;
 
   attributes?: string[];
-
-  groupBy: string;
 }
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
-const VAR_PRIMARY_SIGNAL = 'primarySignal';
-const VAR_PRIMARY_SIGNAL_EXPR = '${primarySignal}';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_PRIMARY_SIGNAL, VAR_FILTERS],
+    variableNames: [VAR_GROUPBY, VAR_FILTERS],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -54,7 +57,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       body: state.body ?? new SceneCSSGridLayout({ children: [] }),
       $variables: state.$variables ?? getVariableSet(),
       showPreviews: true,
-      groupBy: state.groupBy ?? 'resource.service.name',
       ...state,
     });
 
@@ -63,6 +65,12 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   private _onActivate() {
     this.updateAttributes();
+
+    this.subscribeToState((newState, prevState) => {
+      if(newState.attributes !== prevState.attributes) {
+
+      }
+    })
 
     this.setState({
       body: this.buildBody(),
@@ -137,15 +145,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     return variable;
   }
 
-  public getPrimarySignalVariable() {
-    const variable = sceneGraph.lookupVariable(VAR_PRIMARY_SIGNAL, this);
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Primary signal variable not found');
-    }
-
-    return variable;
-  }
-
   public onChangeGroupBy = (value?: string) => {
     if (!value) {
       return;
@@ -154,21 +153,13 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     groupByVariable.changeValueTo(value);
   };
 
-  public onChangePrimarySignal = (value?: string) => {
-    if (!value) {
-      return;
-    }
-    const variable = this.getPrimarySignalVariable();
-    variable.changeValueTo(value);
-  };
-
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
+    const exploration = getExplorationFor(model);
+    const {primarySignal} = exploration.useState();
     const { attributes } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const primarySignalVariable = model.getPrimarySignalVariable();
-    const { value: primarySignal } = primarySignalVariable.useState();
 
     return (
       <div className={styles.container}>
@@ -184,13 +175,13 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
           />
         </div>
         <TabsBar>
-          {primarySignalOptions.map(({ label, value }, index) => {
+          {primarySignalOptions.map((option, index) => {
             return (
               <Tab
                 key={index}
-                label={label}
-                active={value === primarySignal}
-                onChangeTab={() => model.onChangePrimarySignal(value.toString())}
+                label={option.label || ""}
+                active={option.value === primarySignal}
+                onChangeTab={() => option.value && exploration.onChangePrimarySignal(option.value)}
               />
             );
           })}
@@ -219,27 +210,15 @@ function getLabelValue(frame: DataFrame) {
     return 'No labels';
   }
 
-  return labels[keys[0]];
+  return labels[keys[0]].replace(/"/g, '');
 }
-
-const primarySignalOptions = [
-  { label: 'Trace roots', value: 'nestedSetParent = -1' },
-  { label: 'Server spans', value: 'kind = server' },
-  { label: 'Consumer spans', value: 'kind = consumer' },
-  { label: 'HTTP paths', value: 'span.http.path != ""' },
-  { label: 'Databases', value: 'span.db.name != ""' },
-];
 
 function getVariableSet() {
   return new SceneVariableSet({
     variables: [
       new CustomVariable({
         name: VAR_GROUPBY,
-        value: 'resource.service.name',
-      }),
-      new CustomVariable({
-        name: VAR_PRIMARY_SIGNAL,
-        value: 'nestedSetParent = -1',
+        query: 'resource.service.name',
       }),
     ],
   });
@@ -248,7 +227,7 @@ function getVariableSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_PRIMARY_SIGNAL_EXPR} ${VAR_FILTERS_EXPR}} | rate() by (${VAR_GROUPBY_EXPR}, status)`,
+    query: `{${VAR_FILTERS_EXPR}} | rate() by (${VAR_GROUPBY_EXPR}, status)`,
     queryType: 'traceql',
     filters: [],
   };

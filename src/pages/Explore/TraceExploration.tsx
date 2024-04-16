@@ -1,9 +1,10 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
+import {AdHocVariableFilter, GrafanaTheme2} from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import {
+  AdHocFiltersVariable,
   DataSourceVariable,
   getUrlSyncManager,
   SceneComponentProps,
@@ -32,9 +33,10 @@ import {
   VAR_FILTERS,
   DATASOURCE_LS_KEY,
 } from '../../utils/shared';
-import { getUrlForExploration } from '../../utils/utils';
+import {getFilterSignature, getUrlForExploration} from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
+import {getSignalForKey, primarySignalOptions} from "./primary-signals";
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -48,6 +50,7 @@ export interface TraceExplorationState extends SceneObjectState {
   mode?: TraceExplorationMode;
   detailsScene?: DetailsScene;
   showDetails?: boolean;
+  primarySignal?: string;
 
   // just for the starting data source
   initialDS?: string;
@@ -55,7 +58,7 @@ export interface TraceExplorationState extends SceneObjectState {
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', "primarySignal"] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -65,6 +68,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       history: state.history ?? new ExplorationHistory({}),
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
+      primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
       ...state,
     });
 
@@ -79,6 +83,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     // Some scene elements publish this
     this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
     this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
+
+    const filtersVar = this.getFiltersVariable();
 
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
     datasourceVar.subscribeToState((newState) => {
@@ -95,6 +101,14 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
           this.state.body.setState({ secondary: undefined });
           this.setState({ detailsScene: new DetailsScene({}) });
         }
+      }
+      if(newState.primarySignal && newState.primarySignal !== oldState.primarySignal){
+        let filters = filtersVar.state.filters;
+        // Remove previous filter for primary signal
+        filters = filters.filter(f => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldState.primarySignal)?.filter));
+        // Add new filter
+        filters.unshift(getSignalForKey(newState.primarySignal)?.filter);
+        filtersVar.setState({filters});
       }
     });
 
@@ -145,7 +159,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { mode: this.state.mode };
+    return { mode: this.state.mode, primarySignal: this.state.primarySignal };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -157,8 +171,28 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       stateUpdate.topScene = getTopScene(mode);
     }
 
+    if(values.primarySignal && values.primarySignal !== this.state.primarySignal){
+      stateUpdate.primarySignal = values.primarySignal as string;
+    }
+
     this.setState(stateUpdate);
   }
+
+  public getFiltersVariable() {
+    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+    if (!(variable instanceof AdHocFiltersVariable)) {
+      throw new Error('Filters variable not found');
+    }
+
+    return variable;
+  }
+
+  public onChangePrimarySignal = (signal: string) => {
+    if (!signal || this.state.primarySignal === signal) {
+      return;
+    }
+    this.setState({ primarySignal: signal });
+  };
 
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
     const { body } = model.useState();

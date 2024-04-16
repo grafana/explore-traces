@@ -1,4 +1,4 @@
-import { urlUtil } from '@grafana/data';
+import {AdHocVariableFilter, urlUtil} from '@grafana/data';
 import { config, getDataSourceSrv } from '@grafana/runtime';
 import { getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
 
@@ -44,4 +44,8 @@ export function getDatasourceForNewExploration(): string | undefined {
 export function getColorByIndex(index: number) {
   const visTheme = config.theme2.visualization;
   return visTheme.getColorByName(visTheme.palette[index % 8]);
+}
+
+export const getFilterSignature = (filter: AdHocVariableFilter) => {
+  return `${filter.key}${filter.operator}${filter.value}`;
 }
