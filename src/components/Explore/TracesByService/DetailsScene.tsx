@@ -58,17 +58,15 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
   private updateBody() {
     if (this.state.traceId) {
       this.state.body.setState({
-        children: [
-          new TraceViewPanelScene({ traceId: this.state.traceId }),
-        ],
+        children: [new TraceViewPanelScene({ traceId: this.state.traceId })],
       });
     } else {
       this.state.body.setState({
         children: [
           new SceneFlexItem({
             body: new EmptyStateScene({
-              message: "No trace selected" 
-            })
+              message: 'No trace selected',
+            }),
           }),
         ],
       });

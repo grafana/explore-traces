@@ -40,7 +40,7 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
       value: this.state.value,
     });
 
-    variable.setState({filters: newFilters});
+    variable.setState({ filters: newFilters });
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 

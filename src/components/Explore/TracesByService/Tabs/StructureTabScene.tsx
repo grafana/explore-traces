@@ -9,12 +9,12 @@ import {
   SceneObjectState,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import {explorationDS, VAR_FILTERS_EXPR} from "../../../../utils/shared";
-import {TraceSearchMetadata} from "../../../../types";
-import {dumpTree, mergeTraces} from "../../../../utils/trace-merge/merge";
-import {LoadingState} from "@grafana/data";
-import {TreeNode} from "../../../../utils/trace-merge/tree-node";
-import {Stack} from "@grafana/ui";
+import { explorationDS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
+import { TraceSearchMetadata } from '../../../../types';
+import { dumpTree, mergeTraces } from '../../../../utils/trace-merge/merge';
+import { LoadingState } from '@grafana/data';
+import { TreeNode } from '../../../../utils/trace-merge/tree-node';
+import { Stack } from '@grafana/ui';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   loading?: boolean;
@@ -37,13 +37,12 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   public _onActivate() {
     this.state.$data?.subscribeToState((state) => {
-
-      if(state.data?.state === LoadingState.Done){
+      if (state.data?.state === LoadingState.Done) {
         const frame = state.data?.series[0].fields[0].values[0];
-        if(frame){
+        if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
           const merged = mergeTraces(response);
-          this.setState({tree: merged})
+          this.setState({ tree: merged });
         }
       }
     });
@@ -73,10 +72,14 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
     const { panel, tree } = model.useState();
 
-    if(tree){
-      return <Stack gap={0.5} direction={'column'}>
-        {tree.children.map((child) => <pre key={child.name}>{dumpTree(child, 0)}</pre>)}
-      </Stack>
+    if (tree) {
+      return (
+        <Stack gap={0.5} direction={'column'}>
+          {tree.children.map((child) => (
+            <pre key={child.name}>{dumpTree(child, 0)}</pre>
+          ))}
+        </Stack>
+      );
     }
 
     if (!panel) {
@@ -98,7 +101,6 @@ function buildQuery() {
     filters: [],
   };
 }
-
 
 export function buildStructureTabScene() {
   return new SceneFlexItem({

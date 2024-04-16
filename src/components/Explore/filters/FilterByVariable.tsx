@@ -1,10 +1,7 @@
 import React from 'react';
 
 import { AdHocVariableFilter } from '@grafana/data';
-import {
-  AdHocFiltersVariable,
-  SceneComponentProps,
-} from '@grafana/scenes';
+import { AdHocFiltersVariable, SceneComponentProps } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
 
 import { FilterSetRenderer } from './FilterSetRenderer';
@@ -32,17 +29,17 @@ export class FilterByVariable extends AdHocFiltersVariable {
 export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
   return filters.map((filter) => renderFilter(filter)).join('&&');
 }
-const isNumber = /^-?\d+\.?\d*$/
+const isNumber = /^-?\d+\.?\d*$/;
 
 function renderFilter(filter: AdHocVariableFilter) {
   let val = filter.value;
-  if(!isNumber.test(val) && !["status", "kind"].includes(filter.key)){
+  if (!isNumber.test(val) && !['status', 'kind'].includes(filter.key)) {
     // Add quotes if it's coming from the filter input and it's not already quoted.
     // Adding a filter from a time series graph already has quotes. This should be handled better.
     if (typeof val === 'string' && !val.startsWith('"') && !val.endsWith('"')) {
       val = `"${val}"`;
     }
   }
-  
+
   return `${filter.key}${filter.operator}${val}`;
 }

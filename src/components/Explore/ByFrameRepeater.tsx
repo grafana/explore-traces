@@ -37,10 +37,10 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
             if (data.data.series.length === 0) {
               this.state.body.setState({
                 children: [
-                  new SceneFlexItem({ 
-                    body: new EmptyStateScene({ 
-                      message: "No data for selected query" 
-                    }) 
+                  new SceneFlexItem({
+                    body: new EmptyStateScene({
+                      message: 'No data for selected query',
+                    }),
                   }),
                 ],
               });
@@ -52,11 +52,11 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
               children: [
                 new SceneCSSGridLayout({
                   children: [
-                    new ErrorStateScene({ 
+                    new ErrorStateScene({
                       message: data.data.error?.message ?? 'An error occurred in the query',
                     }),
                   ],
-                })
+                }),
               ],
             });
           } else if (data.data?.state === LoadingState.Loading) {
@@ -64,11 +64,11 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
               children: [
                 new SceneCSSGridLayout({
                   children: [
-                    new LoadingStateScene({ 
+                    new LoadingStateScene({
                       component: SkeletonComponent,
                     }),
                   ],
-                })
+                }),
               ],
             });
           }
@@ -130,7 +130,7 @@ const SkeletonComponent = () => {
         </div>
       ))}
     </div>
-  )
+  );
 };
 
 function getStyles(theme: GrafanaTheme2) {

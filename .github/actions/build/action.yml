@@ -11,9 +11,9 @@ outputs:
 inputs:
   policy_token:
     type: string
-    description: "Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token"
+    description: 'Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token'
     required: false
-    default: ""
+    default: ''
 
 runs:
   using: 'composite'
@@ -70,33 +70,33 @@ runs:
         version: latest
         args: buildAll
 
-#      - name: Check for E2E
-#        id: check-for-e2e
-#        run: |
-#          if [ -d "cypress" ]
-#          then
-#            echo "has-e2e=true" >> $GITHUB_OUTPUT
-#          fi
-#
-#      - name: Start grafana docker
-#        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-#        run: docker-compose up -d
-#
-#      - name: Run e2e tests
-#        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-#        run: npm run e2e
-#
-#      - name: Stop grafana docker
-#        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-#        run: docker-compose down
-#
-#      - name: Archive E2E output
-#        uses: actions/upload-artifact@v4
-#        if: steps.check-for-e2e.outputs.has-e2e == 'true' && steps.run-e2e-tests.outcome != 'success'
-#        with:
-#          name: cypress-videos
-#          path: cypress/videos
-#          retention-days: 5
+    #      - name: Check for E2E
+    #        id: check-for-e2e
+    #        run: |
+    #          if [ -d "cypress" ]
+    #          then
+    #            echo "has-e2e=true" >> $GITHUB_OUTPUT
+    #          fi
+    #
+    #      - name: Start grafana docker
+    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
+    #        run: docker-compose up -d
+    #
+    #      - name: Run e2e tests
+    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
+    #        run: npm run e2e
+    #
+    #      - name: Stop grafana docker
+    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
+    #        run: docker-compose down
+    #
+    #      - name: Archive E2E output
+    #        uses: actions/upload-artifact@v4
+    #        if: steps.check-for-e2e.outputs.has-e2e == 'true' && steps.run-e2e-tests.outcome != 'success'
+    #        with:
+    #          name: cypress-videos
+    #          path: cypress/videos
+    #          retention-days: 5
 
     - name: Sign plugin
       run: npm run sign
@@ -116,7 +116,7 @@ runs:
 
         echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
         echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
-        
+
         echo "archive=${GRAFANA_PLUGIN_ARTIFACT}"
 
     - name: Package plugin

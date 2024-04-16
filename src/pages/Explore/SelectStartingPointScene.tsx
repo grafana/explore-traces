@@ -1,13 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import {
-  DataFrame,
-  GrafanaTheme2,
-  MetricFindValue,
-  reduceField,
-  ReducerID,
-} from '@grafana/data';
+import { DataFrame, GrafanaTheme2, MetricFindValue, reduceField, ReducerID } from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
@@ -26,12 +20,12 @@ import {
 import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import {explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR} from '../../utils/shared';
-import {getColorByIndex, getExplorationFor} from '../../utils/utils';
+import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { getColorByIndex, getExplorationFor } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
-import {map, Observable} from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { getDataSourceSrv } from '@grafana/runtime';
-import {primarySignalOptions} from "./primary-signals";
+import { primarySignalOptions } from './primary-signals';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -67,10 +61,9 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.updateAttributes();
 
     this.subscribeToState((newState, prevState) => {
-      if(newState.attributes !== prevState.attributes) {
-
+      if (newState.attributes !== prevState.attributes) {
       }
-    })
+    });
 
     this.setState({
       body: this.buildBody(),
@@ -156,7 +149,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
     const exploration = getExplorationFor(model);
-    const {primarySignal} = exploration.useState();
+    const { primarySignal } = exploration.useState();
     const { attributes } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
@@ -179,7 +172,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             return (
               <Tab
                 key={index}
-                label={option.label || ""}
+                label={option.label || ''}
                 active={option.value === primarySignal}
                 onChangeTab={() => option.value && exploration.onChangePrimarySignal(option.value)}
               />

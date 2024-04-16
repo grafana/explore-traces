@@ -11,7 +11,7 @@ export interface Props {
 
 export const EmptyState = ({ message }: Props) => {
   const styles = useStyles2(getStyles);
-  
+
   return (
     <div className={styles.container}>
       <Box paddingY={8}>
@@ -32,7 +32,7 @@ function getStyles() {
       width: '100%',
       display: 'flex',
       justifyContent: 'space-evenly',
-      flexDirection: 'column'
+      flexDirection: 'column',
     }),
   };
 }

@@ -4,12 +4,15 @@ import React from 'react';
 import { DataFrame, GrafanaTheme2, PanelData } from '@grafana/data';
 import {
   CustomVariable,
-  PanelBuilders, PanelOptionsBuilders,
+  PanelBuilders,
+  PanelOptionsBuilders,
   SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
-  SceneFlexItem, SceneFlexItemLike, SceneFlexLayout,
+  SceneFlexItem,
+  SceneFlexItemLike,
+  SceneFlexLayout,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
@@ -18,7 +21,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import {Button, Field, TooltipDisplayMode, useStyles2} from '@grafana/ui';
+import { Button, Field, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
 import { explorationDS, VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
@@ -28,7 +31,7 @@ import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
 import { getColorByIndex } from '../../../../utils/utils';
 import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
-import {VARIABLE_ALL_VALUE} from "../../../../constants";
+import { VARIABLE_ALL_VALUE } from '../../../../constants';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -48,9 +51,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
       $variables:
         state.$variables ??
         new SceneVariableSet({
-          variables: [
-            new CustomVariable({ name: VAR_ATTRIBUTE_GROUP_BY, defaultToAll: true, includeAll: true }),
-          ],
+          variables: [new CustomVariable({ name: VAR_ATTRIBUTE_GROUP_BY, defaultToAll: true, includeAll: true })],
         }),
       ...state,
     });
@@ -93,7 +94,12 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
   }
 
   private async updateBody(variable: CustomVariable) {
-    this.setState({ body: (variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE) ? buildAllLayout(this.getAttributes()): buildNormalLayout(variable) });
+    this.setState({
+      body:
+        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+          ? buildAllLayout(this.getAttributes())
+          : buildNormalLayout(variable),
+    });
   }
 
   public onChange = (value?: string) => {
@@ -252,30 +258,30 @@ function buildAllLayout(attributes?: string[]) {
     }
 
     const vizPanel = PanelBuilders.timeseries()
-        .setTitle(attribute)
-        .setData(
-            new SceneQueryRunner({
-              maxDataPoints: 250,
-              datasource: explorationDS,
-              queries: [
-                buildQuery(attribute),
-              ],
-            })
-        )
-        .setHeaderActions(new SelectAttributeAction({ attribute: attribute }))
-        .build();
+      .setTitle(attribute)
+      .setData(
+        new SceneQueryRunner({
+          maxDataPoints: 250,
+          datasource: explorationDS,
+          queries: [buildQuery(attribute)],
+        })
+      )
+      .setHeaderActions(new SelectAttributeAction({ attribute: attribute }))
+      .build();
 
     vizPanel.addActivationHandler(() => {
-      vizPanel.onOptionsChange(PanelOptionsBuilders.timeseries()
+      vizPanel.onOptionsChange(
+        PanelOptionsBuilders.timeseries()
           .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
           .setOption('legend', { showLegend: false })
-          .build());
+          .build()
+      );
     });
 
     children.push(
-        new SceneCSSGridItem({
-          body: vizPanel,
-        })
+      new SceneCSSGridItem({
+        body: vizPanel,
+      })
     );
   }
   return new LayoutSwitcher({
@@ -332,7 +338,6 @@ export function getLayoutChild(getTitle: (df: DataFrame) => string) {
   };
 }
 
-
 interface SelectAttributeActionState extends SceneObjectState {
   attribute: string;
 }
@@ -344,9 +349,9 @@ export class SelectAttributeAction extends SceneObjectBase<SelectAttributeAction
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
-        <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-          Select
-        </Button>
+      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+        Select
+      </Button>
     );
   };
 }

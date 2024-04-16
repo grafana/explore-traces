@@ -1,12 +1,12 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { GrafanaTheme2} from '@grafana/data';
+import { GrafanaTheme2 } from '@grafana/data';
 import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
-import {getExplorationFor} from "../../../utils/utils";
-import {primarySignalOptions} from "../../../pages/Explore/primary-signals";
+import { getExplorationFor } from '../../../utils/utils';
+import { primarySignalOptions } from '../../../pages/Explore/primary-signals';
 
 interface Props {
   model: FilterByVariable;

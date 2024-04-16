@@ -1,6 +1,6 @@
-import { SceneObjectState, SceneObjectBase, SceneComponentProps } from "@grafana/scenes";
-import React from "react";
-import { Alert } from "@grafana/ui";
+import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
+import React from 'react';
+import { Alert } from '@grafana/ui';
 
 interface ErrorStateSceneState extends SceneObjectState {
   message: string;

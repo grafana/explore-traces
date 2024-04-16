@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import {AdHocVariableFilter, GrafanaTheme2} from '@grafana/data';
+import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
@@ -33,10 +33,10 @@ import {
   VAR_FILTERS,
   DATASOURCE_LS_KEY,
 } from '../../utils/shared';
-import {getFilterSignature, getUrlForExploration} from '../../utils/utils';
+import { getFilterSignature, getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
-import {getSignalForKey, primarySignalOptions} from "./primary-signals";
+import { getSignalForKey, primarySignalOptions } from './primary-signals';
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -58,7 +58,7 @@ export interface TraceExplorationState extends SceneObjectState {
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', "primarySignal"] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal'] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -102,13 +102,15 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
           this.setState({ detailsScene: new DetailsScene({}) });
         }
       }
-      if(newState.primarySignal && newState.primarySignal !== oldState.primarySignal){
+      if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
         let filters = filtersVar.state.filters;
         // Remove previous filter for primary signal
-        filters = filters.filter(f => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldState.primarySignal)?.filter));
+        filters = filters.filter(
+          (f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldState.primarySignal)?.filter)
+        );
         // Add new filter
         filters.unshift(getSignalForKey(newState.primarySignal)?.filter);
-        filtersVar.setState({filters});
+        filtersVar.setState({ filters });
       }
     });
 
@@ -171,7 +173,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       stateUpdate.topScene = getTopScene(mode);
     }
 
-    if(values.primarySignal && values.primarySignal !== this.state.primarySignal){
+    if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
       stateUpdate.primarySignal = values.primarySignal as string;
     }
 

@@ -43,24 +43,22 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
                 direction: 'row',
                 children: [
                   new SceneFlexItem({
-                    body: PanelBuilders.traces()
-                      .setTitle('Trace')
-                      .build(),
+                    body: PanelBuilders.traces().setTitle('Trace').build(),
                   }),
                 ],
-              })
+              }),
             });
           } else if (data.data?.state === LoadingState.Loading) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'row',
                 children: [
-                  new LoadingStateScene({ 
+                  new LoadingStateScene({
                     component: SkeletonComponent,
                   }),
                 ],
-              })
-            });         
+              }),
+            });
           }
         })
       );
@@ -93,31 +91,55 @@ const SkeletonComponent = () => {
       </div>
 
       <div className={styles.span}>
-        <span className={styles.service1}><Skeleton count={1} /></span>
-        <span className={styles.bar1}><Skeleton count={1} /></span>
+        <span className={styles.service1}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar1}>
+          <Skeleton count={1} />
+        </span>
       </div>
       <div className={styles.span}>
-        <span className={styles.service2}><Skeleton count={1} /></span>
-        <span className={styles.bar2}><Skeleton count={1} /></span>
+        <span className={styles.service2}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar2}>
+          <Skeleton count={1} />
+        </span>
       </div>
       <div className={styles.span}>
-        <span className={styles.service3}><Skeleton count={1} /></span>
-        <span className={styles.bar3}><Skeleton count={1} /></span>
+        <span className={styles.service3}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar3}>
+          <Skeleton count={1} />
+        </span>
       </div>
       <div className={styles.span}>
-        <span className={styles.service4}><Skeleton count={1} /></span>
-        <span className={styles.bar4}><Skeleton count={1} /></span>
+        <span className={styles.service4}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar4}>
+          <Skeleton count={1} />
+        </span>
       </div>
       <div className={styles.span}>
-        <span className={styles.service5}><Skeleton count={1} /></span>
-        <span className={styles.bar5}><Skeleton count={1} /></span>
+        <span className={styles.service5}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar5}>
+          <Skeleton count={1} />
+        </span>
       </div>
       <div className={styles.span}>
-        <span className={styles.service6}><Skeleton count={1} /></span>
-        <span className={styles.bar6}><Skeleton count={1} /></span>
+        <span className={styles.service6}>
+          <Skeleton count={1} />
+        </span>
+        <span className={styles.bar6}>
+          <Skeleton count={1} />
+        </span>
       </div>
     </div>
-  )
+  );
 };
 
 function getStyles(theme: GrafanaTheme2) {
