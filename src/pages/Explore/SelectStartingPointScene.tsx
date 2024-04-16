@@ -21,7 +21,7 @@ import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
 import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../utils/shared';
-import { getColorByIndex, getExplorationFor } from '../../utils/utils';
+import { getColorByIndex, getExplorationFor, getLabelValue } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
 import { getDataSourceSrv } from '@grafana/runtime';
@@ -189,21 +189,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
 function getAttributesAsOptions(attributes: string[]) {
   return attributes.map((attribute) => ({ label: attribute, value: attribute }));
-}
-
-function getLabelValue(frame: DataFrame) {
-  const labels = frame.fields[1]?.labels;
-
-  if (!labels) {
-    return 'No labels';
-  }
-
-  const keys = Object.keys(labels);
-  if (keys.length === 0) {
-    return 'No labels';
-  }
-
-  return labels[keys[0]].replace(/"/g, '');
 }
 
 function getVariableSet() {

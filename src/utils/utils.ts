@@ -1,4 +1,4 @@
-import { AdHocVariableFilter, urlUtil } from '@grafana/data';
+import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
 import { config, getDataSourceSrv } from '@grafana/runtime';
 import { getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
 
@@ -49,3 +49,18 @@ export function getColorByIndex(index: number) {
 export const getFilterSignature = (filter: AdHocVariableFilter) => {
   return `${filter.key}${filter.operator}${filter.value}`;
 };
+
+export function getLabelValue(frame: DataFrame) {
+  const labels = frame.fields[1]?.labels;
+
+  if (!labels) {
+    return 'No labels';
+  }
+
+  const keys = Object.keys(labels);
+  if (keys.length === 0) {
+    return 'No labels';
+  }
+
+  return labels[keys[0]].replace(/"/g, '');
+}

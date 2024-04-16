@@ -29,7 +29,7 @@ import { explorationDS, VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS, VAR_FILTERS_EXPR } 
 import { ByFrameRepeater } from '../../ByFrameRepeater';
 import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
-import { getColorByIndex } from '../../../../utils/utils';
+import { getColorByIndex, getLabelValue } from '../../../../utils/utils';
 import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
 import { VARIABLE_ALL_VALUE } from '../../../../constants';
 
@@ -306,21 +306,6 @@ function buildAllLayout(attributes?: string[]) {
       }),
     ],
   });
-}
-
-function getLabelValue(frame: DataFrame) {
-  const labels = frame.fields[1]?.labels;
-
-  if (!labels) {
-    return 'No labels';
-  }
-
-  const keys = Object.keys(labels);
-  if (keys.length === 0) {
-    return 'No labels';
-  }
-
-  return labels[keys[0]];
 }
 
 export function getLayoutChild(getTitle: (df: DataFrame) => string) {
