@@ -84,8 +84,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
     this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
 
-    const filtersVar = this.getFiltersVariable();
-
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
     datasourceVar.subscribeToState((newState) => {
       if (newState.value) {
@@ -102,15 +100,12 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
           this.setState({ detailsScene: new DetailsScene({}) });
         }
       }
+      if (newState.mode !== oldState.mode) {
+        this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
+        this.setState({ topScene: getTopScene(newState.mode) });
+      }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
-        let filters = filtersVar.state.filters;
-        // Remove previous filter for primary signal
-        filters = filters.filter(
-          (f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldState.primarySignal)?.filter)
-        );
-        // Add new filter
-        filters.unshift(getSignalForKey(newState.primarySignal)?.filter);
-        filtersVar.setState({ filters });
+        this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
       }
     });
 
@@ -142,6 +137,16 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     };
   }
 
+  private updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
+    const filtersVar = this.getFiltersVariable();
+    let filters = filtersVar.state.filters;
+    // Remove previous filter for primary signal
+    filters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldSignal)?.filter));
+    // Add new filter
+    filters.unshift(getSignalForKey(newSignal)?.filter);
+    filtersVar.setState({ filters });
+  }
+
   private goBackToStep(step: ExplorationHistoryStep) {
     getUrlSyncManager().cleanUp(this);
 
@@ -153,7 +158,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   private _handleStartingPointSelected(evt: StartingPointSelectedEvent) {
-    locationService.partial({ mode: 'traces' });
+    this.setState({ mode: 'traces' });
   }
 
   private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
