@@ -67,7 +67,8 @@ const TreeLine = ({ node, depth, maxDuration }: TreeLineProps) => {
       </td>
       <td className={styles.td}>{formatDuration(nodeAvgDuration)}</td>
       <td className={styles.td}>
-        {erroredSpans} ({errorsPercentage.toFixed(0)}%)
+        {erroredSpans}
+        {erroredSpans > 0 && `(${errorsPercentage.toFixed(0)}%)`}
       </td>
     </tr>
   );
