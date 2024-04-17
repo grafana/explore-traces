@@ -11,10 +11,11 @@ import {
 } from '@grafana/scenes';
 import { explorationDS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../types';
-import { dumpTree, mergeTraces } from '../../../../utils/trace-merge/merge';
+import { mergeTraces } from '../../../../utils/trace-merge/merge';
 import { LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../utils/trace-merge/tree-node';
 import { Stack } from '@grafana/ui';
+import { StructureTree } from './StructureTree';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   loading?: boolean;
@@ -74,9 +75,9 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
     if (tree) {
       return (
-        <Stack gap={0.5} direction={'column'}>
+        <Stack gap={2} direction={'column'}>
           {tree.children.map((child) => (
-            <pre key={child.name}>{dumpTree(child, 0)}</pre>
+            <StructureTree tree={child} key={child.name} />
           ))}
         </Stack>
       );
