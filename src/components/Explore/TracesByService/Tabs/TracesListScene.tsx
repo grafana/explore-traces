@@ -7,7 +7,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { getSpansListPanel } from '../../panels/spansListPanel';
+import { SpanListPanelScene } from 'components/Explore/panels/SpanListPanelScene';
 
 export interface TracesListSceneState extends SceneObjectState {
   loading?: boolean;
@@ -20,25 +20,17 @@ export class TracesListScene extends SceneObjectBase<TracesListSceneState> {
       ...state,
     });
 
-    this.addActivationHandler(this._onActivate.bind(this));
-  }
-
-  public _onActivate() {
-    if (!this.state.panel) {
-      this.setState({
-        panel: this.getVizPanel(),
-      });
-    }
-  }
-
-  private getVizPanel() {
-    return new SceneFlexLayout({
-      direction: 'row',
-      children: [
-        new SceneFlexItem({
-          body: getSpansListPanel(),
-        }),
-      ],
+    this.addActivationHandler(() => {
+      if (!this.state.panel) {
+        this.setState({
+          panel: new SceneFlexLayout({
+            direction: 'row',
+            children: [
+              new SpanListPanelScene(),
+            ],
+          })
+        });
+      }
     });
   }
 
