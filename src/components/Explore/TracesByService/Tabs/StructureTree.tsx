@@ -33,7 +33,7 @@ export const StructureTree = ({ tree }: Props) => {
   );
 };
 
-export function renderTree(t: TreeNode, depth: number, maxDuration: number): Array<React.ReactNode> {
+export function renderTree(t: TreeNode, depth: number, maxDuration: number): React.ReactNode[] {
   let result = [];
 
   result.push(<TreeLine key={t.name} node={t} depth={depth} maxDuration={maxDuration} />);
