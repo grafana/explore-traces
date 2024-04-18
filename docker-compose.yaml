@@ -2,15 +2,15 @@ version: '3.0'
 
 services:
   grafana:
-    container_name: 'grafana-tracesapp'
+    container_name: 'grafana-explore-traces'
     platform: 'linux/amd64'
     build:
       context: ./.config
       args:
         grafana_image: ${GRAFANA_IMAGE:-grafana-dev}
-        grafana_version: ${GRAFANA_VERSION:-latest}
+        grafana_version: ${GRAFANA_VERSION:-11.1.0-173403}
     ports:
       - 3000:3000/tcp
     volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-tracesapp
+      - ./dist:/var/lib/grafana/plugins/grafana-explore-traces
       - ./provisioning:/etc/grafana/provisioning
