@@ -60,8 +60,9 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
             {...{ value }}
             placeholder={'Other attributes'}
             options={otherOptions}
-            onChange={(selected) => onChange(selected.value)}
+            onChange={(selected) => onChange(selected?.value ?? 'All')}
             className={styles.select}
+            isClearable={true}
           />
         </>
       ) : (
@@ -69,8 +70,9 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
           {...{ value }}
           placeholder={'Select attribute'}
           options={options}
-          onChange={(selected) => onChange(selected.value)}
+          onChange={(selected) => onChange(selected?.value ?? 'All')}
           className={styles.select}
+          isClearable={true}
         />
       )}
     </div>
