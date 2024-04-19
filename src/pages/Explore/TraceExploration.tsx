@@ -137,13 +137,20 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     };
   }
 
-  private updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
+  public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
+    let signal = newSignal ?? this.state.primarySignal;
+
     const filtersVar = this.getFiltersVariable();
     let filters = filtersVar.state.filters;
     // Remove previous filter for primary signal
-    filters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldSignal)?.filter));
+    if (oldSignal) {
+      filters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldSignal)?.filter));
+    }
     // Add new filter
-    filters.unshift(getSignalForKey(newSignal)?.filter);
+    const newFilter = getSignalForKey(signal)?.filter;
+    if (newFilter) {
+      filters.unshift(newFilter);
+    }
     filtersVar.setState({ filters });
   }
 

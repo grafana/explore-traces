@@ -17,11 +17,11 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
+import { DrawStyle, Select, StackingMode, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
 import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../utils/shared';
-import { getColorByIndex, getExplorationFor, getLabelValue } from '../../utils/utils';
+import { getExplorationFor, getLabelValue } from '../../utils/utils';
 import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
 import { map, Observable } from 'rxjs';
 import { getDataSourceSrv } from '@grafana/runtime';
@@ -40,6 +40,7 @@ export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
 const VAR_GROUPBY_EXPR = '${groupBy}';
+const defaultGroupBy = 'resource.service.name';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -60,11 +61,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   private _onActivate() {
     this.updateAttributes();
 
-    this.subscribeToState((newState, prevState) => {
-      if (newState.attributes !== prevState.attributes) {
-      }
-    });
-
     this.setState({
       body: this.buildBody(),
     });
@@ -78,7 +74,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     }
 
     ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
-      const attributes = tagKeys.map((l) => l.text);
+      const attributes = tagKeys.filter((l) => l.text.startsWith('resource.')).map((l) => l.text);
       if (attributes !== this.state.attributes) {
         this.setState({ attributes });
       }
@@ -86,6 +82,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private buildBody() {
+    const variable = this.getGroupByVariable();
     return new SceneCSSGridLayout({
       children: [
         new ByFrameRepeater({
@@ -112,15 +109,50 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             autoRows: '200px',
             children: [],
           }),
+          groupBy: true,
           getLayoutChild: (data, frame, frameIndex) => {
             return new SceneCSSGridItem({
               body: PanelBuilders.timeseries()
-                .setTitle(getLabelValue(frame))
-                .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-                .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
+                .setTitle(getLabelValue(frame, variable.state.query))
+                .setData(
+                  new SceneDataNode({
+                    data: {
+                      ...data,
+                      series: [
+                        {
+                          ...frame,
+                          fields: frame.fields
+                            .sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0)
+                            .reverse(),
+                        },
+                      ],
+                    },
+                  })
+                )
                 .setOption('legend', { showLegend: false })
-                .setCustomFieldConfig('fillOpacity', 9)
-                .setHeaderActions(new SelectAttributeWithValueAction({ value: getLabelValue(frame) }))
+                .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
+                .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
+                .setCustomFieldConfig('fillOpacity', 100)
+                .setCustomFieldConfig('lineWidth', 0)
+                .setCustomFieldConfig('pointSize', 0)
+                .setOverrides((overrides) => {
+                  overrides.matchFieldsWithNameByRegex('.*status="error".*').overrideColor({
+                    mode: 'fixed',
+                    fixedColor: 'semi-dark-red',
+                  });
+                  overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
+                    mode: 'fixed',
+                    fixedColor: 'green',
+                  });
+                  overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
+                    mode: 'fixed',
+                    fixedColor: 'dark-green',
+                  });
+                })
+                .setHeaderActions(
+                  new SelectAttributeWithValueAction({ value: getLabelValue(frame, variable.state.query) })
+                )
+                .setDisplayMode('transparent')
                 .build(),
             });
           },
@@ -143,6 +175,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       return;
     }
     const groupByVariable = this.getGroupByVariable();
+    groupByVariable.setState({ query: value });
     groupByVariable.changeValueTo(value);
   };
 
@@ -188,7 +221,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 }
 
 function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
+  return attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute }));
 }
 
 function getVariableSet() {
@@ -196,7 +229,7 @@ function getVariableSet() {
     variables: [
       new CustomVariable({
         name: VAR_GROUPBY,
-        query: 'resource.service.name',
+        query: defaultGroupBy,
       }),
     ],
   });
