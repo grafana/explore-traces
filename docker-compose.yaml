@@ -19,7 +19,7 @@ services:
     image: grafana/tempo:main-5e26604
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./tempo.yaml:/etc/tempo.yaml
+      - ./devenv/tempo.yaml:/etc/tempo.yaml
     ports:
       - "3200:3200"   # tempo
 
