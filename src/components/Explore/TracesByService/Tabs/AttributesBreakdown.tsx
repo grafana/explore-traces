@@ -16,7 +16,7 @@ import {
 import { Button, Field, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
-import { VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS } from '../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS } from '../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
@@ -42,7 +42,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
       $variables:
         state.$variables ??
         new SceneVariableSet({
-          variables: [new CustomVariable({ name: VAR_ATTRIBUTE_GROUP_BY, defaultToAll: true, includeAll: true })],
+          variables: [new CustomVariable({ name: VAR_GROUPBY, defaultToAll: true, includeAll: true })],
         }),
       ...state,
     });
@@ -65,7 +65,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
   }
 
   private getVariable(): CustomVariable {
-    const variable = sceneGraph.lookupVariable(VAR_ATTRIBUTE_GROUP_BY, this)!;
+    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
     if (!(variable instanceof CustomVariable)) {
       throw new Error('Group by variable not found');
     }

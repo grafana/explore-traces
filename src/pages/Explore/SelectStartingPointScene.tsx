@@ -13,7 +13,7 @@ import {
 } from '@grafana/scenes';
 import { Button, Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
-import { VAR_DATASOURCE_EXPR, VAR_FILTERS } from '../../utils/shared';
+import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { primarySignalOptions } from './primary-signals';
@@ -34,8 +34,6 @@ export interface TraceSelectSceneState extends SceneObjectState {
 }
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
-
-export const VAR_GROUPBY = 'groupBy';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {

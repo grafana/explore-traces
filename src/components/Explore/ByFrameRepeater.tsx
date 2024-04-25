@@ -17,9 +17,10 @@ import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
-import { GRID_TEMPLATE_COLUMNS, VAR_GROUPBY } from 'pages/Explore/SelectStartingPointScene';
+import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 import { groupSeriesBy } from '../../utils/panels';
+import { VAR_GROUPBY } from '../../utils/shared';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
