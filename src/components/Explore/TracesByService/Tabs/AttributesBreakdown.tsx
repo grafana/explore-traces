@@ -1,43 +1,34 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2, PanelData } from '@grafana/data';
+import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
   CustomVariable,
-  PanelBuilders,
-  PanelOptionsBuilders,
   SceneComponentProps,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
-  SceneDataNode,
   SceneFlexItem,
-  SceneFlexItemLike,
-  SceneFlexLayout,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
+import { Button, Field, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
-import { explorationDS, VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
+import { VAR_ATTRIBUTE_GROUP_BY, VAR_FILTERS } from '../../../../utils/shared';
 
-import { ByFrameRepeater } from '../../ByFrameRepeater';
 import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
-import { getColorByIndex, getLabelValue } from '../../../../utils/utils';
 import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
 import { VARIABLE_ALL_VALUE } from '../../../../constants';
+import { buildAllLayout } from '../../layouts/allAttributes';
+import { buildNormalLayout } from '../../layouts/attributeBreakdown';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
 }
 
-const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
 const ignoredAttributes = ['duration', 'traceDuration'];
 
 export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownSceneState> {
@@ -97,8 +88,11 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout(this.getAttributes())
-          : buildNormalLayout(variable),
+          ? buildAllLayout(this.getAttributes() ?? [], (attribute) => new SelectAttributeAction({ attribute }))
+          : buildNormalLayout(
+              variable,
+              (frame: DataFrame) => new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS })
+            ),
     });
   }
 
@@ -179,147 +173,6 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       flexDirection: 'column',
     }),
-  };
-}
-
-function getExpr(attr: string) {
-  return `{${VAR_FILTERS_EXPR}} | rate() by(${attr})`;
-}
-
-function buildQuery(tagKey: string) {
-  return {
-    refId: 'A',
-    query: getExpr(tagKey),
-    queryType: 'traceql',
-    tableType: 'spans',
-    limit: 100,
-    spss: 10,
-    filters: [],
-  };
-}
-
-const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
-
-function buildNormalLayout(variable: CustomVariable) {
-  const query = buildQuery(variable.getValueText());
-
-  return new LayoutSwitcher({
-    $data: new SceneQueryRunner({
-      datasource: explorationDS,
-      maxDataPoints: 300,
-      queries: [query],
-    }),
-    options: [
-      { value: 'single', label: 'Single' },
-      { value: 'grid', label: 'Grid' },
-      { value: 'rows', label: 'Rows' },
-    ],
-    active: 'grid',
-    layouts: [
-      new SceneFlexLayout({
-        direction: 'column',
-        children: [
-          new SceneFlexItem({
-            minHeight: 300,
-            body: PanelBuilders.timeseries().build(),
-          }),
-        ],
-      }),
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getLabelValue),
-      }),
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: '1fr',
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getLabelValue),
-      }),
-    ],
-  });
-}
-
-function buildAllLayout(attributes?: string[]) {
-  const children: SceneFlexItemLike[] = [];
-
-  if (!attributes) {
-    return new SceneFlexLayout({ children });
-  }
-
-  for (const attribute of attributes) {
-    if (children.length === MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN) {
-      break;
-    }
-
-    const vizPanel = PanelBuilders.timeseries()
-      .setTitle(attribute)
-      .setData(
-        new SceneQueryRunner({
-          maxDataPoints: 250,
-          datasource: explorationDS,
-          queries: [buildQuery(attribute)],
-        })
-      )
-      .setHeaderActions(new SelectAttributeAction({ attribute: attribute }))
-      .build();
-
-    vizPanel.addActivationHandler(() => {
-      vizPanel.onOptionsChange(
-        PanelOptionsBuilders.timeseries()
-          .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-          .setOption('legend', { showLegend: false })
-          .build()
-      );
-    });
-
-    children.push(
-      new SceneCSSGridItem({
-        body: vizPanel,
-      })
-    );
-  }
-  return new LayoutSwitcher({
-    active: 'grid',
-    options: [
-      { value: 'grid', label: 'Grid' },
-      { value: 'rows', label: 'Rows' },
-    ],
-    layouts: [
-      new SceneCSSGridLayout({
-        templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: '200px',
-        children: children,
-        isLazy: true,
-      }),
-      new SceneCSSGridLayout({
-        templateColumns: '1fr',
-        autoRows: '200px',
-        // Clone children since a scene object can only have one parent at a time
-        children: children.map((c) => c.clone()),
-        isLazy: true,
-      }),
-    ],
-  });
-}
-
-export function getLayoutChild(getTitle: (df: DataFrame) => string) {
-  return (data: PanelData, frame: DataFrame, frameIndex: number) => {
-    const panel = PanelBuilders.timeseries() //
-      .setOption('legend', { showLegend: true })
-      .setCustomFieldConfig('fillOpacity', 9)
-      .setTitle(getTitle(frame))
-      .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-      .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
-      .setHeaderActions(new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS }));
-    return new SceneCSSGridItem({
-      body: panel.build(),
-    });
   };
 }
 

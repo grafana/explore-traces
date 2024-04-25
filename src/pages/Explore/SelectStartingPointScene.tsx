@@ -1,34 +1,31 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2, MetricFindValue, reduceField, ReducerID } from '@grafana/data';
+import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
   CustomVariable,
-  PanelBuilders,
   SceneComponentProps,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
-  SceneDataNode,
-  SceneDataTransformer,
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { DrawStyle, Select, StackingMode, Tab, TabsBar, useStyles2 } from '@grafana/ui';
+import { Button, Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
-import { SelectAttributeWithValueAction } from './SelectAttributeWithValueAction';
-import { explorationDS, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_FILTERS_EXPR } from '../../utils/shared';
+import { VAR_DATASOURCE_EXPR, VAR_FILTERS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
-import { ByFrameRepeater } from '../../components/Explore/ByFrameRepeater';
-import { map, Observable } from 'rxjs';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { primarySignalOptions } from './primary-signals';
+import { VARIABLE_ALL_VALUE } from '../../constants';
+import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
+import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
+import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
+import { AddToFiltersGraphAction } from '../../components/Explore/AddToFiltersGraphAction';
+import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithValueAction';
 
 export interface TraceSelectSceneState extends SceneObjectState {
-  body: SceneCSSGridLayout;
+  body?: LayoutSwitcher;
   showHeading?: boolean;
   searchQuery?: string;
   showPreviews?: boolean;
@@ -39,8 +36,6 @@ export interface TraceSelectSceneState extends SceneObjectState {
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_GROUPBY = 'groupBy';
-const VAR_GROUPBY_EXPR = '${groupBy}';
-const defaultGroupBy = 'resource.service.name';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -49,7 +44,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   constructor(state: Partial<TraceSelectSceneState>) {
     super({
-      body: state.body ?? new SceneCSSGridLayout({ children: [] }),
       $variables: state.$variables ?? getVariableSet(),
       showPreviews: true,
       ...state,
@@ -61,8 +55,18 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   private _onActivate() {
     this.updateAttributes();
 
-    this.setState({
-      body: this.buildBody(),
+    const groupByVariable = this.getGroupByVariable();
+
+    this.subscribeToState((newState, prevState) => {
+      if (newState.attributes !== prevState.attributes) {
+        this.buildBody();
+      }
+    });
+
+    groupByVariable.subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
+        this.buildBody();
+      }
     });
   }
 
@@ -83,81 +87,18 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   private buildBody() {
     const variable = this.getGroupByVariable();
-    return new SceneCSSGridLayout({
-      children: [
-        new ByFrameRepeater({
-          $data: new SceneDataTransformer({
-            $data: new SceneQueryRunner({
-              datasource: explorationDS,
-              queries: [buildQuery()],
-            }),
-            transformations: [
-              () => (source: Observable<DataFrame[]>) => {
-                return source.pipe(
-                  map((data: DataFrame[]) => {
-                    data.forEach((a) => reduceField({ field: a.fields[1], reducers: [ReducerID.max] }));
-                    return data.sort((a, b) => {
-                      return (b.fields[1].state?.calcs?.max || 0) - (a.fields[1].state?.calcs?.max || 0);
-                    });
-                  })
-                );
-              },
-            ],
-          }),
-          body: new SceneCSSGridLayout({
-            templateColumns: GRID_TEMPLATE_COLUMNS,
-            autoRows: '200px',
-            children: [],
-          }),
-          groupBy: true,
-          getLayoutChild: (data, frame, frameIndex) => {
-            return new SceneCSSGridItem({
-              body: PanelBuilders.timeseries()
-                .setTitle(getLabelValue(frame, variable.state.query))
-                .setData(
-                  new SceneDataNode({
-                    data: {
-                      ...data,
-                      series: [
-                        {
-                          ...frame,
-                          fields: frame.fields
-                            .sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0)
-                            .reverse(),
-                        },
-                      ],
-                    },
-                  })
-                )
-                .setOption('legend', { showLegend: false })
-                .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
-                .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
-                .setCustomFieldConfig('fillOpacity', 100)
-                .setCustomFieldConfig('lineWidth', 0)
-                .setCustomFieldConfig('pointSize', 0)
-                .setOverrides((overrides) => {
-                  overrides.matchFieldsWithNameByRegex('.*status="error".*').overrideColor({
-                    mode: 'fixed',
-                    fixedColor: 'semi-dark-red',
-                  });
-                  overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
-                    mode: 'fixed',
-                    fixedColor: 'green',
-                  });
-                  overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
-                    mode: 'fixed',
-                    fixedColor: 'dark-green',
-                  });
-                })
-                .setHeaderActions(
-                  new SelectAttributeWithValueAction({ value: getLabelValue(frame, variable.state.query) })
-                )
-                .setDisplayMode('transparent')
-                .build(),
-            });
-          },
-        }),
-      ],
+    this.setState({
+      body:
+        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+          ? buildAllLayout(
+              this.state.attributes ?? [],
+              (attribute) => new SelectAttributeAction({ attribute: attribute })
+            )
+          : buildNormalLayout(
+              variable,
+              (frame: DataFrame) =>
+                new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) })
+            ),
     });
   }
 
@@ -175,7 +116,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       return;
     }
     const groupByVariable = this.getGroupByVariable();
-    groupByVariable.setState({ query: value });
     groupByVariable.changeValueTo(value);
   };
 
@@ -183,7 +123,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const styles = useStyles2(getStyles);
     const exploration = getExplorationFor(model);
     const { primarySignal } = exploration.useState();
-    const { attributes } = model.useState();
+    const { attributes, body } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
 
@@ -212,16 +152,21 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             );
           })}
         </TabsBar>
-        <div className={styles.bodyWrapper}>
-          <model.state.body.Component model={model.state.body} />
-        </div>
+        {body && (
+          <div className={styles.bodyWrapper}>
+            <body.Component model={body} />
+          </div>
+        )}
       </div>
     );
   };
 }
 
 function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute }));
+  return [
+    { label: 'All errors', value: VARIABLE_ALL_VALUE },
+    ...attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute })),
+  ];
 }
 
 function getVariableSet() {
@@ -229,19 +174,12 @@ function getVariableSet() {
     variables: [
       new CustomVariable({
         name: VAR_GROUPBY,
-        query: defaultGroupBy,
+        defaultToAll: true,
+        includeAll: true,
+        value: VARIABLE_ALL_VALUE,
       }),
     ],
   });
-}
-
-function buildQuery() {
-  return {
-    refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | rate() by (${VAR_GROUPBY_EXPR}, status)`,
-    queryType: 'traceql',
-    filters: [],
-  };
 }
 
 function getStyles(theme: GrafanaTheme2) {
@@ -275,5 +213,23 @@ function getStyles(theme: GrafanaTheme2) {
     select: css({
       minWidth: 240,
     }),
+  };
+}
+
+interface SelectAttributeActionState extends SceneObjectState {
+  attribute: string;
+}
+export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
+  public onClick = () => {
+    const startingPointScene = sceneGraph.getAncestor(this, SelectStartingPointScene);
+    startingPointScene.onChangeGroupBy(this.state.attribute);
+  };
+
+  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+    return (
+      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+        Select
+      </Button>
+    );
   };
 }

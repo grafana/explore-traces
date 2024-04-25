@@ -13,11 +13,11 @@ import { Button } from '@grafana/ui';
 import { StartingPointSelectedEvent } from '../../utils/shared';
 import { VAR_GROUPBY } from './SelectStartingPointScene';
 
-export interface SelectAttributeWithValueActionState extends SceneObjectState {
+export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
   value: string;
 }
 
-export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttributeWithValueActionState> {
+export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
   public onClick = () => {
     const variable = sceneGraph.lookupVariable('filters', this);
     if (!(variable instanceof AdHocFiltersVariable)) {
@@ -44,9 +44,9 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeWithValueAction>) => {
+  public static Component = ({ model }: SceneComponentProps<InvestigateAttributeWithValueAction>) => {
     return (
-      <Button variant="primary" size="sm" fill="text" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
         Select
       </Button>
     );

@@ -98,7 +98,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     let frames = data.series;
 
     if (this.state.groupBy) {
-      frames = groupSeriesBy(data, this.getGroupByVariable().state.query);
+      frames = groupSeriesBy(data, this.getGroupByVariable().getValueText());
     }
 
     for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
