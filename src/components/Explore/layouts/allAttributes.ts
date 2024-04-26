@@ -7,7 +7,7 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { explorationDS, VAR_FILTERS_EXPR } from '../../../utils/shared';
-import { TooltipDisplayMode } from '@grafana/ui';
+import { AxisPlacement, DrawStyle, StackingMode, TooltipDisplayMode } from '@grafana/ui';
 import { LayoutSwitcher } from '../LayoutSwitcher';
 
 const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
@@ -30,10 +30,33 @@ export function buildAllLayout(attributes: string[], actionsFn: (attribute: stri
           queries: [buildQuery(attribute)],
         })
       )
-      .setCustomFieldConfig('axisLabel', 'Errors')
+      .setOption('legend', { showLegend: false })
+      .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
+      .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
+      .setCustomFieldConfig('fillOpacity', 100)
+      .setCustomFieldConfig('lineWidth', 0)
+      .setCustomFieldConfig('pointSize', 0)
+      .setCustomFieldConfig('axisLabel', 'Rate')
+      .setOverrides((overrides) => {
+        overrides
+          .matchFieldsWithNameByRegex('.*status="error".*')
+          .overrideColor({
+            mode: 'fixed',
+            fixedColor: 'semi-dark-red',
+          })
+          .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
+          .overrideCustomFieldConfig('axisLabel', 'Errors');
+        overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
+          mode: 'fixed',
+          fixedColor: 'green',
+        });
+        overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
+          mode: 'fixed',
+          fixedColor: 'dark-green',
+        });
+      })
       .setHeaderActions(actionsFn(attribute))
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-      .setOption('legend', { showLegend: false })
       .build();
 
     children.push(
@@ -67,7 +90,7 @@ export function buildAllLayout(attributes: string[], actionsFn: (attribute: stri
 }
 
 function getExpr(attr: string) {
-  return `{${VAR_FILTERS_EXPR} && status = error} | rate() by(${attr})`;
+  return `{${VAR_FILTERS_EXPR}} | rate() by(${attr}, status)`;
 }
 
 function buildQuery(tagKey: string) {

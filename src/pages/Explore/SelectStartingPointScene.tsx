@@ -92,11 +92,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
               this.state.attributes ?? [],
               (attribute) => new SelectAttributeAction({ attribute: attribute })
             )
-          : buildNormalLayout(
-              variable,
-              (frame: DataFrame) =>
-                new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) })
-            ),
+          : buildNormalLayout(variable, (frame: DataFrame) => [
+              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
+            ]),
     });
   }
 
