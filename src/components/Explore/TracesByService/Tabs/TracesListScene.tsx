@@ -18,19 +18,12 @@ export class TracesListScene extends SceneObjectBase<TracesListSceneState> {
   constructor(state: Partial<TracesListSceneState>) {
     super({
       ...state,
-    });
-
-    this.addActivationHandler(() => {
-      if (!this.state.panel) {
-        this.setState({
-          panel: new SceneFlexLayout({
-            direction: 'row',
-            children: [
-              new SpanListPanelScene(),
-            ],
-          })
-        });
-      }
+      panel: new SceneFlexLayout({
+        direction: 'row',
+        children: [
+          new SpanListPanelScene(),
+        ],
+      })
     });
   }
 
