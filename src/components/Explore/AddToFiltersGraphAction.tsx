@@ -9,25 +9,33 @@ import {
   AdHocFiltersVariable,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
+import { getLabelValue } from '../../utils/utils';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;
   variableName: string;
+  labelKey?: string;
 }
 
 export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphActionState> {
   public onClick = () => {
     const variable = sceneGraph.lookupVariable(this.state.variableName, this);
     if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
+      throw new Error(`${this.state.variableName} variable not found`);
     }
 
-    const labels = this.state.frame.fields[1]?.labels ?? {};
-    if (Object.keys(labels).length !== 1) {
-      return;
+    const labels = this.state.frame.fields.find((f) => f.labels)?.labels ?? {};
+    if (this.state.labelKey) {
+      if (!labels[this.state.labelKey]) {
+        return;
+      }
+    } else {
+      if (Object.keys(labels).length !== 1) {
+        return;
+      }
     }
 
-    const labelName = Object.keys(labels)[0];
+    const labelName = this.state.labelKey ?? Object.keys(labels)[0];
 
     variable.setState({
       filters: [
@@ -35,7 +43,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
         {
           key: labelName,
           operator: '=',
-          value: labels[labelName],
+          value: getLabelValue(this.state.frame, this.state.labelKey),
         },
       ],
     });
@@ -43,7 +51,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
-      <Button variant="primary" size="sm" fill="text" onClick={model.onClick}>
+      <Button variant="primary" size="sm" fill="text" onClick={model.onClick} icon={'search-plus'}>
         Add to filters
       </Button>
     );

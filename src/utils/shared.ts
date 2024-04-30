@@ -15,7 +15,7 @@ export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
-export const VAR_ATTRIBUTE_GROUP_BY = 'attributeBy';
+export const VAR_GROUPBY = 'groupBy';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 

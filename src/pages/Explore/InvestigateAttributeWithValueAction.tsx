@@ -10,18 +10,17 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent } from '../../utils/shared';
-import { VAR_GROUPBY } from './SelectStartingPointScene';
+import { StartingPointSelectedEvent, VAR_GROUPBY } from '../../utils/shared';
 
-export interface SelectAttributeWithValueActionState extends SceneObjectState {
+export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
   value: string;
 }
 
-export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttributeWithValueActionState> {
+export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
   public onClick = () => {
     const variable = sceneGraph.lookupVariable('filters', this);
     if (!(variable instanceof AdHocFiltersVariable)) {
-      return;
+      throw new Error('Filters variable not found');
     }
 
     if (!this.state.value) {
@@ -30,7 +29,7 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
 
     const groupByVariable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
     if (!(groupByVariable instanceof CustomVariable)) {
-      return;
+      throw new Error('Group by variable not found');
     }
 
     let newFilters = variable.state.filters;
@@ -44,9 +43,9 @@ export class SelectAttributeWithValueAction extends SceneObjectBase<SelectAttrib
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeWithValueAction>) => {
+  public static Component = ({ model }: SceneComponentProps<InvestigateAttributeWithValueAction>) => {
     return (
-      <Button variant="primary" size="sm" fill="text" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
         Select
       </Button>
     );

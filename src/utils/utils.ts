@@ -4,6 +4,7 @@ import { getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, Scene
 
 import { TraceExploration } from '../pages/Explore';
 import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR } from './shared';
+import { primarySignalOptions } from '../pages/Explore/primary-signals';
 
 export function getExplorationFor(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
@@ -12,6 +13,7 @@ export function getExplorationFor(model: SceneObject): TraceExploration {
 export function newTracesExploration(initialDS?: string): TraceExploration {
   return new TraceExploration({
     initialDS,
+    initialFilters: [primarySignalOptions[0].filter],
     $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
   });
 }
@@ -50,8 +52,8 @@ export const getFilterSignature = (filter: AdHocVariableFilter) => {
   return `${filter.key}${filter.operator}${filter.value}`;
 };
 
-export function getLabelValue(frame: DataFrame) {
-  const labels = frame.fields[1]?.labels;
+export function getLabelValue(frame: DataFrame, labelName?: string) {
+  const labels = frame.fields.find((f) => f.type === 'number')?.labels;
 
   if (!labels) {
     return 'No labels';
@@ -62,5 +64,5 @@ export function getLabelValue(frame: DataFrame) {
     return 'No labels';
   }
 
-  return labels[keys[0]].replace(/"/g, '');
+  return labels[labelName || keys[0]].replace(/"/g, '');
 }
