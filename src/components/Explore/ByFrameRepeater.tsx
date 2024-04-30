@@ -65,7 +65,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 new SceneCSSGridLayout({
                   children: [
                     new LoadingStateScene({
-                      component: SkeletonComponent,
+                      component: () => SkeletonComponent(8),
                     }),
                   ],
                 }),
@@ -98,12 +98,12 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   };
 }
 
-const SkeletonComponent = () => {
+export const SkeletonComponent = (repeat: number) => {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={styles.container}>
-      {[...Array(8)].map((_, i) => (
+      {[...Array(repeat)].map((_, i) => (
         <div className={styles.itemContainer} key={i}>
           <div className={styles.header}>
             <div className={styles.title}>
