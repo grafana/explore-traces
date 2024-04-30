@@ -27,11 +27,11 @@ import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
+  DATASOURCE_LS_KEY,
+  DetailsSceneUpdated,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
-  DetailsSceneUpdated,
   VAR_FILTERS,
-  DATASOURCE_LS_KEY,
 } from '../../utils/shared';
 import { getFilterSignature, getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
@@ -137,13 +137,20 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     };
   }
 
-  private updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
+  public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
+    let signal = newSignal ?? this.state.primarySignal;
+
     const filtersVar = this.getFiltersVariable();
     let filters = filtersVar.state.filters;
     // Remove previous filter for primary signal
-    filters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldSignal)?.filter));
+    if (oldSignal) {
+      filters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(getSignalForKey(oldSignal)?.filter));
+    }
     // Add new filter
-    filters.unshift(getSignalForKey(newSignal)?.filter);
+    const newFilter = getSignalForKey(signal)?.filter;
+    if (newFilter) {
+      filters.unshift(newFilter);
+    }
     filtersVar.setState({ filters });
   }
 
@@ -212,7 +219,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { history, controls, topScene, showDetails, mode } = traceExploration.useState();
+    const { controls, topScene, showDetails, mode } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
@@ -225,10 +232,7 @@ export class TraceExplorationScene extends SceneObjectBase {
     return (
       <div className={styles.container}>
         <Stack gap={2} justifyContent={'space-between'}>
-          <Stack gap={2}>
-            {dsVariable && <dsVariable.Component model={dsVariable} />}
-            <history.Component model={history} />
-          </Stack>
+          {dsVariable && <dsVariable.Component model={dsVariable} />}
           {mode === 'traces' && (
             <Button
               variant={'secondary'}
@@ -298,7 +302,7 @@ function getStyles(theme: GrafanaTheme2) {
     container: css({
       flexGrow: 1,
       display: 'flex',
-      gap: theme.spacing(2),
+      gap: theme.spacing(1),
       minHeight: '100%',
       flexDirection: 'column',
       padding: theme.spacing(2),
@@ -311,7 +315,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     controls: css({
       display: 'flex',
-      gap: theme.spacing(2),
+      gap: theme.spacing(1),
       alignItems: 'flex-end',
       flexWrap: 'wrap',
     }),

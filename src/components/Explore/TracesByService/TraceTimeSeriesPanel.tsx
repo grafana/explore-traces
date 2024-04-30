@@ -12,10 +12,10 @@ import {
 } from '@grafana/scenes';
 import { LoadingState } from '@grafana/data';
 import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
-import { DrawStyle, StackingMode } from '@grafana/ui';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
+import { AxisPlacement, DrawStyle, StackingMode } from '@grafana/ui';
 
 export interface TraceTimeSeriesPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -91,11 +91,16 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
             .setCustomFieldConfig('fillOpacity', 100)
             .setCustomFieldConfig('lineWidth', 0)
             .setCustomFieldConfig('pointSize', 0)
+            .setCustomFieldConfig('axisLabel', 'Rate')
             .setOverrides((overrides) => {
-              overrides.matchFieldsWithNameByRegex('"error"').overrideColor({
-                mode: 'fixed',
-                fixedColor: 'semi-dark-red',
-              });
+              overrides
+                .matchFieldsWithNameByRegex('"error"')
+                .overrideColor({
+                  mode: 'fixed',
+                  fixedColor: 'semi-dark-red',
+                })
+                .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
+                .overrideCustomFieldConfig('axisLabel', 'Errors');
               overrides.matchFieldsWithNameByRegex('"unset"').overrideColor({
                 mode: 'fixed',
                 fixedColor: 'green',

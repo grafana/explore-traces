@@ -10,6 +10,7 @@ import {
   SceneByFrameRepeater,
   SceneLayout,
   SceneCSSGridLayout,
+  CustomVariable,
 } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
@@ -18,9 +19,12 @@ import Skeleton from 'react-loading-skeleton';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
+import { groupSeriesBy } from '../../utils/panels';
+import { VAR_GROUPBY } from '../../utils/shared';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
+  groupBy?: boolean;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneFlexItem;
 }
 
@@ -81,11 +85,25 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     });
   }
 
+  public getGroupByVariable() {
+    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
+    if (!(variable instanceof CustomVariable)) {
+      throw new Error('Group by variable not found');
+    }
+
+    return variable;
+  }
+
   private performRepeat(data: PanelData) {
     const newChildren: SceneFlexItem[] = [];
+    let frames = data.series;
 
-    for (let seriesIndex = 0; seriesIndex < data.series.length; seriesIndex++) {
-      const layoutChild = this.state.getLayoutChild(data, data.series[seriesIndex], seriesIndex);
+    if (this.state.groupBy) {
+      frames = groupSeriesBy(data, this.getGroupByVariable().getValueText());
+    }
+
+    for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
+      const layoutChild = this.state.getLayoutChild(data, frames[frameIndex], frameIndex);
       newChildren.push(layoutChild);
     }
 
