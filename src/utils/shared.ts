@@ -1,7 +1,7 @@
 import { BusEventBase } from '@grafana/data';
 import { SceneObject } from '@grafana/scenes';
 
-export type ActionViewType = 'spans' | 'attributes' | 'structure';
+export type ActionViewType = 'spans' | 'breakdown' | 'structure';
 export interface ActionViewDefinition {
   displayName: string;
   value: ActionViewType;
