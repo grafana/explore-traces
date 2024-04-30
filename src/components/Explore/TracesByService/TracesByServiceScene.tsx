@@ -173,7 +173,7 @@ function getStyles(theme: GrafanaTheme2) {
 const MAIN_PANEL_MIN_HEIGHT = 200;
 const MAIN_PANEL_MAX_HEIGHT = '30%';
 
-function buildQuery() {
+export function buildQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | select(status)`,
