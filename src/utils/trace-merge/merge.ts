@@ -37,6 +37,7 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
       if (child) {
         child.addSpan(span);
         // to the next span!
+        curNode = child;
         continue;
       }
 
@@ -46,6 +47,8 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
       curNode = newNode;
     }
   }
+
+  // console.log(dumpTree(tree, 0));
 
   return tree;
 }
