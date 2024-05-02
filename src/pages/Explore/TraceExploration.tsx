@@ -68,7 +68,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       history: state.history ?? new ExplorationHistory({}),
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
-      primarySignal: state.primarySignal ?? primarySignalOptions[5].value,
+      primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
       ...state,
     });
 
