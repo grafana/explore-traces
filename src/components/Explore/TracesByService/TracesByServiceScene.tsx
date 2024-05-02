@@ -57,7 +57,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView('attributes');
+      this.setActionView('breakdown');
     }
 
     this.updateAttributes();
@@ -119,7 +119,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Attributes', value: 'attributes', getScene: buildAttributesBreakdownActionScene },
+  { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownActionScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureTabScene },
   { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
 ];
@@ -173,7 +173,7 @@ function getStyles(theme: GrafanaTheme2) {
 const MAIN_PANEL_MIN_HEIGHT = 200;
 const MAIN_PANEL_MAX_HEIGHT = '30%';
 
-function buildQuery() {
+export function buildQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | select(status)`,

@@ -72,7 +72,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 new SceneCSSGridLayout({
                   children: [
                     new LoadingStateScene({
-                      component: SkeletonComponent,
+                      component: () => SkeletonComponent(8),
                     }),
                   ],
                 }),
@@ -112,7 +112,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
         });
       }),
     }
-    
+
     if (filteredData.series && filteredData.series.length > 0) {
       this.performRepeat(filteredData as PanelData);
     } else {
@@ -155,7 +155,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   public static Component = ({ model }: SceneComponentProps<ByFrameRepeater>) => {
     const { body, searchQuery } = model.useState();
     const styles = useStyles2(getStyles);
-    
+
     return (
       <div className={styles.container}>
         <Field className={styles.searchField}>
@@ -175,7 +175,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
 function getStyles() {
   return {
     container: css({
-      display: 'flex',    
+      display: 'flex',
       flexDirection: 'column',
       flexGrow: 1,
     }),
@@ -186,12 +186,12 @@ function getStyles() {
   };
 }
 
-const SkeletonComponent = () => {
+export const SkeletonComponent = (repeat: number) => {
   const styles = useStyles2(getSkeletonStyles);
 
   return (
     <div className={styles.container}>
-      {[...Array(8)].map((_, i) => (
+      {[...Array(repeat)].map((_, i) => (
         <div className={styles.itemContainer} key={i}>
           <div className={styles.header}>
             <div className={styles.title}>
