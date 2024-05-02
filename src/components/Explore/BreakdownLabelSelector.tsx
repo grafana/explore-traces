@@ -13,6 +13,7 @@ type Props = {
 };
 
 const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+const hiddenAttributes = ['duration', 'traceDuration'];
 
 export function BreakdownLabelSelector({ options, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
@@ -41,6 +42,13 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
 
   const otherOptions = options.filter((op) => !mainAttributes.includes(op.value?.toString()!));
 
+  const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
+    return options 
+      .filter((op) => !hiddenAttributes.includes(op.value?.toString()!))
+      .filter((op) => 'resource.' !== op.value?.toString()?.substring(0, 9))
+      .map((op) => ({ label: op.label?.replace('span.', ''), value: op.value }));
+  }
+
   useEffect(() => {
     const { fontSize } = theme.typography;
     const text = mainOptions.map((option) => option.label || option.text || '').join(' ');
@@ -59,7 +67,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
           <Select
             {...{ value }}
             placeholder={'Other attributes'}
-            options={otherOptions}
+            options={getModifiedOptions(otherOptions)}
             onChange={(selected) => onChange(selected?.value ?? 'All')}
             className={styles.select}
             isClearable={true}
@@ -69,7 +77,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
         <Select
           {...{ value }}
           placeholder={'Select attribute'}
-          options={options}
+          options={getModifiedOptions(options)}
           onChange={(selected) => onChange(selected?.value ?? 'All')}
           className={styles.select}
           isClearable={true}
