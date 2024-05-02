@@ -126,13 +126,20 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     return (
       <div className={styles.container}>
-        <h3 className={styles.primarySignalHeading}>Choose your exploration type</h3>
+        <h5 className={styles.primarySignalHeading}>Choose your exploration type</h5>
         <div className={styles.primarySignal}>
           {primarySignalOptions.map((option, index) => {
-            const itemStyles = option.value === primarySignal ? [styles.primarySignalItem, styles.primarySignalItemSelected] : [styles.primarySignalItem];
+            const itemStyles =
+              option.value === primarySignal
+                ? [styles.primarySignalItem, styles.primarySignalItemSelected]
+                : [styles.primarySignalItem];
             return (
-              <div key={index} className={cx(itemStyles)} onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}>
-                <h3>{option.label}</h3>
+              <div
+                key={index}
+                className={cx(itemStyles)}
+                onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}
+              >
+                <h5>{option.label}</h5>
                 <span>{option.text}</span>
               </div>
             );
@@ -202,6 +209,8 @@ function getStyles(theme: GrafanaTheme2) {
       borderRadius: '8px',
       border: `2px solid ${theme.colors.secondary.border}`,
       cursor: 'pointer',
+      fontSize: '12px',
+      flex: 1,
     }),
     primarySignalItemSelected: css({
       border: `2px solid #cc8c17`,
