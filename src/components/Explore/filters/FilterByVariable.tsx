@@ -27,7 +27,10 @@ export class FilterByVariable extends AdHocFiltersVariable {
 }
 
 export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
-  return filters.map((filter) => renderFilter(filter)).join('&&');
+  return filters
+    .filter((f) => f.key && f.operator && f.value)
+    .map((filter) => renderFilter(filter))
+    .join('&&');
 }
 const isNumber = /^-?\d+\.?\d*$/;
 
