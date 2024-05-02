@@ -126,7 +126,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     return (
       <div className={styles.container}>
-        <h5 className={styles.primarySignalHeading}>Choose your exploration type</h5>
+        <div className={styles.primarySignalHeading}>Choose your exploration type</div>
         <div className={styles.primarySignal}>
           {primarySignalOptions.map((option, index) => {
             const itemStyles =
@@ -139,7 +139,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
                 className={cx(itemStyles)}
                 onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}
               >
-                <h5>{option.label}</h5>
+                <h6>{option.label}</h6>
                 <span>{option.text}</span>
               </div>
             );
