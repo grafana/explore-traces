@@ -88,8 +88,9 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout(this.getAttributes() ?? [], (attribute) => new SelectAttributeAction({ attribute }))
+          ? buildAllLayout(this, this.getAttributes() ?? [], (attribute) => new SelectAttributeAction({ attribute }))
           : buildNormalLayout(
+              this,
               variable,
               (frame: DataFrame) => new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS })
             ),
