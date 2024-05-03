@@ -17,7 +17,7 @@ import {
 import { Box, Stack, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
-import { buildTracesListScene } from './Tabs/Spans/TracesListScene';
+import { buildSpansScene } from './Tabs/Spans/SpansScene';
 import {
   ActionViewDefinition,
   ActionViewType,
@@ -121,7 +121,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
-  { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
+  { displayName: 'Spans', value: 'spans', getScene: buildSpansScene },
 ];
 
 export interface TracesActionBarState extends SceneObjectState {}
