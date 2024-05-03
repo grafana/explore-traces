@@ -23,6 +23,8 @@ import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
 import { AddToFiltersGraphAction } from '../../components/Explore/AddToFiltersGraphAction';
 import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithValueAction';
+import { MetricFunctionCard } from './MetricFunctionCard';
+import { TraceExploration } from './TraceExploration';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body?: LayoutSwitcher;
@@ -31,6 +33,7 @@ export interface TraceSelectSceneState extends SceneObjectState {
   showPreviews?: boolean;
 
   attributes?: string[];
+  metricCards: MetricFunctionCard[];
 }
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -44,6 +47,11 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     super({
       $variables: state.$variables ?? getVariableSet(),
       showPreviews: true,
+      metricCards: [
+        new MetricFunctionCard({ metric: 'rate' }),
+        new MetricFunctionCard({ metric: 'errors' }),
+        new MetricFunctionCard({ metric: 'latency' }),
+      ],
       ...state,
     });
 
@@ -63,6 +71,13 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     groupByVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
+        this.buildBody();
+      }
+    });
+
+    const exploration = sceneGraph.getAncestor(this, TraceExploration);
+    exploration.subscribeToState((newState, prevState) => {
+      if (newState.metric !== prevState.metric) {
         this.buildBody();
       }
     });
@@ -89,10 +104,11 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
           ? buildAllLayout(
+              this,
               this.state.attributes ?? [],
               (attribute) => new SelectAttributeAction({ attribute: attribute })
             )
-          : buildNormalLayout(variable, (frame: DataFrame) => [
+          : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
               new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
             ]),
@@ -120,7 +136,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const styles = useStyles2(getStyles);
     const exploration = getExplorationFor(model);
     const { primarySignal } = exploration.useState();
-    const { attributes, body } = model.useState();
+    const { attributes, body, metricCards } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
 
@@ -128,14 +144,14 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       <div className={styles.container}>
         <div className={styles.primarySignalHeading}>Choose your exploration type</div>
         <div className={styles.primarySignal}>
-          {primarySignalOptions.map((option, index) => {
+          {primarySignalOptions.map((option) => {
             const itemStyles =
               option.value === primarySignal
                 ? [styles.primarySignalItem, styles.primarySignalItemSelected]
                 : [styles.primarySignalItem];
             return (
               <div
-                key={index}
+                key={option.value}
                 className={cx(itemStyles)}
                 onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}
               >
@@ -144,6 +160,12 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
               </div>
             );
           })}
+        </div>
+        <div className={styles.primarySignalHeading}>Select a metric</div>
+        <div className={styles.primarySignal}>
+          {metricCards.map((card, index) => (
+            <card.Component key={index} model={card} />
+          ))}
         </div>
         <div className={styles.groupBy}>
           <div>Group by</div>
@@ -168,7 +190,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
 function getAttributesAsOptions(attributes: string[]) {
   return [
-    { label: 'All errors', value: VARIABLE_ALL_VALUE },
+    { label: 'All', value: VARIABLE_ALL_VALUE },
     ...attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute })),
   ];
 }

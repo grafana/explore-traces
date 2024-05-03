@@ -1,6 +1,7 @@
 import { BusEventBase } from '@grafana/data';
 import { SceneObject } from '@grafana/scenes';
 
+export type MetricFunction = 'rate' | 'errors' | 'latency';
 export type ActionViewType = 'spans' | 'breakdown' | 'structure';
 export interface ActionViewDefinition {
   displayName: string;
