@@ -30,7 +30,7 @@ import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
 import { buildStructureTabScene } from './Tabs/StructureTabScene';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { buildAttributesBreakdownActionScene } from './Tabs/AttributesBreakdown';
+import { buildAttributesBreakdownActionScene } from './Tabs/AttributesBreakdownScene';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
