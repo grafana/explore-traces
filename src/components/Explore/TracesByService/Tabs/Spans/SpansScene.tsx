@@ -7,7 +7,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { SpanListPanelScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListPanelScene';
+import { SpanListScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListScene';
 
 export interface SpansSceneState extends SceneObjectState {
   loading?: boolean;
@@ -21,7 +21,7 @@ export class SpansScene extends SceneObjectBase<SpansSceneState> {
       panel: new SceneFlexLayout({
         direction: 'row',
         children: [
-          new SpanListPanelScene(),
+          new SpanListScene(),
         ],
       })
     });
