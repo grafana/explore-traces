@@ -194,7 +194,7 @@ export class SelectAttributeAction extends SceneObjectBase<SelectAttributeAction
   };
 }
 
-export function buildAttributesBreakdownActionScene() {
+export function buildAttributesBreakdownScene() {
   return new SceneFlexItem({
     body: new AttributesBreakdownScene({}),
   });
