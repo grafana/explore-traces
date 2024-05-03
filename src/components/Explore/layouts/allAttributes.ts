@@ -7,8 +7,9 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { explorationDS, VAR_FILTERS_EXPR } from '../../../utils/shared';
-import { AxisPlacement, DrawStyle, StackingMode, TooltipDisplayMode } from '@grafana/ui';
+import { TooltipDisplayMode } from '@grafana/ui';
 import { LayoutSwitcher } from '../LayoutSwitcher';
+import { setTimeSeriesConfig } from './timeSeriesConfig';
 
 const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -21,7 +22,7 @@ export function buildAllLayout(attributes: string[], actionsFn: (attribute: stri
       break;
     }
 
-    const vizPanel = PanelBuilders.timeseries()
+    const panel = PanelBuilders.timeseries()
       .setTitle(attribute)
       .setData(
         new SceneQueryRunner({
@@ -30,38 +31,12 @@ export function buildAllLayout(attributes: string[], actionsFn: (attribute: stri
           queries: [buildQuery(attribute)],
         })
       )
-      .setOption('legend', { showLegend: false })
-      .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
-      .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
-      .setCustomFieldConfig('fillOpacity', 100)
-      .setCustomFieldConfig('lineWidth', 0)
-      .setCustomFieldConfig('pointSize', 0)
-      .setCustomFieldConfig('axisLabel', 'Rate')
-      .setOverrides((overrides) => {
-        overrides
-          .matchFieldsWithNameByRegex('.*status="error".*')
-          .overrideColor({
-            mode: 'fixed',
-            fixedColor: 'semi-dark-red',
-          })
-          .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
-          .overrideCustomFieldConfig('axisLabel', 'Errors');
-        overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'green',
-        });
-        overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'dark-green',
-        });
-      })
-      .setHeaderActions(actionsFn(attribute))
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-      .build();
+      .setHeaderActions(actionsFn(attribute));
 
     children.push(
       new SceneCSSGridItem({
-        body: vizPanel,
+        body: setTimeSeriesConfig(panel).build(),
       })
     );
   }

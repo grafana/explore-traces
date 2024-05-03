@@ -17,7 +17,7 @@ import { getLabelValue } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
-import { AxisPlacement, DrawStyle, StackingMode } from '@grafana/ui';
+import { setTimeSeriesConfig } from './timeSeriesConfig';
 
 export function buildNormalLayout(
   variable: CustomVariable,
@@ -104,39 +104,14 @@ export function getLayoutChild(
             ],
           },
         })
-      )
-      .setOption('legend', { showLegend: false })
-      .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
-      .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
-      .setCustomFieldConfig('fillOpacity', 100)
-      .setCustomFieldConfig('lineWidth', 0)
-      .setCustomFieldConfig('pointSize', 0)
-      .setCustomFieldConfig('axisLabel', 'Rate')
-      .setOverrides((overrides) => {
-        overrides
-          .matchFieldsWithNameByRegex('.*status="error".*')
-          .overrideColor({
-            mode: 'fixed',
-            fixedColor: 'semi-dark-red',
-          })
-          .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
-          .overrideCustomFieldConfig('axisLabel', 'Errors');
-        overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'green',
-        });
-        overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'dark-green',
-        });
-      });
+      );
 
     const actions = actionsFn(frame);
     if (actions) {
       panel.setHeaderActions(actions);
     }
     return new SceneCSSGridItem({
-      body: panel.build(),
+      body: setTimeSeriesConfig(panel).build(),
     });
   };
 }
