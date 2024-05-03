@@ -204,7 +204,7 @@ function getStyles(theme: GrafanaTheme2) {
     primarySignalItem: css({
       display: 'flex',
       flexDirection: 'column',
-      padding: theme.spacing(1.5),
+      padding: theme.spacing(1),
       backgroundColor: theme.colors.secondary.main,
       borderRadius: '8px',
       border: `2px solid ${theme.colors.secondary.border}`,
