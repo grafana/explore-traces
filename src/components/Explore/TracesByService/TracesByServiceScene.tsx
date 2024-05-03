@@ -28,7 +28,7 @@ import {
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
-import { buildStructureTabScene } from './Tabs/StructureTabScene';
+import { buildStructureScene } from './Tabs/StructureScene';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildAttributesBreakdownScene } from './Tabs/AttributesBreakdownScene';
 
@@ -120,7 +120,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownScene },
-  { displayName: 'Structure', value: 'structure', getScene: buildStructureTabScene },
+  { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
   { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
 ];
 

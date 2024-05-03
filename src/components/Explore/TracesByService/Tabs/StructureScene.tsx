@@ -162,7 +162,7 @@ function buildQuery() {
   };
 }
 
-export function buildStructureTabScene() {
+export function buildStructureScene() {
   return new SceneFlexItem({
     body: new StructureTabScene({}),
   });
