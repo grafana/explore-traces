@@ -157,7 +157,7 @@ function buildQuery() {
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,
-    spss: 20,
+    spss: 40,
     filters: [],
   };
 }

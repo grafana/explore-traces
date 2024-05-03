@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import React from 'react';
 
 import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
@@ -11,7 +11,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Select, Tab, TabsBar, useStyles2 } from '@grafana/ui';
+import { Button, Select, useStyles2 } from '@grafana/ui';
 
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
@@ -126,7 +126,26 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
+        <div className={styles.primarySignalHeading}>Choose your exploration type</div>
+        <div className={styles.primarySignal}>
+          {primarySignalOptions.map((option, index) => {
+            const itemStyles =
+              option.value === primarySignal
+                ? [styles.primarySignalItem, styles.primarySignalItemSelected]
+                : [styles.primarySignalItem];
+            return (
+              <div
+                key={index}
+                className={cx(itemStyles)}
+                onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}
+              >
+                <h6>{option.label}</h6>
+                <span>{option.text}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className={styles.groupBy}>
           <div>Group by</div>
           <Select
             options={getAttributesAsOptions(attributes || [])}
@@ -137,18 +156,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             className={styles.select}
           />
         </div>
-        <TabsBar>
-          {primarySignalOptions.map((option, index) => {
-            return (
-              <Tab
-                key={index}
-                label={option.label || ''}
-                active={option.value === primarySignal}
-                onChangeTab={() => option.value && exploration.onChangePrimarySignal(option.value)}
-              />
-            );
-          })}
-        </TabsBar>
         {body && (
           <div className={styles.bodyWrapper}>
             <body.Component model={body} />
@@ -187,17 +194,35 @@ function getStyles(theme: GrafanaTheme2) {
       flexGrow: 1,
       position: 'relative',
     }),
-    headingWrapper: css({
-      marginTop: theme.spacing(1),
+    primarySignalHeading: css({
+      margin: `${theme.spacing(1)} 0`,
     }),
-    header: css({
-      position: 'absolute',
+    primarySignal: css({
+      display: 'flex',
+      gap: theme.spacing(1),
+    }),
+    primarySignalItem: css({
+      display: 'flex',
+      flexDirection: 'column',
+      padding: theme.spacing(1.5),
+      backgroundColor: theme.colors.secondary.main,
+      borderRadius: '8px',
+      border: `2px solid ${theme.colors.secondary.border}`,
+      cursor: 'pointer',
+      fontSize: '12px',
+      flex: 1,
+    }),
+    primarySignalItemSelected: css({
+      border: `2px solid #cc8c17`,
+    }),
+    groupBy: css({
       right: 0,
       top: '4px',
       zIndex: 2,
       display: 'flex',
       gap: theme.spacing(1),
       alignItems: 'center',
+      margin: `${theme.spacing(2)} 0 ${theme.spacing(1.5)} 0`,
     }),
     bodyWrapper: css({
       flexGrow: 1,
