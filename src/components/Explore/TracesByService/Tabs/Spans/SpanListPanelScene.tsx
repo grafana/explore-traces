@@ -18,7 +18,7 @@ import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
-import { buildQuery } from '../TracesByService/TracesByServiceScene';
+import { buildQuery } from '../../TracesByServiceScene';
 
 export interface TracePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;

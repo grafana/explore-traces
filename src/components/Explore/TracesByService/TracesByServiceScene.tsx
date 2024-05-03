@@ -17,7 +17,7 @@ import {
 import { Box, Stack, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
-import { buildTracesListScene } from './Tabs/TracesListScene';
+import { buildTracesListScene } from './Tabs/Spans/TracesListScene';
 import {
   ActionViewDefinition,
   ActionViewType,

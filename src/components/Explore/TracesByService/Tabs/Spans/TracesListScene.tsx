@@ -7,7 +7,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { SpanListPanelScene } from 'components/Explore/panels/SpanListPanelScene';
+import { SpanListPanelScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListPanelScene';
 
 export interface TracesListSceneState extends SceneObjectState {
   loading?: boolean;
