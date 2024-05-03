@@ -32,8 +32,8 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
     this.subscribeToState((newState, prevState) => {
       if (newState.traceId !== prevState.traceId) {
         this.updateBody();
-        this.publishEvent(new DetailsSceneUpdated(), true);
       }
+      this.publishEvent(new DetailsSceneUpdated({ showDetails: true }), true);
     });
   }
 

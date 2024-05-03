@@ -16,6 +16,7 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
+import { CloseTraceViewPanelAction } from './CloseTraceViewPanelAction';
 
 export interface TracePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -43,7 +44,10 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
                 direction: 'row',
                 children: [
                   new SceneFlexItem({
-                    body: PanelBuilders.traces().setTitle('Trace').build(),
+                    body: PanelBuilders.traces()
+                      .setTitle('Trace')
+                      .setHeaderActions(new CloseTraceViewPanelAction({}))
+                      .build(),
                   }),
                 ],
               }),

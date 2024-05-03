@@ -21,7 +21,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Button, Stack, useStyles2 } from '@grafana/ui';
+import { Stack, useStyles2 } from '@grafana/ui';
 
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
@@ -169,7 +169,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
-    this.setState({ showDetails: true });
+    this.setState({ showDetails: evt.payload.showDetails ?? false });
   }
 
   getUrlState() {
@@ -219,30 +219,16 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { controls, topScene, showDetails, mode } = traceExploration.useState();
+    const { controls, topScene } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, traceExploration);
 
-    const toggleDetails = () => {
-      traceExploration.setState({ showDetails: !showDetails });
-    };
-
     return (
       <div className={styles.container}>
         <Stack gap={2} justifyContent={'space-between'}>
           {dsVariable && <dsVariable.Component model={dsVariable} />}
-          {mode === 'traces' && (
-            <Button
-              variant={'secondary'}
-              icon={showDetails ? 'arrow-to-right' : 'arrow-from-right'}
-              className={showDetails ? undefined : styles.rotateIcon}
-              onClick={() => toggleDetails()}
-            >
-              Details
-            </Button>
-          )}
         </Stack>
         {controls && (
           <div className={styles.controls}>
