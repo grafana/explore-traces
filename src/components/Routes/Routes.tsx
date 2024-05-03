@@ -1,7 +1,6 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { prefixRoute } from '../../utils/utils.routing';
-import { ROUTES } from '../../constants';
+import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { TraceExplorationPage } from '../../pages/Explore';
 
 export const Routes = () => {
@@ -12,3 +11,8 @@ export const Routes = () => {
     </Switch>
   );
 };
+
+// Prefixes the route with the base URL of the plugin
+function prefixRoute(route: string): string {
+  return `${PLUGIN_BASE_URL}/${route}`;
+}
