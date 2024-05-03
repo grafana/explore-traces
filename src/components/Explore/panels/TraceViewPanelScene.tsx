@@ -87,6 +87,7 @@ const SkeletonComponent = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <Skeleton count={1} width={60} />
+        <Skeleton count={1} width={60} />
       </div>
       <Skeleton count={2} width={'80%'} />
       <div className={styles.map}>
@@ -158,6 +159,8 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     header: css({
       marginBottom: '20px',
+      display: 'flex',
+      justifyContent: 'space-between',
     }),
     map: css({
       marginTop: '20px',
