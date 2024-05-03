@@ -1,9 +1,9 @@
-import { TreeNode } from '../../../../utils/trace-merge/tree-node';
+import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
 import React from 'react';
 import { useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { css } from '@emotion/css';
-import { formatDuration } from '../../../../utils/dates';
+import { formatDuration } from '../../../../../utils/dates';
 
 export interface Props {
   tree: TreeNode;

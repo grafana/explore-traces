@@ -28,7 +28,7 @@ import {
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
-import { buildStructureScene } from './Tabs/StructureScene';
+import { buildStructureScene } from './Tabs/Structure/StructureScene';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildAttributesBreakdownScene } from './Tabs/AttributesBreakdownScene';
 

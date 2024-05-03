@@ -11,15 +11,15 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
-import { TraceSearchMetadata } from '../../../../types';
-import { mergeTraces } from '../../../../utils/trace-merge/merge';
+import { explorationDS, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
+import { TraceSearchMetadata } from '../../../../../types';
+import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { GrafanaTheme2, LoadingState } from '@grafana/data';
-import { TreeNode } from '../../../../utils/trace-merge/tree-node';
+import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
 import { RadioButtonGroup, Stack, useTheme2 } from '@grafana/ui';
 import { StructureTree } from './StructureTree';
 import Skeleton from 'react-loading-skeleton';
-import { EmptyState } from '../../../states/EmptyState/EmptyState';
+import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 
 export interface ServicesTabSceneState extends SceneObjectState {
