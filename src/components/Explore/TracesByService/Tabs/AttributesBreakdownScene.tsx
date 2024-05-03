@@ -16,7 +16,7 @@ import {
 import { Button, Field, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
-import { VAR_GROUPBY, VAR_FILTERS } from '../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
@@ -28,8 +28,6 @@ import { buildNormalLayout } from '../../layouts/attributeBreakdown';
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
 }
-
-const ignoredAttributes = ['duration', 'traceDuration'];
 
 export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
