@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Button } from '@grafana/ui';
-
 import { FilterByVariable } from './FilterByVariable';
 
 import { FilterRenderer } from './FilterRenderer';
+import { css } from '@emotion/css';
+import { useStyles2 } from '@grafana/ui';
 
 interface Props {
   model: FilterByVariable;
@@ -12,21 +12,20 @@ interface Props {
 
 export function AddFilter({ model }: Props) {
   const { _wip } = model.useState();
+  const styles = useStyles2(getStyles);
 
   if (!_wip) {
-    return (
-      <Button
-        variant="secondary"
-        icon="plus"
-        title={'Add filter'}
-        aria-label="Add filter"
-        onClick={() => model._addWip()}
-        size={'sm'}
-      >
-        Filter
-      </Button>
-    );
+    return <div className={styles.addFilterBar} onClick={() => model._addWip()} />;
   }
 
-  return <FilterRenderer filter={_wip} model={model} />;
+  return <FilterRenderer filter={_wip} model={model} isWip={true} />;
 }
+
+const getStyles = () => ({
+  addFilterBar: css({
+    height: '100%',
+    display: 'flex',
+    flex: 1,
+    cursor: 'pointer',
+  }),
+});

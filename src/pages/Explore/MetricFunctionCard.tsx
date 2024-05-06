@@ -51,6 +51,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
               queries: [rateByWithStatus('errors')],
             })
           )
+          .setDisplayMode('transparent')
           .setCustomFieldConfig('axisLabel', 'Errors rate')
           .setHoverHeader(true)
           .setOverrides((overrides) => {
@@ -63,18 +64,20 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
               .overrideDisplayName('Errors rate');
           })
           .build();
-      case 'latency':
+      case 'duration':
         return barsPanelConfig()
+          .setDisplayMode('transparent')
           .setData(
             new SceneQueryRunner({
               maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [rateByWithStatus('latency')],
+              queries: [rateByWithStatus('duration')],
             })
           )
           .build();
       default:
         return barsPanelConfig()
+          .setDisplayMode('transparent')
           .setData(
             new SceneQueryRunner({
               maxDataPoints: 250,
@@ -91,10 +94,10 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
     switch (this.state.metric) {
       case 'errors':
         return 'Errors';
-      case 'latency':
-        return 'Latency';
+      case 'duration':
+        return 'Duration';
       default:
-        return 'Span rate';
+        return 'Rate';
     }
   }
 
