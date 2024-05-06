@@ -92,7 +92,8 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
           : buildNormalLayout(
               this,
               variable,
-              (frame: DataFrame) => new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS })
+              (frame: DataFrame) =>
+                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() })
             ),
     });
   }
