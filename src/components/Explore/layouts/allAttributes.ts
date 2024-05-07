@@ -1,42 +1,70 @@
 import {
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
+  SceneDataTransformer,
   SceneFlexItemLike,
+  sceneGraph,
+  SceneObject,
   SceneQueryRunner,
   VizPanelState,
 } from '@grafana/scenes';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../../utils/shared';
-import { TooltipDisplayMode } from '@grafana/ui';
+import { explorationDS } from '../../../utils/shared';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { setTimeSeriesConfig } from './timeSeriesConfig';
+import { rateByWithStatus } from '../queries/rateByWithStatus';
+import { map, Observable } from 'rxjs';
+import { DataFrame, reduceField, ReducerID } from '@grafana/data';
+import { TraceExploration } from '../../../pages/Explore';
+import { barsPanelConfig } from '../panels/barsPanel';
 
 const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
-export function buildAllLayout(attributes: string[], actionsFn: (attribute: string) => VizPanelState['headerActions']) {
+export function buildAllLayout(
+  scene: SceneObject,
+  attributes: string[],
+  actionsFn: (attribute: string) => VizPanelState['headerActions']
+) {
   const children: SceneFlexItemLike[] = [];
+
+  const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
 
   for (const attribute of attributes) {
     if (children.length === MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN) {
       break;
     }
 
-    const panel = PanelBuilders.timeseries()
+    const vizPanel = barsPanelConfig()
       .setTitle(attribute)
+      .setHeaderActions(actionsFn(attribute))
       .setData(
-        new SceneQueryRunner({
-          maxDataPoints: 250,
-          datasource: explorationDS,
-          queries: [buildQuery(attribute)],
+        new SceneDataTransformer({
+          $data: new SceneQueryRunner({
+            maxDataPoints: 250,
+            datasource: explorationDS,
+            queries: [rateByWithStatus(traceExploration.state.metric, attribute)],
+          }),
+          transformations: [
+            () => (source: Observable<DataFrame[]>) => {
+              return source.pipe(
+                map((data: DataFrame[]) => {
+                  // Sort by value of status
+                  data.forEach((a) => reduceField({ field: a.fields[1], reducers: [ReducerID.max] }));
+                  return data
+                    .sort((a, b) => {
+                      return b.fields[1].labels?.status?.localeCompare(a.fields[1].labels?.status || '') || 0;
+                    })
+                    .reverse();
+                })
+              );
+            },
+          ],
         })
       )
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-      .setHeaderActions(actionsFn(attribute));
+      .build();
 
     children.push(
       new SceneCSSGridItem({
-        body: setTimeSeriesConfig(panel).build(),
+        body: vizPanel,
       })
     );
   }
@@ -62,20 +90,4 @@ export function buildAllLayout(attributes: string[], actionsFn: (attribute: stri
       }),
     ],
   });
-}
-
-function getExpr(attr: string) {
-  return `{${VAR_FILTERS_EXPR}} | rate() by(${attr}, status)`;
-}
-
-function buildQuery(tagKey: string) {
-  return {
-    refId: 'A',
-    query: getExpr(tagKey),
-    queryType: 'traceql',
-    tableType: 'spans',
-    limit: 100,
-    spss: 10,
-    filters: [],
-  };
 }

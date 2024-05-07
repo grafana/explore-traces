@@ -12,6 +12,7 @@ import { css } from '@emotion/css';
 import { getExplorationFor, getFilterSignature } from '../../../utils/utils';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
 import { getSignalForKey } from '../../../pages/Explore/primary-signals';
+import { MetricSelect } from './MetricSelect';
 
 export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariable>) {
   const exploration = getExplorationFor(model);
@@ -28,16 +29,21 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
   return (
     <div className={styles.container}>
       <Icon name={'filter'} />
-      {primarySignalFilter && exploration.state.mode === 'traces' && <PrimarySignalRenderer model={model} />}
+      <MetricSelect model={model} />
+      {primarySignalFilter && (
+        <>
+          <div className={styles.text}>of</div>
+          <PrimarySignalRenderer model={model} />
+        </>
+      )}
+      {(otherFilters.length > 0 || model.state._wip) && <div className={styles.text}>where</div>}
       {otherFilters.map((filter, idx) => (
         <React.Fragment key={idx}>
           <FilterRenderer filter={filter} model={model} />
         </React.Fragment>
       ))}
 
-      <span className={styles.addFilterContainer}>
-        <AddFilter model={model} />
-      </span>
+      <AddFilter model={model} />
     </div>
   );
 }
@@ -52,7 +58,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
     flexGrow: 1,
   }),
-  addFilterContainer: css({
-    marginLeft: theme.spacing(1),
+  text: css({
+    fontSize: 12,
   }),
 });

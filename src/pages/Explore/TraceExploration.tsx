@@ -21,7 +21,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Button, Stack, useStyles2 } from '@grafana/ui';
+import { Stack, useStyles2 } from '@grafana/ui';
 
 import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
@@ -29,6 +29,7 @@ import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
   DATASOURCE_LS_KEY,
   DetailsSceneUpdated,
+  MetricFunction,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
   VAR_FILTERS,
@@ -51,6 +52,7 @@ export interface TraceExplorationState extends SceneObjectState {
   detailsScene?: DetailsScene;
   showDetails?: boolean;
   primarySignal?: string;
+  metric: MetricFunction;
 
   // just for the starting data source
   initialDS?: string;
@@ -69,6 +71,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
+      metric: state.metric ?? 'rate',
       ...state,
     });
 
@@ -208,6 +211,13 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.setState({ primarySignal: signal });
   };
 
+  public onChangeMetricFunction = (metric: string) => {
+    if (!metric || this.state.metric === metric) {
+      return;
+    }
+    this.setState({ metric: metric as MetricFunction });
+  };
+
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
     const { body } = model.useState();
     const styles = useStyles2(getStyles);
@@ -219,37 +229,30 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { controls, topScene, showDetails, mode } = traceExploration.useState();
+    const { controls, topScene } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, traceExploration);
 
-    const toggleDetails = () => {
-      traceExploration.setState({ showDetails: !showDetails });
-    };
-
     return (
       <div className={styles.container}>
         <Stack gap={2} justifyContent={'space-between'}>
-          {dsVariable && <dsVariable.Component model={dsVariable} />}
-          {mode === 'traces' && (
-            <Button
-              variant={'secondary'}
-              icon={showDetails ? 'arrow-to-right' : 'arrow-from-right'}
-              className={showDetails ? undefined : styles.rotateIcon}
-              onClick={() => toggleDetails()}
-            >
-              Details
-            </Button>
+          {dsVariable && (
+            <Stack gap={1} alignItems={'center'}>
+              <div>Data source</div>
+              <dsVariable.Component model={dsVariable} />
+            </Stack>
           )}
+          <div className={styles.controls}>
+            {controls.map((control) => (
+              <control.Component key={control.state.key} model={control} />
+            ))}
+          </div>
         </Stack>
         {controls && (
           <div className={styles.controls}>
             {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
           </div>
         )}
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
