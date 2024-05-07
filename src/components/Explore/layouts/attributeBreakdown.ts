@@ -7,23 +7,29 @@ import {
   SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
+  SceneObject,
   SceneQueryRunner,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../../utils/shared';
+import { explorationDS } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { getLabelValue } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
-import { AxisPlacement, DrawStyle, StackingMode } from '@grafana/ui';
+import { rateByWithStatus } from '../queries/rateByWithStatus';
+import { TraceExploration } from '../../../pages/Explore';
+import { barsPanelConfig } from '../panels/barsPanel';
 
 export function buildNormalLayout(
+  scene: SceneObject,
   variable: CustomVariable,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
-  const query = buildQuery(variable.getValueText());
+  const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
+  const query = rateByWithStatus(traceExploration.state.metric, variable.getValueText());
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
@@ -88,7 +94,7 @@ export function getLayoutChild(
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = PanelBuilders.timeseries()
+    const panel = barsPanelConfig()
       .setTitle(getTitle(frame, variable.getValueText()))
       .setData(
         new SceneDataNode({
@@ -97,39 +103,12 @@ export function getLayoutChild(
             series: [
               {
                 ...frame,
-                fields: frame.fields
-                  .sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0)
-                  .reverse(),
+                fields: frame.fields.sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0),
               },
             ],
           },
         })
-      )
-      .setOption('legend', { showLegend: false })
-      .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
-      .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
-      .setCustomFieldConfig('fillOpacity', 100)
-      .setCustomFieldConfig('lineWidth', 0)
-      .setCustomFieldConfig('pointSize', 0)
-      .setCustomFieldConfig('axisLabel', 'Rate')
-      .setOverrides((overrides) => {
-        overrides
-          .matchFieldsWithNameByRegex('.*status="error".*')
-          .overrideColor({
-            mode: 'fixed',
-            fixedColor: 'semi-dark-red',
-          })
-          .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
-          .overrideCustomFieldConfig('axisLabel', 'Errors');
-        overrides.matchFieldsWithNameByRegex('.*status="unset".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'green',
-        });
-        overrides.matchFieldsWithNameByRegex('.*status="ok".*').overrideColor({
-          mode: 'fixed',
-          fixedColor: 'dark-green',
-        });
-      });
+      );
 
     const actions = actionsFn(frame);
     if (actions) {
@@ -138,21 +117,5 @@ export function getLayoutChild(
     return new SceneCSSGridItem({
       body: panel.build(),
     });
-  };
-}
-
-function getExpr(attr: string) {
-  return `{${VAR_FILTERS_EXPR}} | rate() by(${attr}, status)`;
-}
-
-function buildQuery(tagKey: string) {
-  return {
-    refId: 'A',
-    query: getExpr(tagKey),
-    queryType: 'traceql',
-    tableType: 'spans',
-    limit: 100,
-    spss: 10,
-    filters: [],
   };
 }

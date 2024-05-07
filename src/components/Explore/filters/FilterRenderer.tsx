@@ -8,10 +8,11 @@ import { FilterByVariable } from './FilterByVariable';
 
 interface Props {
   filter: AdHocVariableFilter;
+  isWip?: boolean;
   model: FilterByVariable;
 }
 
-export function FilterRenderer({ filter, model }: Props) {
+export function FilterRenderer({ filter, model, isWip }: Props) {
   const styles = useStyles2(getStyles);
 
   const [state, setState] = useState<{
@@ -41,6 +42,7 @@ export function FilterRenderer({ filter, model }: Props) {
     }
   }, [filter, key, model, state]);
 
+  const keyAutoFocus = isWip && filter.key === '';
   const keySelect = (
     <BaseSelect
       value={key}
@@ -48,6 +50,8 @@ export function FilterRenderer({ filter, model }: Props) {
       options={state.keys}
       onChange={(v) => model._updateFilter(filter, 'key', v.value)}
       isLoading={state.isKeysLoading}
+      autoFocus={keyAutoFocus}
+      openMenuOnFocus={keyAutoFocus}
       className={styles.key}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
@@ -57,6 +61,7 @@ export function FilterRenderer({ filter, model }: Props) {
     />
   );
 
+  const valueAutoFocus = isWip && filter.key !== '';
   const valueSelect = (
     <BaseSelect
       value={value}
@@ -64,6 +69,8 @@ export function FilterRenderer({ filter, model }: Props) {
       options={state.values}
       onChange={(v) => model._updateFilter(filter, 'value', v.value)}
       isLoading={state.isValuesLoading}
+      autoFocus={valueAutoFocus}
+      openMenuOnFocus={valueAutoFocus}
       onOpenMenu={async () => {
         setState({ ...state, isValuesLoading: true });
         const values = await model._getValuesFor(filter);
@@ -71,6 +78,10 @@ export function FilterRenderer({ filter, model }: Props) {
       }}
     />
   );
+
+  if (isWip && filter.key === '') {
+    return <div className={styles.wrapper}>{keySelect}</div>;
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -82,14 +93,16 @@ export function FilterRenderer({ filter, model }: Props) {
         onChange={(v) => model._updateFilter(filter, 'operator', v.value)}
       />
       {valueSelect}
-      <Button
-        variant="secondary"
-        aria-label="Remove filter"
-        title="Remove filter"
-        className={styles.removeButton}
-        icon="times"
-        onClick={() => model._removeFilter(filter)}
-      />
+      {filter.value.length > 0 && (
+        <Button
+          variant="secondary"
+          aria-label="Remove filter"
+          title="Remove filter"
+          className={styles.removeButton}
+          icon="times"
+          onClick={() => model._removeFilter(filter)}
+        />
+      )}
     </div>
   );
 }

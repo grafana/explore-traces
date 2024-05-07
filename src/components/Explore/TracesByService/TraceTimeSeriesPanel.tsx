@@ -15,7 +15,7 @@ import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
-import { AxisPlacement, DrawStyle, StackingMode } from '@grafana/ui';
+import { barsPanelConfig } from '../panels/barsPanel';
 
 export interface TraceTimeSeriesPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -42,11 +42,11 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
-                    new SceneFlexItem({ 
-                      body: new EmptyStateScene({ 
-                        message: "No data for selected query",
-                        imgWidth:  150,
-                      }) 
+                    new SceneFlexItem({
+                      body: new EmptyStateScene({
+                        message: 'No data for selected query',
+                        imgWidth: 150,
+                      }),
                     }),
                   ],
                 }),
@@ -61,12 +61,12 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
               panel: new SceneFlexLayout({
                 direction: 'column',
                 children: [
-                  new LoadingStateScene({ 
+                  new LoadingStateScene({
                     component: () => SkeletonComponent(1),
                   }),
                 ],
-              })
-            });         
+              }),
+            });
           }
         })
       );
@@ -84,33 +84,7 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: PanelBuilders.timeseries()
-            .setTitle('Requests over time')
-            .setCustomFieldConfig('drawStyle', DrawStyle.Bars)
-            .setCustomFieldConfig('stacking', { mode: StackingMode.Normal })
-            .setCustomFieldConfig('fillOpacity', 100)
-            .setCustomFieldConfig('lineWidth', 0)
-            .setCustomFieldConfig('pointSize', 0)
-            .setCustomFieldConfig('axisLabel', 'Rate')
-            .setOverrides((overrides) => {
-              overrides
-                .matchFieldsWithNameByRegex('"error"')
-                .overrideColor({
-                  mode: 'fixed',
-                  fixedColor: 'semi-dark-red',
-                })
-                .overrideCustomFieldConfig('axisPlacement', AxisPlacement.Right)
-                .overrideCustomFieldConfig('axisLabel', 'Errors');
-              overrides.matchFieldsWithNameByRegex('"unset"').overrideColor({
-                mode: 'fixed',
-                fixedColor: 'green',
-              });
-              overrides.matchFieldsWithNameByRegex('"ok"').overrideColor({
-                mode: 'fixed',
-                fixedColor: 'dark-green',
-              });
-            })
-            .build(),
+          body: barsPanelConfig().build(),
         }),
       ],
     });

@@ -6,21 +6,24 @@ import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { getExplorationFor } from '../../../utils/utils';
-import { primarySignalOptions } from '../../../pages/Explore/primary-signals';
 
 interface Props {
   model: FilterByVariable;
 }
 
-export function PrimarySignalRenderer({ model }: Props) {
+export function MetricSelect({ model }: Props) {
   const exploration = getExplorationFor(model);
-  const { primarySignal } = exploration.useState();
+  const { metric } = exploration.useState();
 
   return (
     <BaseSelect
-      value={primarySignal}
-      options={primarySignalOptions}
-      onChange={(v) => v.value && exploration.onChangePrimarySignal(v.value)}
+      value={metric}
+      options={[
+        { label: 'Rate', value: 'rate' },
+        { label: 'Errors', value: 'errors' },
+        { label: 'Duration', value: 'duration' },
+      ]}
+      onChange={(v) => v.value && exploration.onChangeMetricFunction(v.value)}
     />
   );
 }
@@ -41,6 +44,12 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    fontSize: 12,
+  }),
   control: css({
     padding: 0,
     border: `1px solid ${theme.colors.border.weak}`,
