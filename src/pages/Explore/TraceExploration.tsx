@@ -172,7 +172,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
-    this.setState({ showDetails: true });
+    this.setState({ showDetails: evt.payload.showDetails ?? false });
   }
 
   getUrlState() {

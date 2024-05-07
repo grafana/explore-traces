@@ -1,4 +1,4 @@
-import { BusEventBase } from '@grafana/data';
+import { BusEventBase, BusEventWithPayload } from '@grafana/data';
 import { SceneObject } from '@grafana/scenes';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
@@ -28,6 +28,9 @@ export class StartingPointSelectedEvent extends BusEventBase {
   public static type = 'start-point-selected-event';
 }
 
-export class DetailsSceneUpdated extends BusEventBase {
+export interface DetailsSceneUpdatedPayload {
+  showDetails?: boolean;
+}
+export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
 }
