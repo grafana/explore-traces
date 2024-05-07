@@ -309,6 +309,8 @@ function getStyles(theme: GrafanaTheme2) {
       minHeight: '100%',
       flexDirection: 'column',
       padding: theme.spacing(2),
+      overflow: 'auto', /* Needed for sticky positioning */
+      height: '1px' /* Needed for sticky positioning */
     }),
     body: css({
       flexGrow: 1,
@@ -321,6 +323,10 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       alignItems: 'flex-end',
       flexWrap: 'wrap',
+      backgroundColor: theme.colors.background.primary,
+      position: 'sticky',
+      top: `-${theme.spacing(2)}`,
+      zIndex: 3,
     }),
     rotateIcon: css({
       svg: { transform: 'rotate(180deg)' },
