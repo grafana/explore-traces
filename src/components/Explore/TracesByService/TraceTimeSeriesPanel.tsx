@@ -4,7 +4,6 @@ import {
   SceneObjectState,
   SceneObjectBase,
   SceneComponentProps,
-  PanelBuilders,
   SceneFlexItem,
   SceneFlexLayout,
   SceneQueryRunner,

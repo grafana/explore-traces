@@ -17,7 +17,7 @@ import {
 import { Box, Stack, Tab, TabsBar, useStyles2 } from '@grafana/ui';
 
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
-import { buildTracesListScene } from './Tabs/TracesListScene';
+import { buildSpansScene } from './Tabs/Spans/SpansScene';
 import {
   ActionViewDefinition,
   ActionViewType,
@@ -28,9 +28,9 @@ import {
 } from '../../../utils/shared';
 import { getExplorationFor } from '../../../utils/utils';
 import { ShareExplorationButton } from './ShareExplorationButton';
-import { buildStructureTabScene } from './Tabs/StructureTabScene';
+import { buildStructureScene } from './Tabs/Structure/StructureScene';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { buildAttributesBreakdownActionScene } from './Tabs/AttributesBreakdown';
+import { buildAttributesBreakdownScene } from './Tabs/AttributesBreakdownScene';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -119,9 +119,9 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownActionScene },
-  { displayName: 'Structure', value: 'structure', getScene: buildStructureTabScene },
-  { displayName: 'Spans', value: 'spans', getScene: buildTracesListScene },
+  { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownScene },
+  { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
+  { displayName: 'Spans', value: 'spans', getScene: buildSpansScene },
 ];
 
 export interface TracesActionBarState extends SceneObjectState {}

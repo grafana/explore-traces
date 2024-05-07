@@ -16,7 +16,7 @@ import {
 import { Button, Field, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
-import { VAR_GROUPBY, VAR_FILTERS } from '../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../LayoutSwitcher';
 import { TracesByServiceScene } from '../TracesByServiceScene';
@@ -29,9 +29,7 @@ export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
 }
 
-const ignoredAttributes = ['duration', 'traceDuration'];
-
-export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownSceneState> {
+export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: this.onReferencedVariableValueChanged.bind(this),
@@ -108,7 +106,7 @@ export class AttributesBreakdown extends SceneObjectBase<AttributesBreakdownScen
     variable.changeValueTo(value);
   };
 
-  public static Component = ({ model }: SceneComponentProps<AttributesBreakdown>) => {
+  public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
     const { body } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
@@ -183,7 +181,7 @@ interface SelectAttributeActionState extends SceneObjectState {
 }
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
   public onClick = () => {
-    const attributesBreakdownScene = sceneGraph.getAncestor(this, AttributesBreakdown);
+    const attributesBreakdownScene = sceneGraph.getAncestor(this, AttributesBreakdownScene);
     attributesBreakdownScene.onChange(this.state.attribute);
   };
 
@@ -196,8 +194,8 @@ export class SelectAttributeAction extends SceneObjectBase<SelectAttributeAction
   };
 }
 
-export function buildAttributesBreakdownActionScene() {
+export function buildAttributesBreakdownScene() {
   return new SceneFlexItem({
-    body: new AttributesBreakdown({}),
+    body: new AttributesBreakdownScene({}),
   });
 }

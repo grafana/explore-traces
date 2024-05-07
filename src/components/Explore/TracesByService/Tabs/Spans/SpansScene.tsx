@@ -7,27 +7,27 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { SpanListPanelScene } from 'components/Explore/panels/SpanListPanelScene';
+import { SpanListScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListScene';
 
-export interface TracesListSceneState extends SceneObjectState {
+export interface SpansSceneState extends SceneObjectState {
   loading?: boolean;
   panel?: SceneFlexLayout;
 }
 
-export class TracesListScene extends SceneObjectBase<TracesListSceneState> {
-  constructor(state: Partial<TracesListSceneState>) {
+export class SpansScene extends SceneObjectBase<SpansSceneState> {
+  constructor(state: Partial<SpansSceneState>) {
     super({
       ...state,
       panel: new SceneFlexLayout({
         direction: 'row',
         children: [
-          new SpanListPanelScene(),
+          new SpanListScene(),
         ],
       })
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<TracesListScene>) => {
+  public static Component = ({ model }: SceneComponentProps<SpansScene>) => {
     const { panel } = model.useState();
 
     if (!panel) {
@@ -38,8 +38,8 @@ export class TracesListScene extends SceneObjectBase<TracesListSceneState> {
   };
 }
 
-export function buildTracesListScene() {
+export function buildSpansScene() {
   return new SceneFlexItem({
-    body: new TracesListScene({}),
+    body: new SpansScene({}),
   });
 }

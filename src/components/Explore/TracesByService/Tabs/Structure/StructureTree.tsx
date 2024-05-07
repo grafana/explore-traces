@@ -1,9 +1,9 @@
-import { TreeNode } from '../../../../utils/trace-merge/tree-node';
+import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
 import React from 'react';
 import { useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { css } from '@emotion/css';
-import { formatDuration } from '../../../../utils/dates';
+import { formatDuration } from '../../../../../utils/dates';
 
 export interface Props {
   tree: TreeNode;
@@ -36,7 +36,7 @@ export const StructureTree = ({ tree }: Props) => {
 export function renderTree(t: TreeNode, depth: number, maxDuration: number): React.ReactNode[] {
   let result = [];
 
-  result.push(<TreeLine key={t.name} node={t} depth={depth} maxDuration={maxDuration} />);
+  result.push(<TreeLine key={`${t.name}_${maxDuration}`} node={t} depth={depth} maxDuration={maxDuration} />);
 
   for (const c of t.children) {
     result.push(...renderTree(c, depth + 1, maxDuration));

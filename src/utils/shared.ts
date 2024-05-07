@@ -20,6 +20,8 @@ export const VAR_GROUPBY = 'groupBy';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
+export const ignoredAttributes = ['duration', 'traceDuration'];
+
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export class StartingPointSelectedEvent extends BusEventBase {

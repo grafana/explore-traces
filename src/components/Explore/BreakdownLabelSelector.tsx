@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText } from '@grafana/ui';
 import { VARIABLE_ALL_VALUE } from '../../constants';
+import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;
@@ -13,7 +14,6 @@ type Props = {
 };
 
 const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
-const hiddenAttributes = ['duration', 'traceDuration'];
 
 export function BreakdownLabelSelector({ options, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
@@ -44,7 +44,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
 
   const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
     return options 
-      .filter((op) => !hiddenAttributes.includes(op.value?.toString()!))
+      .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
       .filter((op) => 'resource.' !== op.value?.toString()?.substring(0, 9))
       .map((op) => ({ label: op.label?.replace('span.', ''), value: op.value }));
   }
