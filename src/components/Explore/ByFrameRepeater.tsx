@@ -9,18 +9,15 @@ import {
   SceneComponentProps,
   SceneLayout,
   SceneCSSGridLayout,
-  SceneDataProvider,
-  SceneDataState,
   CustomVariable,
 } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
-import { Field, Icon, Input, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
-import { debounce } from 'lodash';
 import { groupSeriesBy } from '../../utils/panels';
 import { VAR_GROUPBY } from '../../utils/shared';
 
@@ -28,7 +25,6 @@ interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
   groupBy?: boolean;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneFlexItem;
-  searchQuery?: string;
 }
 
 export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
@@ -82,51 +78,12 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
         })
       );
 
-      this.subscribeToState((newState, prevState) => {
-        if (newState.searchQuery !== prevState.searchQuery) {
-          this.onSearchQueryChangeDebounced(data, newState.searchQuery ?? '');
-        }
-      });
-
       if (data.state.data) {
         this.performRepeat(data.state.data);
       }
     });
   }
 
-  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
-    this.setState({ searchQuery: evt.currentTarget.value });
-  };
-
-  private onSearchQueryChangeDebounced = debounce((data: SceneDataProvider<SceneDataState>, searchQuery: string) => {
-    const filteredData = {
-      ...data.state.data,
-      series: data.state.data?.series.filter((frame) => {
-        return frame.fields.some((field) => {
-          if (!field.labels) {
-            return false;
-          }
-
-          const matchFound = Object.values(field.labels).find((label) => label.toLowerCase().includes(searchQuery));
-          return matchFound ? true : false;
-        });
-      }),
-    }
-
-    if (filteredData.series && filteredData.series.length > 0) {
-      this.performRepeat(filteredData as PanelData);
-    } else {
-      this.state.body.setState({
-        children: [
-          new SceneFlexItem({
-            body: new EmptyStateScene({
-              message: 'No data for search term',
-            }),
-          }),
-        ],
-      });
-    }
-  }, 250);
   public getGroupByVariable() {
     const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
     if (!(variable instanceof CustomVariable)) {
@@ -153,19 +110,11 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<ByFrameRepeater>) => {
-    const { body, searchQuery } = model.useState();
+    const { body } = model.useState();
     const styles = useStyles2(getStyles);
 
     return (
       <div className={styles.container}>
-        <Field className={styles.searchField}>
-          <Input
-            placeholder="Search"
-            prefix={<Icon name={'search'} />}
-            value={searchQuery}
-            onChange={model.onSearchQueryChange}
-          />
-        </Field>
         <body.Component model={body} />
       </div>
     );
@@ -178,10 +127,6 @@ function getStyles() {
       display: 'flex',
       flexDirection: 'column',
       flexGrow: 1,
-    }),
-    searchField: css({
-      marginBottom: '7px',
-      marginTop: '10px',
     }),
   };
 }

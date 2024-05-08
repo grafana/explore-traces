@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import React from 'react';
+import { debounce } from 'lodash';
 
 import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
@@ -8,12 +9,13 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
+  SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Select, useStyles2 } from '@grafana/ui';
+import { Button, Field, Icon, Input, Select, useStyles2 } from '@grafana/ui';
 
-import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from '../../utils/shared';
+import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { primarySignalOptions } from './primary-signals';
@@ -25,9 +27,16 @@ import { AddToFiltersGraphAction } from '../../components/Explore/AddToFiltersGr
 import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithValueAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
+import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
+
+export type AllLayoutRunners = {
+  attribute: string;
+  runner: SceneQueryRunner;
+};
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body?: LayoutSwitcher;
+  allLayoutRunners?: AllLayoutRunners[];
   showHeading?: boolean;
   searchQuery?: string;
   showPreviews?: boolean;
@@ -52,6 +61,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         new MetricFunctionCard({ metric: 'errors' }),
         new MetricFunctionCard({ metric: 'duration' }),
       ],
+      allLayoutRunners: [],
       ...state,
     });
 
@@ -81,7 +91,22 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         this.buildBody();
       }
     });
+
+    this.subscribeToState((newState, prevState) => {
+      if (newState.searchQuery !== prevState.searchQuery) {
+        this.onSearchQueryChangeDebounced(newState.searchQuery ?? '');
+      }
+    });
   }
+
+  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
+    this.setState({ searchQuery: evt.currentTarget.value });
+  };
+
+  private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
+    const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
+    this.setBody(filtered);
+  }, 250);
 
   private async updateAttributes() {
     const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this } });
@@ -99,19 +124,26 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private buildBody() {
+    const allLayoutRunners = getAllLayoutRunners(sceneGraph.getAncestor(this, TraceExploration), this.state.attributes ?? []);
+    this.setState({ allLayoutRunners });
+    this.setBody(allLayoutRunners);
+  }
+
+  private setBody = (runners: AllLayoutRunners[]) => {
     const variable = this.getGroupByVariable();
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout(
-              this,
-              this.state.attributes ?? [],
-              (attribute) => new SelectAttributeAction({ attribute: attribute })
-            )
-          : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
-              new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
-            ]),
+          ? buildAllLayout((attribute) => new SelectAttributeAction({ attribute }), runners)
+          : buildNormalLayout(
+              this, 
+              variable, 
+              (frame: DataFrame) => [
+                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+                new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
+              ], 
+              this.state.searchQuery ?? ''
+            ),
     });
   }
 
@@ -130,13 +162,16 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     }
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(value);
+
+    // reset searchQuery
+    this.setState({ searchQuery: '' });
   };
 
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
     const exploration = getExplorationFor(model);
     const { primarySignal } = exploration.useState();
-    const { attributes, body, metricCards } = model.useState();
+    const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
 
@@ -178,6 +213,15 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             className={styles.select}
           />
         </div>
+        <Field className={styles.searchField}>
+          <Input
+            placeholder='Search'
+            prefix={<Icon name={'search'} />}
+            value={searchQuery}
+            onChange={model.onSearchQueryChange}
+            id='searchFieldInput'
+          />
+        </Field>
         {body && (
           <div className={styles.bodyWrapper}>
             <body.Component model={body} />
@@ -186,6 +230,27 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       </div>
     );
   };
+}
+
+export function getAllLayoutRunners(traceExploration: TraceExploration, attributes: string[]) {
+  const runners = [];
+  for (const attribute of attributes) {
+    runners.push({
+      attribute: attribute,
+      runner: new SceneQueryRunner({
+        maxDataPoints: 250,
+        datasource: explorationDS,
+        queries: [rateByWithStatus(traceExploration.state.metric, attribute)],
+      })
+    });
+  }
+  return runners;
+}
+
+export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery: string) {
+  return runners.filter((runner: AllLayoutRunners) => {
+    return runner.attribute.toLowerCase().includes(searchQuery);
+  }) ?? [];
 }
 
 function getAttributesAsOptions(attributes: string[]) {
@@ -244,7 +309,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       gap: theme.spacing(1),
       alignItems: 'center',
-      margin: `${theme.spacing(2)} 0 ${theme.spacing(1.5)} 0`,
+      margin: `${theme.spacing(2)} 0 ${theme.spacing(1)} 0`,
     }),
     bodyWrapper: css({
       flexGrow: 1,
@@ -256,6 +321,9 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     select: css({
       minWidth: 240,
+    }),
+    searchField: css({
+      marginBottom: theme.spacing(1),
     }),
   };
 }

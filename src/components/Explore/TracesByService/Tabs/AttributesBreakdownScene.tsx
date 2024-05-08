@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, useStyles2 } from '@grafana/ui';
+import { Button, Field, Icon, Input, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
@@ -24,9 +24,14 @@ import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
 import { VARIABLE_ALL_VALUE } from '../../../../constants';
 import { buildAllLayout } from '../../layouts/allAttributes';
 import { buildNormalLayout } from '../../layouts/attributeBreakdown';
+import { debounce } from 'lodash';
+import { TraceExploration } from 'pages/Explore';
+import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
+  allLayoutRunners?: any;
+  searchQuery?: string;
 }
 
 export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
@@ -55,12 +60,27 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       this.updateBody(variable);
     });
 
+    this.subscribeToState((newState, prevState) => {
+      if (newState.searchQuery !== prevState.searchQuery) {
+        this.onSearchQueryChangeDebounced(newState.searchQuery ?? '');
+      }
+    });
+
     sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
       this.updateBody(variable);
     });
 
     this.updateBody(variable);
   }
+
+  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
+    this.setState({ searchQuery: evt.currentTarget.value });
+  };
+
+  private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
+    const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
+    this.setBody(filtered, this.getVariable());
+  }, 250);
 
   private getVariable(): CustomVariable {
     const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
@@ -83,15 +103,23 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private async updateBody(variable: CustomVariable) {
+    const allLayoutRunners = getAllLayoutRunners(sceneGraph.getAncestor(this, TraceExploration), this.getAttributes() ?? []);
+    this.setState({ allLayoutRunners });
+    this.setBody(allLayoutRunners, variable);
+  }
+
+  private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout(this, this.getAttributes() ?? [], (attribute) => new SelectAttributeAction({ attribute }))
+          ? buildAllLayout((attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(
-              this,
-              variable,
-              (frame: DataFrame) =>
-                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() })
+              this, 
+              variable, 
+              (frame: DataFrame) => [
+                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              ], 
+              this.state.searchQuery ?? ''
             ),
     });
   }
@@ -104,10 +132,13 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const variable = this.getVariable();
 
     variable.changeValueTo(value);
+
+    // reset searchQuery
+    this.setState({ searchQuery: '' });
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
-    const { body } = model.useState();
+    const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
@@ -132,6 +163,15 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
             </div>
           )}
         </div>
+        <Field className={styles.searchField}>
+          <Input
+            placeholder='Search'
+            prefix={<Icon name={'search'} />}
+            value={searchQuery}
+            onChange={model.onSearchQueryChange}
+            id='searchFieldInput'
+          />
+        </Field>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );
@@ -172,6 +212,9 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
+    }),
+    searchField: css({
+      marginBottom: theme.spacing(1),
     }),
   };
 }
