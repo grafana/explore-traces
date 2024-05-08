@@ -142,8 +142,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
               (frame: DataFrame) => [
                 new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
                 new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
-              ], 
-              this.state.searchQuery ?? ''
+              ],
             ),
     });
   }
@@ -214,7 +213,9 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             className={styles.select}
           />
         </div>
-        <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
+        {isGroupByAll(groupByVariable) && (
+          <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
+        )}
         {body && (
           <div className={styles.bodyWrapper}>
             <body.Component model={body} />
@@ -244,6 +245,10 @@ export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery:
   return runners.filter((runner: AllLayoutRunners) => {
     return runner.attribute.toLowerCase().includes(searchQuery);
   }) ?? [];
+}
+
+export function isGroupByAll(variable: CustomVariable) {
+  return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
 }
 
 function getAttributesAsOptions(attributes: string[]) {

@@ -26,8 +26,7 @@ import { barsPanelConfig } from '../panels/barsPanel';
 export function buildNormalLayout(
   scene: SceneObject,
   variable: CustomVariable,
-  actionsFn: (df: DataFrame) => VizPanelState['headerActions'],
-  searchQuery: string
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
   const query = rateByWithStatus(traceExploration.state.metric, variable.getValueText());
@@ -43,19 +42,9 @@ export function buildNormalLayout(
           return source.pipe(
             map((data: DataFrame[]) => {
               data.forEach((a) => reduceField({ field: a.fields[1], reducers: [ReducerID.max] }));
-              const sorted = data.sort((a, b) => {
+              return data.sort((a, b) => {
                 return (b.fields[1].state?.calcs?.max || 0) - (a.fields[1].state?.calcs?.max || 0);
               });
-
-              return sorted.filter((f: DataFrame) => {
-                return f.fields.some((field) => {
-                  if (!field.labels) {
-                    return false;
-                  }
-                  const matchFound = Object.values(field.labels).find((label) => label.toLowerCase().includes(searchQuery));
-                  return matchFound ? true : false;
-                });
-              });;
             })
           );
         },

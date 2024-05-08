@@ -26,7 +26,7 @@ import { buildAllLayout } from '../../layouts/allAttributes';
 import { buildNormalLayout } from '../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
 import { TraceExploration } from 'pages/Explore';
-import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners, isGroupByAll } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
@@ -119,8 +119,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
               variable, 
               (frame: DataFrame) => [
                 new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
-              ], 
-              this.state.searchQuery ?? ''
+              ],
             ),
     });
   }
@@ -164,7 +163,9 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
             </div>
           )}
         </div>
-        <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
+        {isGroupByAll(variable) && (
+          <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
+        )}
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );
