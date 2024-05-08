@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, Icon, Input, useStyles2 } from '@grafana/ui';
+import { Button, Field, useStyles2 } from '@grafana/ui';
 
 import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
@@ -27,6 +27,7 @@ import { buildNormalLayout } from '../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
 import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { Search } from 'pages/Explore/Search';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -163,15 +164,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
             </div>
           )}
         </div>
-        <Field className={styles.searchField}>
-          <Input
-            placeholder='Search'
-            prefix={<Icon name={'search'} />}
-            value={searchQuery}
-            onChange={model.onSearchQueryChange}
-            id='searchFieldInput'
-          />
-        </Field>
+        <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );
@@ -212,9 +205,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
-    }),
-    searchField: css({
-      marginBottom: theme.spacing(1),
     }),
   };
 }

@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, Icon, Input, Select, useStyles2 } from '@grafana/ui';
+import { Button, Select, useStyles2 } from '@grafana/ui';
 
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
@@ -28,6 +28,7 @@ import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithV
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
+import { Search } from './Search';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -213,15 +214,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             className={styles.select}
           />
         </div>
-        <Field className={styles.searchField}>
-          <Input
-            placeholder='Search'
-            prefix={<Icon name={'search'} />}
-            value={searchQuery}
-            onChange={model.onSearchQueryChange}
-            id='searchFieldInput'
-          />
-        </Field>
+        <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
         {body && (
           <div className={styles.bodyWrapper}>
             <body.Component model={body} />
@@ -321,9 +314,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     select: css({
       minWidth: 240,
-    }),
-    searchField: css({
-      marginBottom: theme.spacing(1),
     }),
   };
 }
