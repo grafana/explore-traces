@@ -9,8 +9,6 @@ import {
   SceneComponentProps,
   SceneLayout,
   SceneCSSGridLayout,
-  SceneDataProvider,
-  SceneDataState,
   CustomVariable,
 } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
