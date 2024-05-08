@@ -62,7 +62,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         new MetricFunctionCard({ metric: 'errors' }),
         new MetricFunctionCard({ metric: 'duration' }),
       ],
-      allLayoutRunners: [],
       ...state,
     });
 
