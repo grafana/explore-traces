@@ -124,13 +124,8 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     });
   }
 
-  public onChange = (value?: string) => {
-    if (!value) {
-      return;
-    }
-
+  public onChange = (value: string) => {
     const variable = this.getVariable();
-
     variable.changeValueTo(value);
 
     // reset searchQuery
