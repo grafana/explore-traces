@@ -298,12 +298,6 @@ function getStyles(theme: GrafanaTheme2) {
       border: `2px solid #cc8c17`,
     }),
     groupBy: css({
-      right: 0,
-      top: '4px',
-      zIndex: 2,
-      display: 'flex',
-      gap: theme.spacing(1),
-      alignItems: 'center',
       margin: `${theme.spacing(2)} 0 ${theme.spacing(1)} 0`,
     }),
     bodyWrapper: css({
