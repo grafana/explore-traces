@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Select, useStyles2 } from '@grafana/ui';
+import { Button, useStyles2 } from '@grafana/ui';
 
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
@@ -204,17 +204,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
           ))}
         </div>
         <div className={styles.groupBy}>
-          <div>Group by</div>
-          <Select
-            options={getAttributesAsOptions(attributes || [])}
-            value={groupByValue}
-            onChange={(value) => model.onChangeGroupBy(value.value?.toString())}
-            width={'auto'}
-            placeholder={'Select an attribute'}
-            className={styles.select}
-          />
-        </div>
-        <div className={styles.groupBy}>
           <GroupBySelector
             options={getAttributesAsOptions(attributes || [])}
             mainAttributes={mainAttributes}
@@ -324,9 +313,6 @@ function getStyles(theme: GrafanaTheme2) {
       '& > div': {
         overflow: 'scroll',
       },
-    }),
-    select: css({
-      minWidth: 240,
     }),
   };
 }
