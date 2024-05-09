@@ -10,7 +10,7 @@ import { ignoredAttributes } from 'utils/shared';
 type Props = {
   options: Array<SelectableValue<string>>;
   value?: string;
-  onChange: (label: string | undefined) => void;
+  onChange: (label: string) => void;
 };
 
 const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
@@ -62,10 +62,12 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
       {useHorizontalLabelSelector ? (
         <>
           <RadioButtonGroup
-            {...{ options: [{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions], value, onChange }}
+            options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
+            value={value}
+            onChange={onChange}
           />
           <Select
-            {...{ value }}
+            value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clciked
             placeholder={'Other attributes'}
             options={getModifiedOptions(otherOptions)}
             onChange={(selected) => onChange(selected?.value ?? 'All')}
@@ -75,7 +77,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
         </>
       ) : (
         <Select
-          {...{ value }}
+          value={value}
           placeholder={'Select attribute'}
           options={getModifiedOptions(options)}
           onChange={(selected) => onChange(selected?.value ?? 'All')}
