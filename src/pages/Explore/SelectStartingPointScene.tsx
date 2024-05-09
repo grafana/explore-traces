@@ -174,7 +174,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const mainAttributes = ['resource.cluster', 'resource.namespace', 'resource.environment'];
+    const mainAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
 
     return (
       <div className={styles.container}>

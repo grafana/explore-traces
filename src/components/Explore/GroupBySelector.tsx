@@ -40,7 +40,6 @@ export function GroupBySelector({ options, mainAttributes, value, onChange }: Pr
     .map((attribute) => ({ label: attribute.replace('span.', '').replace('resource.', ''), text: attribute, value: attribute }));
 
   const otherOptions = options.filter((op) => !mainAttributes.includes(op.value?.toString()!));
-  console.log(mainOptions, otherOptions);
 
   const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
     return options 
