@@ -9,14 +9,12 @@ import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;
+  mainAttributes: string[];
   value?: string;
   onChange: (label: string) => void;
 };
 
-const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
-const mainAttributes2 = ['resource.cluster', 'resource.namespace', 'resource.environment'];
-
-export function BreakdownLabelSelector({ options, value, onChange }: Props) {
+export function BreakdownLabelSelector({ options, mainAttributes, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
 

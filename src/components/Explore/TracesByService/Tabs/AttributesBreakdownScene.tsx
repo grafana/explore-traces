@@ -137,6 +137,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
+    const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 
     return (
       <div className={styles.container}>
@@ -146,6 +147,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
               <Field label="By attribute">
                 <BreakdownLabelSelector
                   options={getAttributesAsOptions(attributes)}
+                  mainAttributes={mainAttributes}
                   value={variable.getValueText()}
                   onChange={model.onChange}
                 />
