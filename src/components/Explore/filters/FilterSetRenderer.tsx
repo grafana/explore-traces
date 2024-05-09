@@ -52,7 +52,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   container: css({
     height: '30px',
     display: 'flex',
-    border: `1px solid ${theme.colors.border.strong}`,
+    border: `1px solid ${theme.colors.border.weak}`,
     alignItems: 'center',
     gap: theme.spacing(1),
     padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,

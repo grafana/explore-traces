@@ -145,7 +145,7 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       position: 'absolute',
       backgroundColor: theme.colors.background.primary,
-      border: `1px solid ${theme.colors.background.secondary}`,
+      border: `1px solid ${theme.colors.border.weak}`,
       padding: '5px',
     }),
     title: css({

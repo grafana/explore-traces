@@ -67,7 +67,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
             onChange={onChange}
           />
           <Select
-            value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clciked
+            value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
             placeholder={'Other attributes'}
             options={getModifiedOptions(otherOptions)}
             onChange={(selected) => onChange(selected?.value ?? 'All')}
