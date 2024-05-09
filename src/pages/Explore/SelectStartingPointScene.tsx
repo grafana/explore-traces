@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Select, useStyles2 } from '@grafana/ui';
+import { Button, Field, Select, useStyles2 } from '@grafana/ui';
 
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
@@ -29,6 +29,7 @@ import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
 import { Search } from './Search';
+import { BreakdownLabelSelector } from 'components/Explore/BreakdownLabelSelector';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -212,6 +213,15 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             className={styles.select}
           />
         </div>
+        <div className={styles.groupBy}>
+          <Field label="By attribute">
+            <BreakdownLabelSelector
+              options={getAttributesAsOptions(attributes || [])}
+              value={groupByValue.toString()}
+              onChange={(value) => model.onChangeGroupBy(value)}
+            />
+          </Field>
+        </div>
         {isGroupByAll(groupByVariable) && (
           <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
         )}
@@ -252,8 +262,7 @@ export function isGroupByAll(variable: CustomVariable) {
 
 function getAttributesAsOptions(attributes: string[]) {
   return [
-    { label: 'All', value: VARIABLE_ALL_VALUE },
-    ...attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute })),
+    ...attributes.map((attribute) => ({ label: attribute, value: attribute })),
   ];
 }
 

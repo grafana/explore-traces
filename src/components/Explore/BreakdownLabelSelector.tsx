@@ -14,6 +14,7 @@ type Props = {
 };
 
 const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+const mainAttributes2 = ['resource.cluster', 'resource.namespace', 'resource.environment'];
 
 export function BreakdownLabelSelector({ options, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
@@ -38,15 +39,15 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
 
   const mainOptions = mainAttributes
     .filter((at) => !!options.find((op) => op.value === at))
-    .map((attribute) => ({ label: attribute, text: attribute, value: attribute }));
+    .map((attribute) => ({ label: attribute.replace('span.', '').replace('resource.', ''), text: attribute, value: attribute }));
 
   const otherOptions = options.filter((op) => !mainAttributes.includes(op.value?.toString()!));
+  console.log(mainOptions, otherOptions);
 
   const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
     return options 
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
-      .filter((op) => 'resource.' !== op.value?.toString()?.substring(0, 9))
-      .map((op) => ({ label: op.label?.replace('span.', ''), value: op.value }));
+      .map((op) => ({ label: op.label?.replace('span.', '').replace('resource.', ''), value: op.value }));
   }
 
   useEffect(() => {
