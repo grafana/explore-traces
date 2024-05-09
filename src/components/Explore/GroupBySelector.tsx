@@ -3,7 +3,7 @@ import { useResizeObserver } from '@react-aria/utils';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText } from '@grafana/ui';
+import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
 import { VARIABLE_ALL_VALUE } from '../../constants';
 import { ignoredAttributes } from 'utils/shared';
 
@@ -14,7 +14,7 @@ type Props = {
   onChange: (label: string) => void;
 };
 
-export function BreakdownLabelSelector({ options, mainAttributes, value, onChange }: Props) {
+export function GroupBySelector({ options, mainAttributes, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
 
@@ -57,34 +57,36 @@ export function BreakdownLabelSelector({ options, mainAttributes, value, onChang
   }, [mainOptions, theme]);
 
   return (
-    <div ref={controlsContainer} className={styles.container}>
-      {useHorizontalLabelSelector ? (
-        <>
-          <RadioButtonGroup
-            options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
-            value={value}
-            onChange={onChange}
-          />
+    <Field label="Group by">
+      <div ref={controlsContainer} className={styles.container}>
+        {useHorizontalLabelSelector ? (
+          <>
+            <RadioButtonGroup
+              options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
+              value={value}
+              onChange={onChange}
+            />
+            <Select
+              value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
+              placeholder={'Other attributes'}
+              options={getModifiedOptions(otherOptions)}
+              onChange={(selected) => onChange(selected?.value ?? 'All')}
+              className={styles.select}
+              isClearable={true}
+            />
+          </>
+        ) : (
           <Select
-            value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
-            placeholder={'Other attributes'}
-            options={getModifiedOptions(otherOptions)}
+            value={value}
+            placeholder={'Select attribute'}
+            options={getModifiedOptions(options)}
             onChange={(selected) => onChange(selected?.value ?? 'All')}
             className={styles.select}
             isClearable={true}
           />
-        </>
-      ) : (
-        <Select
-          value={value}
-          placeholder={'Select attribute'}
-          options={getModifiedOptions(options)}
-          onChange={(selected) => onChange(selected?.value ?? 'All')}
-          className={styles.select}
-          isClearable={true}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </Field>
   );
 }
 

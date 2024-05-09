@@ -13,9 +13,9 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, useStyles2 } from '@grafana/ui';
+import { Button, useStyles2 } from '@grafana/ui';
 
-import { BreakdownLabelSelector } from '../../BreakdownLabelSelector';
+import { GroupBySelector } from '../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../LayoutSwitcher';
@@ -144,14 +144,12 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
-              <Field label="By attribute">
-                <BreakdownLabelSelector
-                  options={getAttributesAsOptions(attributes)}
-                  mainAttributes={mainAttributes}
-                  value={variable.getValueText()}
-                  onChange={model.onChange}
-                />
-              </Field>
+              <GroupBySelector
+                options={getAttributesAsOptions(attributes)}
+                mainAttributes={mainAttributes}
+                value={variable.getValueText()}
+                onChange={model.onChange}
+              />
             </div>
           )}
           {body instanceof LayoutSwitcher && (
