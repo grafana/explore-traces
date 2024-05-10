@@ -13,7 +13,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Select, useStyles2 } from '@grafana/ui';
+import { Button, useStyles2 } from '@grafana/ui';
 
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
@@ -29,6 +29,7 @@ import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
 import { Search } from './Search';
+import { GroupBySelector } from 'components/Explore/GroupBySelector';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -173,6 +174,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
+    const mainAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
 
     return (
       <div className={styles.container}>
@@ -202,14 +204,11 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
           ))}
         </div>
         <div className={styles.groupBy}>
-          <div>Group by</div>
-          <Select
+          <GroupBySelector
             options={getAttributesAsOptions(attributes || [])}
-            value={groupByValue}
-            onChange={(value) => model.onChangeGroupBy(value.value?.toString())}
-            width={'auto'}
-            placeholder={'Select an attribute'}
-            className={styles.select}
+            mainAttributes={mainAttributes}
+            value={groupByValue.toString()}
+            onChange={(value) => model.onChangeGroupBy(value)}
           />
         </div>
         {isGroupByAll(groupByVariable) && (
@@ -252,8 +251,7 @@ export function isGroupByAll(variable: CustomVariable) {
 
 function getAttributesAsOptions(attributes: string[]) {
   return [
-    { label: 'All', value: VARIABLE_ALL_VALUE },
-    ...attributes.map((attribute) => ({ label: attribute.replace('resource.', ''), value: attribute })),
+    ...attributes.map((attribute) => ({ label: attribute, value: attribute })),
   ];
 }
 
@@ -300,13 +298,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: `2px solid #cc8c17`,
     }),
     groupBy: css({
-      right: 0,
-      top: '4px',
-      zIndex: 2,
-      display: 'flex',
-      gap: theme.spacing(1),
-      alignItems: 'center',
-      margin: `${theme.spacing(2)} 0 ${theme.spacing(1)} 0`,
+      margin: `${theme.spacing(2)} 0 0 0`,
     }),
     bodyWrapper: css({
       flexGrow: 1,
@@ -315,9 +307,6 @@ function getStyles(theme: GrafanaTheme2) {
       '& > div': {
         overflow: 'scroll',
       },
-    }),
-    select: css({
-      minWidth: 240,
     }),
   };
 }

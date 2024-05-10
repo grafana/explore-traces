@@ -3,19 +3,18 @@ import { useResizeObserver } from '@react-aria/utils';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText } from '@grafana/ui';
+import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
 import { VARIABLE_ALL_VALUE } from '../../constants';
 import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;
+  mainAttributes: string[];
   value?: string;
   onChange: (label: string) => void;
 };
 
-const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
-
-export function BreakdownLabelSelector({ options, value, onChange }: Props) {
+export function GroupBySelector({ options, mainAttributes, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
 
@@ -38,15 +37,14 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
 
   const mainOptions = mainAttributes
     .filter((at) => !!options.find((op) => op.value === at))
-    .map((attribute) => ({ label: attribute, text: attribute, value: attribute }));
+    .map((attribute) => ({ label: attribute.replace('span.', '').replace('resource.', ''), text: attribute, value: attribute }));
 
   const otherOptions = options.filter((op) => !mainAttributes.includes(op.value?.toString()!));
 
   const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
     return options 
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
-      .filter((op) => 'resource.' !== op.value?.toString()?.substring(0, 9))
-      .map((op) => ({ label: op.label?.replace('span.', ''), value: op.value }));
+      .map((op) => ({ label: op.label?.replace('span.', '').replace('resource.', ''), value: op.value }));
   }
 
   useEffect(() => {
@@ -58,34 +56,36 @@ export function BreakdownLabelSelector({ options, value, onChange }: Props) {
   }, [mainOptions, theme]);
 
   return (
-    <div ref={controlsContainer} className={styles.container}>
-      {useHorizontalLabelSelector ? (
-        <>
-          <RadioButtonGroup
-            options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
-            value={value}
-            onChange={onChange}
-          />
+    <Field label="Group by">
+      <div ref={controlsContainer} className={styles.container}>
+        {useHorizontalLabelSelector ? (
+          <>
+            <RadioButtonGroup
+              options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
+              value={value}
+              onChange={onChange}
+            />
+            <Select
+              value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
+              placeholder={'Other attributes'}
+              options={getModifiedOptions(otherOptions)}
+              onChange={(selected) => onChange(selected?.value ?? 'All')}
+              className={styles.select}
+              isClearable={true}
+            />
+          </>
+        ) : (
           <Select
-            value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clciked
-            placeholder={'Other attributes'}
-            options={getModifiedOptions(otherOptions)}
+            value={value}
+            placeholder={'Select attribute'}
+            options={getModifiedOptions(options)}
             onChange={(selected) => onChange(selected?.value ?? 'All')}
             className={styles.select}
             isClearable={true}
           />
-        </>
-      ) : (
-        <Select
-          value={value}
-          placeholder={'Select attribute'}
-          options={getModifiedOptions(options)}
-          onChange={(selected) => onChange(selected?.value ?? 'All')}
-          className={styles.select}
-          isClearable={true}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </Field>
   );
 }
 
