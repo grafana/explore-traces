@@ -298,7 +298,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: `2px solid #cc8c17`,
     }),
     groupBy: css({
-      margin: `${theme.spacing(2)} 0 ${theme.spacing(1)} 0`,
+      margin: `${theme.spacing(2)} 0 0 0`,
     }),
     bodyWrapper: css({
       flexGrow: 1,
