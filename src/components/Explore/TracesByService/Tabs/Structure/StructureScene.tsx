@@ -153,7 +153,7 @@ function getVariablesSet() {
 function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} >> { ${VAR_STRUCTURE_FILTER_EXPR} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR}} &>> { ${VAR_STRUCTURE_FILTER_EXPR} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,
