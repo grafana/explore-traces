@@ -15,14 +15,13 @@ import {
 
 import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
 import {
-  ActionViewType,
   MakeOptional,
   explorationDS,
   VAR_FILTERS_EXPR,
   VAR_DATASOURCE_EXPR,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { TracesActionBar, actionViewsDefinitions } from './Tabs/TracesActionBar';
+import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -110,7 +109,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   };
 }
 
-const MAIN_PANEL_MIN_HEIGHT = 200;
+const MAIN_PANEL_MIN_HEIGHT = 205;
 const MAIN_PANEL_MAX_HEIGHT = '30%';
 
 export function buildQuery() {
@@ -137,7 +136,7 @@ function buildGraphScene() {
       }),
       new SceneFlexItem({
         ySizing: 'content',
-        body: new TracesActionBar({}),
+        body: new TabsBarScene({}),
       }),
     ],
   });

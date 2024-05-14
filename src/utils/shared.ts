@@ -1,13 +1,6 @@
 import { BusEventBase, BusEventWithPayload } from '@grafana/data';
-import { SceneObject } from '@grafana/scenes';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
-export type ActionViewType = 'spans' | 'breakdown' | 'structure';
-export interface ActionViewDefinition {
-  displayName: string;
-  value: ActionViewType;
-  getScene: () => SceneObject;
-}
 
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
