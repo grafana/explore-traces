@@ -53,7 +53,9 @@ interface TreeLineProps {
 const TreeLine = ({ node, depth, maxDuration }: TreeLineProps) => {
   const styles = useStyles2(getStyles);
 
-  const nodeAvgDuration = node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length;
+  // parse and sum up all span durations
+  // nodeAvgDuration is in nanos, but formatDuration expects micros so divide by 1000
+  const nodeAvgDuration = (node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length) / 1000;
   const erroredSpans = node.spans.reduce(
     (acc, c) => (c.attributes?.find((a) => a.key === 'status')?.value.stringValue === 'error' ? acc + 1 : acc),
     0
