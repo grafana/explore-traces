@@ -6,6 +6,7 @@ import {
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneObjectUrlSyncConfig,
@@ -19,9 +20,12 @@ import {
   explorationDS,
   VAR_FILTERS_EXPR,
   VAR_DATASOURCE_EXPR,
+  MetricFunction,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
+import { HistogramPanel } from './HistogramPanel';
+import { TraceExploration } from 'pages/Explore';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -35,7 +39,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
-      body: state.body ?? buildGraphScene(),
+      body: state.body ?? new SceneFlexLayout({ children: []}),
       $data: new SceneQueryRunner({
         datasource: explorationDS,
         queries: [buildQuery()],
@@ -47,11 +51,18 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   private _onActivate() {
+    this.setBody(this);
+
     if (this.state.actionView === undefined) {
       this.setActionView('breakdown');
     }
 
     this.updateAttributes();
+  }
+
+  setBody(model: any) {
+    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
+    this.setState({ body: buildGraphScene(traceExploration.state.metric) });
   }
 
   private async updateAttributes() {
@@ -90,16 +101,18 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const { body } = this.state;
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
 
-    if (actionViewDef && actionViewDef.value !== this.state.actionView) {
-      // reduce max height for main panel to reduce height flicker
-      body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
-      body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
-      this.setState({ actionView: actionViewDef.value });
-    } else {
-      // restore max height
-      body.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
-      body.setState({ children: body.state.children.slice(0, 2) });
-      this.setState({ actionView: undefined });
+    if (body.state.children.length > 1) {
+      if (actionViewDef && actionViewDef.value !== this.state.actionView) {
+        // reduce max height for main panel to reduce height flicker
+        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
+        body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
+        this.setState({ actionView: actionViewDef.value });
+      } else {
+        // restore max height
+        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
+        body.setState({ children: body.state.children.slice(0, 2) });
+        this.setState({ actionView: undefined });
+      }
     }
   }
 
@@ -124,7 +137,7 @@ export function buildQuery() {
   };
 }
 
-function buildGraphScene() {
+function buildGraphScene(type: MetricFunction) {
   return new SceneFlexLayout({
     direction: 'column',
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
@@ -132,7 +145,7 @@ function buildGraphScene() {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: new TraceTimeSeriesPanel({}),
+        body: type === 'rate' || type === 'errors' ? new TraceTimeSeriesPanel({}) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',
