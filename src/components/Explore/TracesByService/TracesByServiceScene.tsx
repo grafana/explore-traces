@@ -51,7 +51,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   private _onActivate() {
-    this.setBody(this);
+    this.updateBody(this);
 
     if (this.state.actionView === undefined) {
       this.setActionView('breakdown');
@@ -60,7 +60,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     this.updateAttributes();
   }
 
-  setBody(model: any) {
+  updateBody(model: any) {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
     this.setState({ body: buildGraphScene(traceExploration.state.metric) });
   }
