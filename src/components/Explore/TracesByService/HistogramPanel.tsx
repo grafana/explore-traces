@@ -15,8 +15,6 @@ import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
-import { HeatmapCalculationMode, ScaleDistribution } from '@grafana/schema';
-
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -86,14 +84,8 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       children: [
         new SceneFlexItem({
           body: PanelBuilders.heatmap()
-            .setOption('calculate', true)
-            .setOption('calculation', { 
-              xBuckets: { mode: HeatmapCalculationMode.Size }, 
-              yBuckets: { 
-                mode: HeatmapCalculationMode.Size,
-                scale: {log: 2, type: ScaleDistribution.Log },
-                value: '2'
-               } 
+            .setOption('yAxis', { 
+              unit: "s",
             })
             .setOption('color', {
               scheme: 'Turbo',
