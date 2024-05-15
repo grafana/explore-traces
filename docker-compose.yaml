@@ -16,7 +16,7 @@ services:
       - ./provisioning:/etc/grafana/provisioning
 
   tempo:
-    image: grafana/tempo:main-496b450
+    image: grafana/tempo:main-d8c69d4
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./devenv/tempo.yaml:/etc/tempo.yaml
