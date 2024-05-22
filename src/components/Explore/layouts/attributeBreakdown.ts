@@ -22,6 +22,7 @@ import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { TraceExploration } from '../../../pages/Explore';
 import { barsPanelConfig } from '../panels/barsPanel';
+import { linesPanelConfig } from '../panels/linesPanel';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -29,7 +30,8 @@ export function buildNormalLayout(
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
-  const query = rateByWithStatus(traceExploration.state.metric, variable.getValueText());
+  const metric = traceExploration.state.metric;
+  const query = rateByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
@@ -73,7 +75,7 @@ export function buildNormalLayout(
           children: [],
         }),
         groupBy: true,
-        getLayoutChild: getLayoutChild(getLabelValue, variable, actionsFn),
+        getLayoutChild: getLayoutChild(getLabelValue, variable, metric, actionsFn),
       }),
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
@@ -82,7 +84,7 @@ export function buildNormalLayout(
           children: [],
         }),
         groupBy: true,
-        getLayoutChild: getLayoutChild(getLabelValue, variable, actionsFn),
+        getLayoutChild: getLayoutChild(getLabelValue, variable, metric, actionsFn),
       }),
     ],
   });
@@ -91,10 +93,11 @@ export function buildNormalLayout(
 export function getLayoutChild(
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
+  metric: string,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = barsPanelConfig()
+    const panel = (metric === 'duration' ? linesPanelConfig() : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
       .setData(
         new SceneDataNode({

@@ -27,11 +27,18 @@ import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/Tab
 import { HistogramPanel } from './HistogramPanel';
 import { TraceExploration } from 'pages/Explore';
 
+interface AxisSelection {
+  key: string;
+  from: number;
+  to: number;
+}
+
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   actionView?: string;
 
   attributes?: string[];
+  selection?: AxisSelection[];
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
@@ -39,7 +46,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
-      body: state.body ?? new SceneFlexLayout({ children: []}),
+      body: state.body ?? new SceneFlexLayout({ children: [] }),
       $data: new SceneQueryRunner({
         datasource: explorationDS,
         queries: [buildQuery()],
@@ -56,6 +63,13 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     if (this.state.actionView === undefined) {
       this.setActionView('breakdown');
     }
+
+    const exploration = sceneGraph.getAncestor(this, TraceExploration);
+    exploration.subscribeToState((newState, prevState) => {
+      if (newState.metric !== prevState.metric) {
+        this.updateBody(this);
+      }
+    });
 
     this.updateAttributes();
   }

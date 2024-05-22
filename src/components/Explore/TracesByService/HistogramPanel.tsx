@@ -15,6 +15,9 @@ import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
+import { useStyles2 } from '@grafana/ui';
+import { css } from '@emotion/css';
+import { TracesByServiceScene } from './TracesByServiceScene';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -79,18 +82,33 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   }
 
   private getVizPanel() {
+    const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const panel = PanelBuilders.heatmap()
+      .setTitle('Histogram by duration')
+      .setOption('legend', { show: false })
+      .setOption('yAxis', {
+        unit: 's',
+      })
+      .setOption('color', {
+        scheme: 'Turbo',
+      })
+      // @ts-ignore
+      .setOption('selectMode', 'xy')
+      // @ts-ignore
+      .setOption('keepSelectedArea', true)
+      .build();
+    panel.setState({
+      extendPanelContext: (vizPanel, context) => {
+        // TODO remove when we the Grafana version with #88107 is released
+        // @ts-ignore
+        context.onSelect = (args) => parent.setState({ selection: args });
+      },
+    });
     return new SceneFlexLayout({
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: PanelBuilders.heatmap()
-            .setOption('yAxis', { 
-              unit: "s",
-            })
-            .setOption('color', {
-              scheme: 'Turbo',
-            })
-            .build(),
+          body: panel,
         }),
       ],
     });
@@ -98,12 +116,29 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
   public static Component = ({ model }: SceneComponentProps<HistogramPanel>) => {
     const { panel } = model.useState();
+    const styles = useStyles2(getStyles);
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    return (
+      <div className={styles.container}>
+        <panel.Component model={panel} />
+      </div>
+    );
+  };
+}
+
+function getStyles() {
+  return {
+    container: css({
+      height: '100%',
+      display: 'flex',
+      '& .u-select': {
+        border: '1px solid #ffffff75',
+      },
+    }),
   };
 }
 

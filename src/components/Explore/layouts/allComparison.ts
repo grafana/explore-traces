@@ -18,7 +18,7 @@ import { linesPanelConfig } from '../panels/linesPanel';
 const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
-export function buildAllLayout(
+export function buildAllComparisonLayout(
   scene: SceneObject,
   actionsFn: (attribute: string) => VizPanelState['headerActions'],
   runners: AllLayoutRunners[]

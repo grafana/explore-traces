@@ -60,7 +60,7 @@ export interface TraceExplorationState extends SceneObjectState {
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal', 'metric'] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -176,7 +176,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { mode: this.state.mode, primarySignal: this.state.primarySignal };
+    return { mode: this.state.mode, primarySignal: this.state.primarySignal, metric: this.state.metric };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -190,6 +190,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
       stateUpdate.primarySignal = values.primarySignal as string;
+    }
+
+    if (values.metric && values.metric !== this.state.metric) {
+      stateUpdate.metric = values.metric as MetricFunction;
     }
 
     this.setState(stateUpdate);
@@ -309,8 +313,8 @@ function getStyles(theme: GrafanaTheme2) {
       minHeight: '100%',
       flexDirection: 'column',
       padding: theme.spacing(2),
-      overflow: 'auto', /* Needed for sticky positioning */
-      height: '1px' /* Needed for sticky positioning */
+      overflow: 'auto' /* Needed for sticky positioning */,
+      height: '1px' /* Needed for sticky positioning */,
     }),
     body: css({
       flexGrow: 1,

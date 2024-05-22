@@ -1,16 +1,16 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
+  SceneObjectBase,
+  SceneObjectState,
+  SceneQueryRunner,
 } from '@grafana/scenes';
-import { LoadingState } from '@grafana/data';
-import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
+import { FieldType, LoadingState } from '@grafana/data';
+import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -51,6 +51,11 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
                 }),
               });
             } else {
+              data.data.annotations?.push({
+                length: 1,
+                fields: [{ name: 'bloop', type: FieldType.string, values: ['bloop'], config: {} }],
+                refId: 'A',
+              });
               this.setState({
                 panel: this.getVizPanel(),
               });
