@@ -250,11 +250,9 @@ export class TraceExplorationScene extends SceneObjectBase {
             ))}
           </div>
         </Stack>
-        {controls && (
-          <div className={styles.controls}>
-            {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
-          </div>
-        )}
+        <div className={styles.filters}>
+          {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
+        </div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
     );
@@ -321,15 +319,14 @@ function getStyles(theme: GrafanaTheme2) {
     controls: css({
       display: 'flex',
       gap: theme.spacing(1),
-      alignItems: 'flex-end',
-      flexWrap: 'wrap',
+      backgroundColor: theme.colors.background.primary,
+      zIndex: 3,
+    }),
+    filters: css({
       backgroundColor: theme.colors.background.primary,
       position: 'sticky',
       top: `-${theme.spacing(2)}`,
-      zIndex: 3,
-    }),
-    rotateIcon: css({
-      svg: { transform: 'rotate(180deg)' },
+      zIndex: 2,
     }),
   };
 }
