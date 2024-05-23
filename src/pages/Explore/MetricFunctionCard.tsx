@@ -1,4 +1,5 @@
 import {
+  PanelBuilders,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
@@ -15,6 +16,7 @@ import { css, cx } from '@emotion/css';
 import { TraceExploration } from './TraceExploration';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
+import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -65,15 +67,15 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
           })
           .build();
       case 'duration':
-        return barsPanelConfig()
-          .setDisplayMode('transparent')
+        return histogramPanelConfig()
           .setData(
             new SceneQueryRunner({
               maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [rateByWithStatus('duration')],
+              queries: [buildQuery()],
             })
           )
+          .setDisplayMode('transparent')
           .build();
       default:
         return barsPanelConfig()
