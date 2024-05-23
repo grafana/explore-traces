@@ -1,5 +1,4 @@
 import {
-  PanelBuilders,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
