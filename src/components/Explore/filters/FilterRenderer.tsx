@@ -61,12 +61,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   const sortValues = (values: Array<SelectableValue<string>>) => {
     return values.sort((a, b) => {
       if (a.label && b.label) {
-        if (a.label < b.label) {
-          return -1;
-        }
-        if (a.label > b.label) {
-          return 1;
-        }
+        return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
       }
       return 0;
     });
