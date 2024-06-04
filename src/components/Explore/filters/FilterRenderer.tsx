@@ -5,6 +5,7 @@ import { AdHocVariableFilter, GrafanaTheme2, SelectableValue, toOption } from '@
 import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
+import { ignoredAttributes } from 'utils/shared';
 
 interface Props {
   filter: AdHocVariableFilter;
@@ -33,7 +34,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   useEffect(() => {
     async function updateKeys() {
       setState({ ...state, isKeysLoading: true });
-      const keys = await model._getKeys(filter.key);
+      const keys = formatKeys(await model._getKeys(filter.key));
       setState({ ...state, isKeysLoading: false, keys });
     }
 
@@ -41,6 +42,30 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       updateKeys();
     }
   }, [filter, key, model, state]);
+
+  const formatKeys = (keys: Array<SelectableValue<string>>) => {
+    const filteredKeys = keys.filter((k) => ignoredAttributes.indexOf(k.value!) === -1);
+
+    // Ensure we always have the same order of keys
+    const resourceAttributes = filteredKeys.filter((k) => k.value?.includes('resource.'));
+    const spanAttributes = filteredKeys.filter((k) => k.value?.includes('span.'));
+    const intrinsicAttributes = filteredKeys.filter((k) => !k.value?.includes('resource.') && !k.value?.includes('span.'));
+    return intrinsicAttributes?.concat(resourceAttributes).concat(spanAttributes).map((key) => {
+      return {
+        label: key.value,
+        value: key.value,
+      };
+    });
+  }
+
+  const sortValues = (values: Array<SelectableValue<string>>) => {
+    return values.sort((a, b) => {
+      if (a.label && b.label) {
+        return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
+      }
+      return 0;
+    });
+  }
 
   const keyAutoFocus = isWip && filter.key === '';
   const keySelect = (
@@ -55,7 +80,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       className={styles.key}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
-        const keys = await model._getKeys(filter.key);
+        const keys = formatKeys(await model._getKeys(filter.key));
         setState({ ...state, isKeysLoading: false, keys });
       }}
     />
@@ -73,7 +98,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       openMenuOnFocus={valueAutoFocus}
       onOpenMenu={async () => {
         setState({ ...state, isValuesLoading: true });
-        const values = await model._getValuesFor(filter);
+        const values = sortValues(await model._getValuesFor(filter));
         setState({ ...state, isValuesLoading: false, values });
       }}
     />
