@@ -1,10 +1,11 @@
 import { css } from '@emotion/css';
 import React from 'react';
 
-import { DataFrame, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, FieldType, GrafanaTheme2, Field } from '@grafana/data';
 import {
   CustomVariable,
   SceneComponentProps,
+  SceneDataTransformer,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
@@ -16,23 +17,24 @@ import {
 import { Button, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, explorationDS, VAR_FILTERS_EXPR } from '../../../../utils/shared';
+import {
+  VAR_GROUPBY,
+  VAR_FILTERS,
+  ignoredAttributes,
+  explorationDS,
+  VAR_FILTERS_EXPR,
+} from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { VARIABLE_ALL_VALUE } from '../../../../../constants';
-import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
 import { TraceExploration } from 'pages/Explore';
-import {
-  AllLayoutRunners,
-  getAllLayoutRunners,
-  filterAllLayoutRunners,
-  isGroupByAll,
-} from 'pages/Explore/SelectStartingPointScene';
-import { Search } from 'pages/Explore/Search';
+import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { map, Observable } from 'rxjs';
+import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -53,9 +55,23 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
         new SceneVariableSet({
           variables: [new CustomVariable({ name: VAR_GROUPBY, defaultToAll: true, includeAll: true })],
         }),
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery()],
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: explorationDS,
+          queries: [buildQuery()],
+        }),
+        transformations: [
+          () => (source: Observable<DataFrame[]>) => {
+            return source.pipe(
+              map((data: DataFrame[]) => {
+                const groupedFrames = groupFrameListByAttribute(data);
+                return Object.entries(groupedFrames).map(([attribute, frames]) =>
+                  frameGroupToDataframe(attribute, frames)
+                );
+              })
+            );
+          },
+        ],
       }),
       ...state,
     });
@@ -125,7 +141,9 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          ? buildAllComparisonLayout((frame: DataFrame) => [
+              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+            ])
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
             ]),
@@ -166,9 +184,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             </div>
           )}
         </div>
-        {isGroupByAll(variable) && (
-          <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
-        )}
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );
@@ -179,6 +194,7 @@ export function buildQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | compare({duration > 1s})`,
+    step: '5m',
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,
@@ -190,6 +206,64 @@ export function buildQuery() {
 function getAttributesAsOptions(attributes: string[]) {
   return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }
+
+const groupFrameListByAttribute = (frames: DataFrame[]) => {
+  return frames.reduce((acc: Record<string, DataFrame[]>, series) => {
+    const numberField = series.fields.find((field) => field.type === 'number');
+    const nonInternalKey = Object.keys(numberField?.labels || {}).find((key) => !key.startsWith('__'));
+    if (nonInternalKey) {
+      acc[nonInternalKey] = [...(acc[nonInternalKey] || []), series];
+    }
+    return acc;
+  }, {});
+};
+
+const frameGroupToDataframe = (attribute: string, frames: DataFrame[]): DataFrame => {
+  const newFrame: DataFrame = {
+    name: attribute,
+    refId: attribute,
+    fields: [],
+    length: 0,
+  };
+
+  const valueNameField: Field = {
+    name: 'Value',
+    type: FieldType.string,
+    values: [],
+    config: {},
+  };
+  const baselineField: Field = {
+    name: 'Baseline',
+    type: FieldType.number,
+    values: [],
+    config: {},
+  };
+  const selectionField: Field = {
+    name: 'Selection',
+    type: FieldType.number,
+    values: [],
+    config: {},
+  };
+
+  const values = frames.reduce((acc: Record<string, Field[]>, frame) => {
+    const numberField = frame.fields.find((field) => field.type === 'number');
+    const val = numberField?.labels?.[attribute];
+    if (val) {
+      acc[val] = [...(acc[val] || []), numberField];
+    }
+    return acc;
+  }, {});
+
+  newFrame.length = Object.keys(values).length;
+
+  Object.entries(values).forEach(([value, fields]) => {
+    valueNameField.values.push(value);
+    baselineField.values.push(fields.find((field) => field.labels?.['__meta_type'] === '"baseline"')?.values[0]);
+    selectionField.values.push(fields.find((field) => field.labels?.['__meta_type'] === '"selection"')?.values[0]);
+  });
+  newFrame.fields = [valueNameField, baselineField, selectionField];
+  return newFrame;
+};
 
 function getStyles(theme: GrafanaTheme2) {
   return {

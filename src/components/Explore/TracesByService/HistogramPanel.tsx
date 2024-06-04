@@ -1,17 +1,17 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
+  PanelBuilders,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
-  PanelBuilders,
+  SceneObjectBase,
+  SceneObjectState,
+  SceneQueryRunner,
 } from '@grafana/scenes';
-import { LoadingState } from '@grafana/data';
-import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
+import { arrayToDataFrame, LoadingState } from '@grafana/data';
+import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -37,10 +37,39 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._onActivate();
       const data = sceneGraph.getData(this);
 
+      const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
       this._subs.add(
-        data.subscribeToState((data) => {
-          if (data.data?.state === LoadingState.Done) {
-            if (data.data.series.length === 0 || data.data.series[0].length === 0) {
+        parent.subscribeToState((newState, prevState) => {
+          if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
+            const xSel = newState.selection?.find((s) => s.key === 'x');
+            const ySel = newState.selection?.find((s) => s.key.startsWith('y') && s.from != s.to);
+
+            data.setState({
+              data: {
+                ...data.state.data!,
+                annotations: [
+                  arrayToDataFrame([
+                    {
+                      time: xSel?.from || 0,
+                      timeEnd: xSel?.to || 0,
+                      fromY: ySel?.from,
+                      toY: ySel?.to,
+                      isRegion: true,
+                      text: 'Comparison selection',
+                    },
+                  ]),
+                ],
+              },
+            });
+          }
+        })
+      );
+
+      this._subs.add(
+        data.subscribeToState((newData) => {
+          console.log(newData);
+          if (newData.data?.state === LoadingState.Done) {
+            if (newData.data.series.length === 0 || newData.data.series[0].length === 0) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
@@ -58,7 +87,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
                 panel: this.getVizPanel(),
               });
             }
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else if (newData.data?.state === LoadingState.Loading) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',
@@ -93,17 +122,21 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
         scheme: 'Turbo',
       })
       // @ts-ignore
-      .setOption('selectMode', 'xy')
+      .setOption('selectionAxis', 'xy')
       // @ts-ignore
-      .setOption('keepSelectedArea', true)
+      .setOption('selectionMode', 'annotate')
       .build();
     panel.setState({
       extendPanelContext: (vizPanel, context) => {
         // TODO remove when we the Grafana version with #88107 is released
         // @ts-ignore
-        context.onSelect = (args) => parent.setState({ selection: args });
+        context.onSelectRange = (args) => {
+          console.log(args);
+          parent.setState({ selection: args });
+        };
       },
     });
+
     return new SceneFlexLayout({
       direction: 'row',
       children: [
