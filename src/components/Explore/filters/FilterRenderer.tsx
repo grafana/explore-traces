@@ -77,7 +77,6 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       isLoading={state.isKeysLoading}
       autoFocus={keyAutoFocus}
       openMenuOnFocus={keyAutoFocus}
-      className={styles.key}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
         const keys = formatKeys(await model._getKeys(filter.key));
@@ -185,10 +184,5 @@ const getStyles = (theme: GrafanaTheme2) => ({
       paddingLeft: '8px',
       paddingRight: '8px',
     },
-  }),
-  key: css({
-    fontWeight: 500,
-    background: theme.colors.border.weak,
-    color: '#ffffff',
   }),
 });
