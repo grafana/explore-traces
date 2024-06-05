@@ -7,7 +7,7 @@ import { FilterByVariable } from './FilterByVariable';
 
 import { FilterRenderer } from './FilterRenderer';
 import { AddFilter } from './AddFilter';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getExplorationFor, getFilterSignature } from '../../../utils/utils';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
