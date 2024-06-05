@@ -28,7 +28,6 @@ import { HistogramPanel } from './HistogramPanel';
 import { TraceExploration } from 'pages/Explore';
 
 interface AxisSelection {
-  key: string;
   from: number;
   to: number;
 }
@@ -38,7 +37,7 @@ export interface TraceSceneState extends SceneObjectState {
   actionView?: string;
 
   attributes?: string[];
-  selection?: AxisSelection[];
+  selection?: { x: AxisSelection; y: AxisSelection };
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {

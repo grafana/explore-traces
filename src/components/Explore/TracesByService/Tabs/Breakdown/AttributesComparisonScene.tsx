@@ -11,6 +11,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
+  SceneTimeRangeLike,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
@@ -35,11 +36,11 @@ import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
+import moment from 'moment';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
   allLayoutRunners?: any;
-  searchQuery?: string;
 }
 
 export class AttributesComparisonScene extends SceneObjectBase<AttributesComparisonSceneState> {
@@ -55,24 +56,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
         new SceneVariableSet({
           variables: [new CustomVariable({ name: VAR_GROUPBY, defaultToAll: true, includeAll: true })],
         }),
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: explorationDS,
-          queries: [buildQuery()],
-        }),
-        transformations: [
-          () => (source: Observable<DataFrame[]>) => {
-            return source.pipe(
-              map((data: DataFrame[]) => {
-                const groupedFrames = groupFrameListByAttribute(data);
-                return Object.entries(groupedFrames).map(([attribute, frames]) =>
-                  frameGroupToDataframe(attribute, frames)
-                );
-              })
-            );
-          },
-        ],
-      }),
       ...state,
     });
 
@@ -81,6 +64,8 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   private _onActivate() {
     const variable = this.getVariable();
+
+    this.updateData();
 
     variable.subscribeToState(() => {
       this.updateBody(variable);
@@ -96,12 +81,35 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
       this.updateBody(variable);
     });
 
+    sceneGraph.getTimeRange(this).subscribeToState(() => {
+      this.updateData();
+    });
+
     this.updateBody(variable);
   }
 
-  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
-    this.setState({ searchQuery: evt.currentTarget.value });
-  };
+  private updateData() {
+    this.setState({
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: explorationDS,
+          queries: [buildQuery(sceneGraph.getTimeRange(this))],
+        }),
+        transformations: [
+          () => (source: Observable<DataFrame[]>) => {
+            return source.pipe(
+              map((data: DataFrame[]) => {
+                const groupedFrames = groupFrameListByAttribute(data);
+                return Object.entries(groupedFrames).map(([attribute, frames]) =>
+                  frameGroupToDataframe(attribute, frames)
+                );
+              })
+            );
+          },
+        ],
+      }),
+    });
+  }
 
   private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
     const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
@@ -153,13 +161,10 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   public onChange = (value: string) => {
     const variable = this.getVariable();
     variable.changeValueTo(value);
-
-    // reset searchQuery
-    this.setState({ searchQuery: '' });
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {
-    const { body, searchQuery } = model.useState();
+    const { body } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
@@ -190,11 +195,13 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   };
 }
 
-export function buildQuery() {
+export function buildQuery(timeRange: SceneTimeRangeLike) {
+  const dur = moment.duration(timeRange.state.value.to.subtract(timeRange.state.value.from).unix(), 's');
+  const durString = `${dur.asSeconds()}s`;
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | compare({duration > 1s})`,
-    step: '5m',
+    query: `{${VAR_FILTERS_EXPR} && status != error} | compare({status = error})`,
+    step: durString,
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,

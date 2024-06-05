@@ -41,24 +41,29 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
           if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
-            const xSel = newState.selection?.find((s) => s.key === 'x');
-            const ySel = newState.selection?.find((s) => s.key.startsWith('y') && s.from != s.to);
+            const xSel = newState.selection?.x;
+            const ySel = newState.selection?.y;
+
+            const frame = arrayToDataFrame([
+              {
+                time: xSel?.from || 0,
+                xMin: xSel?.from || 0,
+                xMax: xSel?.to || 0,
+                yMin: ySel?.from,
+                yMax: ySel?.to,
+                isRegion: true,
+                fillOpacity: 0.1,
+                lineWidth: 2,
+                lineStyle: 'dash',
+                text: 'Comparison selection',
+              },
+            ]);
+            frame.name = 'xymark';
 
             data.setState({
               data: {
                 ...data.state.data!,
-                annotations: [
-                  arrayToDataFrame([
-                    {
-                      time: xSel?.from || 0,
-                      timeEnd: xSel?.to || 0,
-                      fromY: ySel?.from,
-                      toY: ySel?.to,
-                      isRegion: true,
-                      text: 'Comparison selection',
-                    },
-                  ]),
-                ],
+                annotations: [frame],
               },
             });
           }
@@ -67,7 +72,6 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
       this._subs.add(
         data.subscribeToState((newData) => {
-          console.log(newData);
           if (newData.data?.state === LoadingState.Done) {
             if (newData.data.series.length === 0 || newData.data.series[0].length === 0) {
               this.setState({
@@ -122,17 +126,15 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
         scheme: 'Turbo',
       })
       // @ts-ignore
-      .setOption('selectionAxis', 'xy')
-      // @ts-ignore
-      .setOption('selectionMode', 'annotate')
+      .setOption('selectionMode', 'xy')
       .build();
     panel.setState({
       extendPanelContext: (vizPanel, context) => {
         // TODO remove when we the Grafana version with #88107 is released
         // @ts-ignore
         context.onSelectRange = (args) => {
-          console.log(args);
-          parent.setState({ selection: args });
+          console.log(args, args.length > 0 ? args[0] : undefined);
+          parent.setState({ selection: args.length > 0 ? args[0] : undefined });
         };
       },
     });
