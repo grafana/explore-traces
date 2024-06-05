@@ -26,6 +26,12 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
   );
   const otherFilters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(primarySignalOption?.filter));
 
+  const clearFilters = () => {
+    for (const filter of filters) {
+      model._removeFilter(filter);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Icon name={'filter'} />
@@ -44,6 +50,19 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
       ))}
 
       <AddFilter model={model} />
+
+      {filters.length > 0 && (
+        <Button
+          variant="secondary"
+          aria-label="Clear filters"
+          size='sm'
+          className={styles.clearFilters}
+          icon="times"
+          onClick={() => clearFilters()}
+          tooltip="Clear filters"
+          tooltipPlacement='left'
+        />
+      )}
     </div>
   );
 }
@@ -59,6 +78,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
     flexGrow: 1,
   }),
   text: css({
+    fontSize: 12,
+  }),
+  clearFilters: css({
     fontSize: 12,
   }),
 });
