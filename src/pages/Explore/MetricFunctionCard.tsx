@@ -130,9 +130,15 @@ function getStyles(theme: GrafanaTheme2) {
       cursor: 'pointer',
       fontSize: '12px',
       flex: 1,
+      '&:hover': {
+        border: `2px solid ${theme.colors.secondary.borderTransparent}`
+      },
     }),
     selected: css({
       border: `2px solid #cc8c17`,
+      '&:hover': {
+        border: `2px solid #cc8c17`
+      },
     }),
   };
 }

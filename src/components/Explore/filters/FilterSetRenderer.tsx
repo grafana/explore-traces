@@ -74,7 +74,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     border: `1px solid ${theme.colors.border.weak}`,
     alignItems: 'center',
     gap: theme.spacing(1),
-    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+    padding: `${theme.spacing(0.5)} 0 ${theme.spacing(0.5)} ${theme.spacing(1)}`,
     flexGrow: 1,
   }),
   text: css({
