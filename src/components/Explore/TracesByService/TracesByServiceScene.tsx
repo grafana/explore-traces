@@ -7,6 +7,7 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
+  SceneObject,
   SceneObjectBase,
   SceneObjectState,
   SceneObjectUrlSyncConfig,
@@ -60,14 +61,24 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   private _onActivate() {
     this.updateBody();
 
+    const exploration = sceneGraph.getAncestor(this, TraceExploration);
+    exploration.getMetricVariable().subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
+        this.updateBody();
+      }
+    });
+
     this.updateAttributes();
   }
 
   updateBody() {
     const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
     const metric = traceExploration.getMetricVariable().getValue();
+    const actionViewDef = actionViewsDefinitions.find((v) => v.value === this.state.actionView);
 
-    this.setState({ body: buildGraphScene(metric as MetricFunction) });
+    this.setState({
+      body: buildGraphScene(metric as MetricFunction, actionViewDef ? [actionViewDef?.getScene()] : undefined),
+    });
 
     if (this.state.actionView === undefined) {
       this.setActionView('breakdown');
@@ -151,7 +162,7 @@ export function buildQuery() {
   };
 }
 
-function buildGraphScene(type: MetricFunction) {
+function buildGraphScene(type: MetricFunction, children?: SceneObject[]) {
   return new SceneFlexLayout({
     direction: 'column',
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
@@ -165,6 +176,7 @@ function buildGraphScene(type: MetricFunction) {
         ySizing: 'content',
         body: new TabsBarScene({}),
       }),
+      ...(children || []),
     ],
   });
 }
