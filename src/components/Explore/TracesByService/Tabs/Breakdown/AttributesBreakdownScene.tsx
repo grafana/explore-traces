@@ -15,7 +15,7 @@ import {
 import { Button, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
@@ -41,7 +41,7 @@ export interface AttributesBreakdownSceneState extends SceneObjectState {
 
 export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERS],
+    variableNames: [VAR_FILTERS, VAR_METRIC],
     onReferencedVariableValueChanged: this.onReferencedVariableValueChanged.bind(this),
   });
 

@@ -58,26 +58,20 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   private _onActivate() {
-    this.updateBody(this);
-
-    if (this.state.actionView === undefined) {
-      this.setActionView('breakdown');
-    }
-
-    const exploration = sceneGraph.getAncestor(this, TraceExploration);
-    exploration.getMetricVariable().subscribeToState((newState, prevState) => {
-      if (newState.value !== prevState.value) {
-        this.updateBody(this);
-      }
-    });
+    this.updateBody();
 
     this.updateAttributes();
   }
 
-  updateBody(model: any) {
-    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
+  updateBody() {
+    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
     const metric = traceExploration.getMetricVariable().getValue();
+
     this.setState({ body: buildGraphScene(metric as MetricFunction) });
+
+    if (this.state.actionView === undefined) {
+      this.setActionView('breakdown');
+    }
   }
 
   private async updateAttributes() {
@@ -111,7 +105,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView(undefined);
+      this.setActionView('breakdown');
     }
 
     if (typeof values.selection === 'string') {
@@ -127,16 +121,11 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
 
     if (body.state.children.length > 1) {
-      if (actionViewDef && actionViewDef.value !== this.state.actionView) {
+      if (actionViewDef) {
         // reduce max height for main panel to reduce height flicker
         body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
         this.setState({ actionView: actionViewDef.value });
-      } else {
-        // restore max height
-        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
-        body.setState({ children: body.state.children.slice(0, 2) });
-        this.setState({ actionView: undefined });
       }
     }
   }

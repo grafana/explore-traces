@@ -35,6 +35,7 @@ import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
+// eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {

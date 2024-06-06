@@ -7,16 +7,21 @@ import {
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
+  VariableDependencyConfig,
 } from '@grafana/scenes';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AttributesComparisonScene } from './AttributesComparisonScene';
 import { AttributesBreakdownScene } from './AttributesBreakdownScene';
+import { VAR_METRIC } from '../../../../../utils/shared';
 
 interface BreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
 }
 
 export class BreakdownScene extends SceneObjectBase<BreakdownSceneState> {
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_METRIC],
+  });
   constructor(state: Partial<BreakdownSceneState>) {
     super({ ...state });
 
@@ -36,7 +41,7 @@ export class BreakdownScene extends SceneObjectBase<BreakdownSceneState> {
   private updateBody() {
     const ancestor = sceneGraph.getAncestor(this, TracesByServiceScene);
     const { selection } = ancestor.state;
-    if (selection && selection) {
+    if (selection) {
       this.setState({ body: new AttributesComparisonScene({}) });
     } else {
       this.setState({ body: new AttributesBreakdownScene({}) });

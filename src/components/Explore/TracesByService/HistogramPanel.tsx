@@ -116,15 +116,8 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
   private getVizPanel() {
     const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
-    const panel = PanelBuilders.heatmap()
+    const panel = histogramPanelConfig()
       .setTitle('Histogram by duration')
-      .setOption('legend', { show: false })
-      .setOption('yAxis', {
-        unit: 's',
-      })
-      .setOption('color', {
-        scheme: 'Turbo',
-      })
       // @ts-ignore
       .setOption('selectionMode', 'xy')
       .build();
@@ -133,7 +126,6 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
         // TODO remove when we the Grafana version with #88107 is released
         // @ts-ignore
         context.onSelectRange = (args) => {
-          console.log(args, args.length > 0 ? args[0] : undefined);
           parent.setState({ selection: args.length > 0 ? args[0] : undefined });
         };
       },
@@ -191,10 +183,11 @@ export function buildQuery() {
 
 export const histogramPanelConfig = () => {
   return PanelBuilders.heatmap()
+    .setOption('legend', { show: false })
     .setOption('yAxis', {
-      unit: "s",
+      unit: 's',
     })
     .setOption('color', {
-      scheme: 'Turbo',
-    })
+      scheme: 'RdBu',
+    });
 };

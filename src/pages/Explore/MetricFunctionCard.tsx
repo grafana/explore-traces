@@ -74,6 +74,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
               queries: [buildQuery()],
             })
           )
+          .setHoverHeader(true)
           .setDisplayMode('transparent')
           .build();
       default:
@@ -131,13 +132,13 @@ function getStyles(theme: GrafanaTheme2) {
       fontSize: '12px',
       flex: 1,
       '&:hover': {
-        border: `2px solid ${theme.colors.secondary.borderTransparent}`
+        border: `2px solid ${theme.colors.secondary.borderTransparent}`,
       },
     }),
     selected: css({
       border: `2px solid #cc8c17`,
       '&:hover': {
-        border: `2px solid #cc8c17`
+        border: `2px solid #cc8c17`,
       },
     }),
   };
