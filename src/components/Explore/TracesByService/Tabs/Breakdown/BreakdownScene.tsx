@@ -36,7 +36,7 @@ export class BreakdownScene extends SceneObjectBase<BreakdownSceneState> {
   private updateBody() {
     const ancestor = sceneGraph.getAncestor(this, TracesByServiceScene);
     const { selection } = ancestor.state;
-    if (selection && selection.length > 0) {
+    if (selection && selection) {
       this.setState({ body: new AttributesComparisonScene({}) });
     } else {
       this.setState({ body: new AttributesBreakdownScene({}) });

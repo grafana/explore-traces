@@ -31,9 +31,8 @@ import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { VARIABLE_ALL_VALUE } from '../../../../../constants';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { debounce } from 'lodash';
 import { TraceExploration } from 'pages/Explore';
-import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 import moment from 'moment';
@@ -71,12 +70,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
       this.updateBody(variable);
     });
 
-    this.subscribeToState((newState, prevState) => {
-      if (newState.searchQuery !== prevState.searchQuery) {
-        this.onSearchQueryChangeDebounced(newState.searchQuery ?? '');
-      }
-    });
-
     sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
       this.updateBody(variable);
     });
@@ -89,11 +82,12 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private updateData() {
+    const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
     this.setState({
       $data: new SceneDataTransformer({
         $data: new SceneQueryRunner({
           datasource: explorationDS,
-          queries: [buildQuery(sceneGraph.getTimeRange(this))],
+          queries: [buildQuery(sceneGraph.getTimeRange(this), byServiceScene.state.selection?.query ?? '')],
         }),
         transformations: [
           () => (source: Observable<DataFrame[]>) => {
@@ -110,11 +104,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
       }),
     });
   }
-
-  private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
-    const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
-    this.setBody(filtered, this.getVariable());
-  }, 250);
 
   private getVariable(): CustomVariable {
     const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
@@ -195,12 +184,12 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   };
 }
 
-export function buildQuery(timeRange: SceneTimeRangeLike) {
-  const dur = moment.duration(timeRange.state.value.to.subtract(timeRange.state.value.from).unix(), 's');
+export function buildQuery(timeRange: SceneTimeRangeLike, compareQuery: string) {
+  const dur = moment.duration(timeRange.state.value.to.unix() - timeRange.state.value.from.unix(), 's');
   const durString = `${dur.asSeconds()}s`;
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR} && status != error} | compare({status = error})`,
+    query: `{${VAR_FILTERS_EXPR} && status != error} | compare({${compareQuery}})`,
     step: durString,
     queryType: 'traceql',
     tableType: 'spans',

@@ -14,7 +14,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 
-import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
+import { RateMetricsPanel } from './RateMetricsPanel';
 import {
   MakeOptional,
   explorationDS,
@@ -37,7 +37,7 @@ export interface TraceSceneState extends SceneObjectState {
   actionView?: string;
 
   attributes?: string[];
-  selection?: { x: AxisSelection; y: AxisSelection };
+  selection?: { x?: AxisSelection; y?: AxisSelection; query?: string };
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
@@ -158,7 +158,7 @@ function buildGraphScene(type: MetricFunction) {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: type === 'rate' || type === 'errors' ? new TraceTimeSeriesPanel({}) : new HistogramPanel({}),
+        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({}) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',
