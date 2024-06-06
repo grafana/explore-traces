@@ -15,7 +15,14 @@ import {
 } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 
-import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
+import {
+  VAR_DATASOURCE_EXPR,
+  VAR_FILTERS,
+  VAR_GROUPBY,
+  explorationDS,
+  MetricFunction,
+  VAR_METRIC,
+} from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { primarySignalOptions } from './primary-signals';
@@ -51,7 +58,7 @@ export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_FILTERS],
+    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -82,13 +89,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     groupByVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.buildBody();
-      }
-    });
-
-    const exploration = sceneGraph.getAncestor(this, TraceExploration);
-    exploration.subscribeToState((newState, prevState) => {
-      if (newState.metric !== prevState.metric) {
         this.buildBody();
       }
     });
@@ -225,13 +225,14 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
 export function getAllLayoutRunners(traceExploration: TraceExploration, attributes: string[]) {
   const runners = [];
+  const variable = traceExploration.getMetricVariable();
   for (const attribute of attributes) {
     runners.push({
       attribute: attribute,
       runner: new SceneQueryRunner({
         maxDataPoints: 250,
         datasource: explorationDS,
-        queries: [rateByWithStatus(traceExploration.state.metric, attribute)],
+        queries: [rateByWithStatus(variable.getValue() as MetricFunction, attribute)],
       }),
     });
   }

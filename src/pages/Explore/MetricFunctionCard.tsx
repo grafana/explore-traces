@@ -104,7 +104,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
   public static Component = ({ model }: SceneComponentProps<MetricFunctionCard>) => {
     const { body, metric } = model.useState();
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { metric: selectedMetric } = traceExploration.useState();
+    const { value: selectedMetric } = traceExploration.getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 
     const itemStyles = metric === selectedMetric ? [styles.item, styles.selected] : [styles.item];

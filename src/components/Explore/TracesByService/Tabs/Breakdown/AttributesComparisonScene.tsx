@@ -35,7 +35,7 @@ import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
-import moment from 'moment';
+import { duration } from 'moment';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -185,11 +185,11 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 }
 
 export function buildQuery(timeRange: SceneTimeRangeLike, compareQuery: string) {
-  const dur = moment.duration(timeRange.state.value.to.unix() - timeRange.state.value.from.unix(), 's');
+  const dur = duration(timeRange.state.value.to.unix() - timeRange.state.value.from.unix(), 's');
   const durString = `${dur.asSeconds()}s`;
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR} && status != error} | compare({${compareQuery}})`,
+    query: `{${VAR_FILTERS_EXPR}} | compare({${compareQuery}})`,
     step: durString,
     queryType: 'traceql',
     tableType: 'spans',
@@ -250,16 +250,33 @@ const frameGroupToDataframe = (attribute: string, frames: DataFrame[]): DataFram
     return acc;
   }, {});
 
+  const baselineTotal = getValueForMetaType(frames, '"baseline_total"');
+  const selectionTotal = getValueForMetaType(frames, '"selection_total"');
+
   newFrame.length = Object.keys(values).length;
 
   Object.entries(values).forEach(([value, fields]) => {
     valueNameField.values.push(value);
-    baselineField.values.push(fields.find((field) => field.labels?.['__meta_type'] === '"baseline"')?.values[0]);
-    selectionField.values.push(fields.find((field) => field.labels?.['__meta_type'] === '"selection"')?.values[0]);
+    baselineField.values.push(
+      fields.find((field) => field.labels?.['__meta_type'] === '"baseline"')?.values[0] / baselineTotal
+    );
+    selectionField.values.push(
+      fields.find((field) => field.labels?.['__meta_type'] === '"selection"')?.values[0] / selectionTotal
+    );
   });
   newFrame.fields = [valueNameField, baselineField, selectionField];
   return newFrame;
 };
+
+function getValueForMetaType(frames: DataFrame[], metaType: string) {
+  return frames.reduce((currentValue, frame) => {
+    const field = frame.fields.find((f) => f.type === 'number');
+    if (field?.labels?.['__meta_type'] === metaType) {
+      return field.values[0];
+    }
+    return currentValue;
+  }, 1);
+}
 
 function getStyles(theme: GrafanaTheme2) {
   return {

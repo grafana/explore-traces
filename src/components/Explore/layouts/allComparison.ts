@@ -47,6 +47,8 @@ export function getLayoutChild(
       .setTitle(getTitle(frame))
       .setOption('legend', { showLegend: false })
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
+      .setUnit('percentunit')
+      .setMax(1)
       .setOverrides((overrides) => {
         overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
       })

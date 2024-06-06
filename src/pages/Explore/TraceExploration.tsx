@@ -5,6 +5,7 @@ import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
+  CustomVariable,
   DataSourceVariable,
   getUrlSyncManager,
   SceneComponentProps,
@@ -29,15 +30,16 @@ import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
   DATASOURCE_LS_KEY,
   DetailsSceneUpdated,
-  MetricFunction,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
   VAR_FILTERS,
+  VAR_METRIC,
 } from '../../utils/shared';
 import { getFilterSignature, getUrlForExploration } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
+import { VariableHide } from '@grafana/schema';
 
 type TraceExplorationMode = 'start' | 'traces';
 
@@ -52,7 +54,6 @@ export interface TraceExplorationState extends SceneObjectState {
   detailsScene?: DetailsScene;
   showDetails?: boolean;
   primarySignal?: string;
-  metric: MetricFunction;
 
   // just for the starting data source
   initialDS?: string;
@@ -60,7 +61,7 @@ export interface TraceExplorationState extends SceneObjectState {
 }
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal', 'metric'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal'] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -71,7 +72,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
-      metric: state.metric ?? 'rate',
       ...state,
     });
 
@@ -176,7 +176,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { mode: this.state.mode, primarySignal: this.state.primarySignal, metric: this.state.metric };
+    return { mode: this.state.mode, primarySignal: this.state.primarySignal };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -192,10 +192,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       stateUpdate.primarySignal = values.primarySignal as string;
     }
 
-    if (values.metric && values.metric !== this.state.metric) {
-      stateUpdate.metric = values.metric as MetricFunction;
-    }
-
     this.setState(stateUpdate);
   }
 
@@ -203,6 +199,15 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (!(variable instanceof AdHocFiltersVariable)) {
       throw new Error('Filters variable not found');
+    }
+
+    return variable;
+  }
+
+  public getMetricVariable() {
+    const variable = sceneGraph.lookupVariable(VAR_METRIC, this);
+    if (!(variable instanceof CustomVariable)) {
+      throw new Error('Metric variable not found');
     }
 
     return variable;
@@ -216,10 +221,11 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   };
 
   public onChangeMetricFunction = (metric: string) => {
-    if (!metric || this.state.metric === metric) {
+    const variable = this.getMetricVariable();
+    if (!metric || variable.getValue() === metric) {
       return;
     }
-    this.setState({ metric: metric as MetricFunction });
+    variable.changeValueTo(metric);
   };
 
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
@@ -293,6 +299,10 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       }),
       new FilterByVariable({
         initialFilters,
+      }),
+      new CustomVariable({
+        name: VAR_METRIC,
+        hide: VariableHide.hideVariable,
       }),
     ],
   });

@@ -26,6 +26,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { TraceExploration } from 'pages/Explore';
+import { isEqual } from 'lodash';
 
 interface AxisSelection {
   from: number;
@@ -41,7 +42,7 @@ export interface TraceSceneState extends SceneObjectState {
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection'] });
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
@@ -64,8 +65,8 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     }
 
     const exploration = sceneGraph.getAncestor(this, TraceExploration);
-    exploration.subscribeToState((newState, prevState) => {
-      if (newState.metric !== prevState.metric) {
+    exploration.getMetricVariable().subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
         this.updateBody(this);
       }
     });
@@ -75,7 +76,8 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   updateBody(model: any) {
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    this.setState({ body: buildGraphScene(traceExploration.state.metric) });
+    const metric = traceExploration.getMetricVariable().getValue();
+    this.setState({ body: buildGraphScene(metric as MetricFunction) });
   }
 
   private async updateAttributes() {
@@ -94,7 +96,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   getUrlState() {
-    return { actionView: this.state.actionView };
+    return {
+      actionView: this.state.actionView,
+      selection: this.state.selection ? JSON.stringify(this.state.selection) : undefined,
+    };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -107,6 +112,13 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       }
     } else if (values.actionView === null) {
       this.setActionView(undefined);
+    }
+
+    if (typeof values.selection === 'string') {
+      const newSelection = JSON.parse(values.selection);
+      if (!isEqual(newSelection, this.state.selection)) {
+        this.setState({ selection: newSelection });
+      }
     }
   }
 

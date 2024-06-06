@@ -13,7 +13,7 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS } from '../../../utils/shared';
+import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { getLabelValue } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
@@ -30,7 +30,7 @@ export function buildNormalLayout(
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
-  const metric = traceExploration.state.metric;
+  const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
   const query = rateByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
