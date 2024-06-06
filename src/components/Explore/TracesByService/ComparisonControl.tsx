@@ -21,7 +21,6 @@ export class ComparisonControl extends SceneObjectBase {
     const { selection } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
 
-    console.log(selection);
     return (
       <div className={styles.button}>
         <Button

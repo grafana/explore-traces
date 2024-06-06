@@ -94,9 +94,17 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             return source.pipe(
               map((data: DataFrame[]) => {
                 const groupedFrames = groupFrameListByAttribute(data);
-                return Object.entries(groupedFrames).map(([attribute, frames]) =>
-                  frameGroupToDataframe(attribute, frames)
-                );
+                return Object.entries(groupedFrames)
+                  .map(([attribute, frames]) => frameGroupToDataframe(attribute, frames))
+                  .sort((a, b) => {
+                    const aCompare = a.fields[1].values
+                      .map((val, i) => (val || 0) - (a.fields[2].values[i] || 0))
+                      .reduce((acc, val) => acc + val, 0);
+                    const bCompare = b.fields[1].values
+                      .map((val, i) => (val || 0) - (b.fields[2].values[i] || 0))
+                      .reduce((acc, val) => acc + val, 0);
+                    return aCompare - bCompare;
+                  });
               })
             );
           },
@@ -138,9 +146,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllComparisonLayout((frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
-            ])
+          ? buildAllComparisonLayout((frame: DataFrame) => [])
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
             ]),
