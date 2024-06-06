@@ -6,6 +6,7 @@ import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { getExplorationFor } from '../../../utils/utils';
+import { MetricFunction } from '../../../utils/shared';
 
 interface Props {
   model: FilterByVariable;
@@ -13,11 +14,11 @@ interface Props {
 
 export function MetricSelect({ model }: Props) {
   const exploration = getExplorationFor(model);
-  const { metric } = exploration.useState();
+  const { value: metric } = exploration.getMetricVariable().useState();
 
   return (
     <BaseSelect
-      value={metric}
+      value={metric as MetricFunction}
       options={[
         { label: 'Rate', value: 'rate' },
         { label: 'Errors', value: 'errors' },

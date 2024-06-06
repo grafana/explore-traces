@@ -74,6 +74,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
               queries: [buildQuery()],
             })
           )
+          .setHoverHeader(true)
           .setDisplayMode('transparent')
           .build();
       default:
@@ -105,7 +106,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
   public static Component = ({ model }: SceneComponentProps<MetricFunctionCard>) => {
     const { body, metric } = model.useState();
     const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    const { metric: selectedMetric } = traceExploration.useState();
+    const { value: selectedMetric } = traceExploration.getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 
     const itemStyles = metric === selectedMetric ? [styles.item, styles.selected] : [styles.item];
@@ -131,13 +132,13 @@ function getStyles(theme: GrafanaTheme2) {
       fontSize: '12px',
       flex: 1,
       '&:hover': {
-        border: `2px solid ${theme.colors.secondary.borderTransparent}`
+        border: `2px solid ${theme.colors.secondary.borderTransparent}`,
       },
     }),
     selected: css({
       border: `2px solid #cc8c17`,
       '&:hover': {
-        border: `2px solid #cc8c17`
+        border: `2px solid #cc8c17`,
       },
     }),
   };

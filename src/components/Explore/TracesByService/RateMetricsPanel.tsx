@@ -1,27 +1,28 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
+  SceneObjectBase,
+  SceneObjectState,
+  SceneQueryRunner,
 } from '@grafana/scenes';
-import { LoadingState } from '@grafana/data';
-import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
+import { FieldType, LoadingState } from '@grafana/data';
+import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
 import { barsPanelConfig } from '../panels/barsPanel';
+import { ComparisonControl } from './ComparisonControl';
 
-export interface TraceTimeSeriesPanelState extends SceneObjectState {
+export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
 }
 
-export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelState> {
-  constructor(state: TraceTimeSeriesPanelState) {
+export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
+  constructor(state: RateMetricsPanelState) {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
@@ -51,6 +52,11 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
                 }),
               });
             } else {
+              data.data.annotations?.push({
+                length: 1,
+                fields: [{ name: 'bloop', type: FieldType.string, values: ['bloop'], config: {} }],
+                refId: 'A',
+              });
               this.setState({
                 panel: this.getVizPanel(),
               });
@@ -83,13 +89,13 @@ export class TraceTimeSeriesPanel extends SceneObjectBase<TraceTimeSeriesPanelSt
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: barsPanelConfig().build(),
+          body: barsPanelConfig().setHeaderActions(new ComparisonControl({})).build(),
         }),
       ],
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<TraceTimeSeriesPanel>) => {
+  public static Component = ({ model }: SceneComponentProps<RateMetricsPanel>) => {
     const { panel } = model.useState();
 
     if (!panel) {

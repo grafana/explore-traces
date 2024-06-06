@@ -5,7 +5,6 @@ import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
   CustomVariable,
   SceneComponentProps,
-  SceneFlexItem,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
@@ -15,18 +14,23 @@ import {
 } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 
-import { GroupBySelector } from '../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes } from '../../../../utils/shared';
+import { GroupBySelector } from '../../../GroupBySelector';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC } from '../../../../../utils/shared';
 
-import { LayoutSwitcher } from '../../LayoutSwitcher';
-import { TracesByServiceScene } from '../TracesByServiceScene';
-import { AddToFiltersGraphAction } from '../../AddToFiltersGraphAction';
-import { VARIABLE_ALL_VALUE } from '../../../../constants';
-import { buildAllLayout } from '../../layouts/allAttributes';
-import { buildNormalLayout } from '../../layouts/attributeBreakdown';
+import { LayoutSwitcher } from '../../../LayoutSwitcher';
+import { TracesByServiceScene } from '../../TracesByServiceScene';
+import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
+import { VARIABLE_ALL_VALUE } from '../../../../../constants';
+import { buildAllLayout } from '../../../layouts/allAttributes';
+import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
 import { TraceExploration } from 'pages/Explore';
-import { AllLayoutRunners, getAllLayoutRunners, filterAllLayoutRunners, isGroupByAll } from 'pages/Explore/SelectStartingPointScene';
+import {
+  AllLayoutRunners,
+  getAllLayoutRunners,
+  filterAllLayoutRunners,
+  isGroupByAll,
+} from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
@@ -37,7 +41,7 @@ export interface AttributesBreakdownSceneState extends SceneObjectState {
 
 export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERS],
+    variableNames: [VAR_FILTERS, VAR_METRIC],
     onReferencedVariableValueChanged: this.onReferencedVariableValueChanged.bind(this),
   });
 
@@ -104,7 +108,10 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private async updateBody(variable: CustomVariable) {
-    const allLayoutRunners = getAllLayoutRunners(sceneGraph.getAncestor(this, TraceExploration), this.getAttributes() ?? []);
+    const allLayoutRunners = getAllLayoutRunners(
+      sceneGraph.getAncestor(this, TraceExploration),
+      this.getAttributes() ?? []
+    );
     this.setState({ allLayoutRunners });
     this.setBody(allLayoutRunners, variable);
   }
@@ -113,16 +120,12 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout((attribute) => new SelectAttributeAction({ attribute }), runners)
-          : buildNormalLayout(
-              this, 
-              variable, 
-              (frame: DataFrame) => [
-                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
-              ],
-            ),
+          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          : buildNormalLayout(this, variable, (frame: DataFrame) => [
+              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+            ]),
     });
-  }
+  };
 
   public onChange = (value: string) => {
     const variable = this.getVariable();
@@ -221,10 +224,4 @@ export class SelectAttributeAction extends SceneObjectBase<SelectAttributeAction
       </Button>
     );
   };
-}
-
-export function buildAttributesBreakdownScene() {
-  return new SceneFlexItem({
-    body: new AttributesBreakdownScene({}),
-  });
 }

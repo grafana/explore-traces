@@ -14,7 +14,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 
-import { TraceTimeSeriesPanel } from './TraceTimeSeriesPanel';
+import { RateMetricsPanel } from './RateMetricsPanel';
 import {
   MakeOptional,
   explorationDS,
@@ -26,20 +26,27 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { TraceExploration } from 'pages/Explore';
+import { isEqual } from 'lodash';
+
+interface AxisSelection {
+  from: number;
+  to: number;
+}
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   actionView?: string;
 
   attributes?: string[];
+  selection?: { x?: AxisSelection; y?: AxisSelection; query?: string };
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection'] });
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
-      body: state.body ?? new SceneFlexLayout({ children: []}),
+      body: state.body ?? new SceneFlexLayout({ children: [] }),
       $data: new SceneQueryRunner({
         datasource: explorationDS,
         queries: [buildQuery()],
@@ -51,18 +58,20 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   private _onActivate() {
-    this.updateBody(this);
-
-    if (this.state.actionView === undefined) {
-      this.setActionView('breakdown');
-    }
+    this.updateBody();
 
     this.updateAttributes();
   }
 
-  updateBody(model: any) {
-    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
-    this.setState({ body: buildGraphScene(traceExploration.state.metric) });
+  updateBody() {
+    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
+    const metric = traceExploration.getMetricVariable().getValue();
+
+    this.setState({ body: buildGraphScene(metric as MetricFunction) });
+
+    if (this.state.actionView === undefined) {
+      this.setActionView('breakdown');
+    }
   }
 
   private async updateAttributes() {
@@ -81,7 +90,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   getUrlState() {
-    return { actionView: this.state.actionView };
+    return {
+      actionView: this.state.actionView,
+      selection: this.state.selection ? JSON.stringify(this.state.selection) : undefined,
+    };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -93,7 +105,14 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView(undefined);
+      this.setActionView('breakdown');
+    }
+
+    if (typeof values.selection === 'string') {
+      const newSelection = JSON.parse(values.selection);
+      if (!isEqual(newSelection, this.state.selection)) {
+        this.setState({ selection: newSelection });
+      }
     }
   }
 
@@ -102,16 +121,11 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
 
     if (body.state.children.length > 1) {
-      if (actionViewDef && actionViewDef.value !== this.state.actionView) {
+      if (actionViewDef) {
         // reduce max height for main panel to reduce height flicker
         body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
         this.setState({ actionView: actionViewDef.value });
-      } else {
-        // restore max height
-        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
-        body.setState({ children: body.state.children.slice(0, 2) });
-        this.setState({ actionView: undefined });
       }
     }
   }
@@ -145,7 +159,7 @@ function buildGraphScene(type: MetricFunction) {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: type === 'rate' || type === 'errors' ? new TraceTimeSeriesPanel({}) : new HistogramPanel({}),
+        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({}) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',

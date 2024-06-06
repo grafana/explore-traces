@@ -10,6 +10,7 @@ export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_GROUPBY = 'groupBy';
+export const VAR_METRIC = 'metric';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 

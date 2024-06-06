@@ -1,20 +1,23 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
+  PanelBuilders,
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
-  PanelBuilders,
+  SceneObjectBase,
+  SceneObjectState,
+  SceneQueryRunner,
 } from '@grafana/scenes';
-import { LoadingState } from '@grafana/data';
-import { VAR_FILTERS_EXPR, explorationDS } from 'utils/shared';
+import { arrayToDataFrame, LoadingState } from '@grafana/data';
+import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
+import { useStyles2 } from '@grafana/ui';
+import { css } from '@emotion/css';
+import { TracesByServiceScene } from './TracesByServiceScene';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -34,10 +37,43 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._onActivate();
       const data = sceneGraph.getData(this);
 
+      const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
       this._subs.add(
-        data.subscribeToState((data) => {
-          if (data.data?.state === LoadingState.Done) {
-            if (data.data.series.length === 0 || data.data.series[0].length === 0) {
+        parent.subscribeToState((newState, prevState) => {
+          if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
+            const xSel = newState.selection?.x;
+            const ySel = newState.selection?.y;
+
+            const frame = arrayToDataFrame([
+              {
+                time: xSel?.from || 0,
+                xMin: xSel?.from || 0,
+                xMax: xSel?.to || 0,
+                yMin: ySel?.from,
+                yMax: ySel?.to,
+                isRegion: true,
+                fillOpacity: 0.1,
+                lineWidth: 2,
+                lineStyle: 'dash',
+                text: 'Comparison selection',
+              },
+            ]);
+            frame.name = 'xymark';
+
+            data.setState({
+              data: {
+                ...data.state.data!,
+                annotations: [frame],
+              },
+            });
+          }
+        })
+      );
+
+      this._subs.add(
+        data.subscribeToState((newData) => {
+          if (newData.data?.state === LoadingState.Done) {
+            if (newData.data.series.length === 0 || newData.data.series[0].length === 0) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
@@ -55,7 +91,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
                 panel: this.getVizPanel(),
               });
             }
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else if (newData.data?.state === LoadingState.Loading) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',
@@ -79,11 +115,27 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   }
 
   private getVizPanel() {
+    const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const panel = histogramPanelConfig()
+      .setTitle('Histogram by duration')
+      // @ts-ignore
+      .setOption('selectionMode', 'xy')
+      .build();
+    panel.setState({
+      extendPanelContext: (vizPanel, context) => {
+        // TODO remove when we the Grafana version with #88107 is released
+        // @ts-ignore
+        context.onSelectRange = (args) => {
+          parent.setState({ selection: args.length > 0 ? args[0] : undefined });
+        };
+      },
+    });
+
     return new SceneFlexLayout({
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: histogramPanelConfig().build(),
+          body: panel,
         }),
       ],
     });
@@ -91,12 +143,29 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
   public static Component = ({ model }: SceneComponentProps<HistogramPanel>) => {
     const { panel } = model.useState();
+    const styles = useStyles2(getStyles);
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    return (
+      <div className={styles.container}>
+        <panel.Component model={panel} />
+      </div>
+    );
+  };
+}
+
+function getStyles() {
+  return {
+    container: css({
+      height: '100%',
+      display: 'flex',
+      '& .u-select': {
+        border: '1px solid #ffffff75',
+      },
+    }),
   };
 }
 
@@ -114,10 +183,11 @@ export function buildQuery() {
 
 export const histogramPanelConfig = () => {
   return PanelBuilders.heatmap()
-    .setOption('yAxis', { 
-      unit: "s",
+    .setOption('legend', { show: false })
+    .setOption('yAxis', {
+      unit: 's',
     })
     .setOption('color', {
-      scheme: 'Turbo',
-    })
+      scheme: 'RdBu',
+    });
 };

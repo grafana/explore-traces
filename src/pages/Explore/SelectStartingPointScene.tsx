@@ -15,7 +15,14 @@ import {
 } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 
-import { VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, explorationDS } from '../../utils/shared';
+import {
+  VAR_DATASOURCE_EXPR,
+  VAR_FILTERS,
+  VAR_GROUPBY,
+  explorationDS,
+  MetricFunction,
+  VAR_METRIC,
+} from '../../utils/shared';
 import { getExplorationFor, getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { primarySignalOptions } from './primary-signals';
@@ -51,7 +58,7 @@ export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_FILTERS],
+    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -82,13 +89,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     groupByVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.buildBody();
-      }
-    });
-
-    const exploration = sceneGraph.getAncestor(this, TraceExploration);
-    exploration.subscribeToState((newState, prevState) => {
-      if (newState.metric !== prevState.metric) {
         this.buildBody();
       }
     });
@@ -125,7 +125,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private buildBody() {
-    const allLayoutRunners = getAllLayoutRunners(sceneGraph.getAncestor(this, TraceExploration), this.state.attributes ?? []);
+    const allLayoutRunners = getAllLayoutRunners(
+      sceneGraph.getAncestor(this, TraceExploration),
+      this.state.attributes ?? []
+    );
     this.setState({ allLayoutRunners });
     this.setBody(allLayoutRunners);
   }
@@ -135,17 +138,13 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
-          ? buildAllLayout((attribute) => new SelectAttributeAction({ attribute }), runners)
-          : buildNormalLayout(
-              this, 
-              variable, 
-              (frame: DataFrame) => [
-                new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
-                new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
-              ],
-            ),
+          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          : buildNormalLayout(this, variable, (frame: DataFrame) => [
+              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
+            ]),
     });
-  }
+  };
 
   public getGroupByVariable() {
     const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
@@ -226,33 +225,34 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
 export function getAllLayoutRunners(traceExploration: TraceExploration, attributes: string[]) {
   const runners = [];
+  const variable = traceExploration.getMetricVariable();
   for (const attribute of attributes) {
     runners.push({
       attribute: attribute,
       runner: new SceneQueryRunner({
         maxDataPoints: 250,
         datasource: explorationDS,
-        queries: [rateByWithStatus(traceExploration.state.metric, attribute)],
-      })
+        queries: [rateByWithStatus(variable.getValue() as MetricFunction, attribute)],
+      }),
     });
   }
   return runners;
 }
 
 export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery: string) {
-  return runners.filter((runner: AllLayoutRunners) => {
-    return runner.attribute.toLowerCase().includes(searchQuery);
-  }) ?? [];
+  return (
+    runners.filter((runner: AllLayoutRunners) => {
+      return runner.attribute.toLowerCase().includes(searchQuery);
+    }) ?? []
+  );
 }
 
 export function isGroupByAll(variable: CustomVariable) {
-  return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+  return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE;
 }
 
 function getAttributesAsOptions(attributes: string[]) {
-  return [
-    ...attributes.map((attribute) => ({ label: attribute, value: attribute })),
-  ];
+  return [...attributes.map((attribute) => ({ label: attribute, value: attribute }))];
 }
 
 function getVariableSet() {

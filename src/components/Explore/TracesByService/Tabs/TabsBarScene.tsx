@@ -1,14 +1,14 @@
-import { css } from "@emotion/css";
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, sceneGraph, SceneObject } from "@grafana/scenes";
+import { css } from '@emotion/css';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, sceneGraph, SceneObject } from '@grafana/scenes';
 import { GrafanaTheme2 } from '@grafana/data';
-import { useStyles2, Box, Stack, TabsBar, Tab } from "@grafana/ui";
-import React from "react";
-import { getExplorationFor } from "utils/utils";
-import { ShareExplorationButton } from "../ShareExplorationButton";
-import { TracesByServiceScene } from "../TracesByServiceScene";
-import { buildAttributesBreakdownScene } from "./AttributesBreakdownScene";
-import { buildSpansScene } from "./Spans/SpansScene";
-import { buildStructureScene } from "./Structure/StructureScene";
+import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
+import React from 'react';
+import { getExplorationFor } from 'utils/utils';
+import { ShareExplorationButton } from '../ShareExplorationButton';
+import { TracesByServiceScene } from '../TracesByServiceScene';
+import { buildSpansScene } from './Spans/SpansScene';
+import { buildStructureScene } from './Structure/StructureScene';
+import { buildBreakdownScene } from './Breakdown/BreakdownScene';
 
 interface ActionViewDefinition {
   displayName: string;
@@ -18,7 +18,7 @@ interface ActionViewDefinition {
 
 export type ActionViewType = 'spans' | 'breakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildAttributesBreakdownScene },
+  { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
   { displayName: 'Spans', value: 'spans', getScene: buildSpansScene },
 ];

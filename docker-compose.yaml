@@ -8,7 +8,7 @@ services:
       context: ./.config
       args:
         grafana_image: ${GRAFANA_IMAGE:-grafana-dev}
-        grafana_version: ${GRAFANA_VERSION:-11.1.0-173403}
+        grafana_version: ${GRAFANA_VERSION:-11.1.0-178722}
     ports:
       - 3000:3000/tcp
     volumes:
@@ -16,7 +16,7 @@ services:
       - ./provisioning:/etc/grafana/provisioning
 
   tempo:
-    image: grafana/tempo:main-d8c69d4
+    image: mdisibio2/tempo:8aa1f372e
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./devenv/tempo.yaml:/etc/tempo.yaml
