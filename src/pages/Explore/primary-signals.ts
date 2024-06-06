@@ -2,10 +2,10 @@ import { SelectableValue } from '@grafana/data';
 
 export const primarySignalOptions: Array<SelectableValue<string>> = [
   {
-    label: 'All spans',
-    value: 'all_spans',
-    filter: { key: '', operator: '', value: true },
-    text: 'View and analyze raw span data',
+    label: 'Full traces',
+    value: 'full_traces',
+    filter: { key: 'nestedSetParent', operator: '<', value: '0' },
+    text: 'Inspect full journeys of requests across services',
   },
   {
     label: 'Server spans',
@@ -32,10 +32,10 @@ export const primarySignalOptions: Array<SelectableValue<string>> = [
     text: 'Evaluate the performance issues in database interactions',
   },
   {
-    label: 'Full traces',
-    value: 'full_traces',
-    filter: { key: 'nestedSetParent', operator: '<', value: '0' },
-    text: 'Inspect full journeys of requests across services',
+    label: 'All spans',
+    value: 'all_spans',
+    filter: { key: '', operator: '', value: true },
+    text: 'View and analyze raw span data',
   },
 ];
 

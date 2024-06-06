@@ -15,6 +15,7 @@ import { css, cx } from '@emotion/css';
 import { TraceExploration } from './TraceExploration';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
+import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -65,15 +66,15 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
           })
           .build();
       case 'duration':
-        return barsPanelConfig()
-          .setDisplayMode('transparent')
+        return histogramPanelConfig()
           .setData(
             new SceneQueryRunner({
               maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [rateByWithStatus('duration')],
+              queries: [buildQuery()],
             })
           )
+          .setDisplayMode('transparent')
           .build();
       default:
         return barsPanelConfig()
@@ -129,9 +130,15 @@ function getStyles(theme: GrafanaTheme2) {
       cursor: 'pointer',
       fontSize: '12px',
       flex: 1,
+      '&:hover': {
+        border: `2px solid ${theme.colors.secondary.borderTransparent}`
+      },
     }),
     selected: css({
       border: `2px solid #cc8c17`,
+      '&:hover': {
+        border: `2px solid #cc8c17`
+      },
     }),
   };
 }

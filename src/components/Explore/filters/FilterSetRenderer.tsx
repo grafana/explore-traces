@@ -7,7 +7,7 @@ import { FilterByVariable } from './FilterByVariable';
 
 import { FilterRenderer } from './FilterRenderer';
 import { AddFilter } from './AddFilter';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getExplorationFor, getFilterSignature } from '../../../utils/utils';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
@@ -25,6 +25,12 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
     (f) => getFilterSignature(f) === getFilterSignature(primarySignalOption?.filter)
   );
   const otherFilters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(primarySignalOption?.filter));
+
+  const clearFilters = () => {
+    for (const filter of filters) {
+      model._removeFilter(filter);
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -44,6 +50,19 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
       ))}
 
       <AddFilter model={model} />
+
+      {filters.length > 0 && (
+        <Button
+          variant="secondary"
+          aria-label="Clear filters"
+          size='sm'
+          className={styles.clearFilters}
+          icon="times"
+          onClick={() => clearFilters()}
+          tooltip="Clear filters"
+          tooltipPlacement='left'
+        />
+      )}
     </div>
   );
 }
@@ -55,10 +74,13 @@ const getStyles = (theme: GrafanaTheme2) => ({
     border: `1px solid ${theme.colors.border.weak}`,
     alignItems: 'center',
     gap: theme.spacing(1),
-    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+    padding: `${theme.spacing(0.5)} 0 ${theme.spacing(0.5)} ${theme.spacing(1)}`,
     flexGrow: 1,
   }),
   text: css({
+    fontSize: 12,
+  }),
+  clearFilters: css({
     fontSize: 12,
   }),
 });

@@ -177,7 +177,7 @@ function getStyles() {
   };
 }
 
-function buildQuery() {
+export function buildQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | histogram_over_time(duration)`,
@@ -188,3 +188,13 @@ function buildQuery() {
     filters: [],
   };
 }
+
+export const histogramPanelConfig = () => {
+  return PanelBuilders.heatmap()
+    .setOption('yAxis', {
+      unit: "s",
+    })
+    .setOption('color', {
+      scheme: 'Turbo',
+    })
+};
