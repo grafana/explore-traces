@@ -87,6 +87,13 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       }
     });
 
+    const metricVariable = sceneGraph.getAncestor(this, TraceExploration).getMetricVariable();
+    metricVariable?.subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
+        this.buildBody();
+      }
+    });
+
     groupByVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
         this.buildBody();
@@ -294,13 +301,13 @@ function getStyles(theme: GrafanaTheme2) {
       fontSize: '12px',
       flex: 1,
       '&:hover': {
-        border: `2px solid ${theme.colors.secondary.borderTransparent}`
+        border: `2px solid ${theme.colors.secondary.borderTransparent}`,
       },
     }),
     primarySignalItemSelected: css({
       border: `2px solid #cc8c17`,
       '&:hover': {
-        border: '2px solid #cc8c17'
+        border: '2px solid #cc8c17',
       },
     }),
     groupBy: css({
