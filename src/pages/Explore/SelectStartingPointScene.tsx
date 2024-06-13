@@ -305,9 +305,9 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
     primarySignalItemSelected: css({
-      border: `2px solid #cc8c17`,
+      border: `2px solid ${theme.colors.primary.border}`,
       '&:hover': {
-        border: '2px solid #cc8c17',
+        border: `2px solid ${theme.colors.primary.border}`,
       },
     }),
     groupBy: css({
