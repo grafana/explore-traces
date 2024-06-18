@@ -6,7 +6,7 @@ export function rateByWithStatus(metric: MetricFunction, tagKey?: string) {
   } status)`;
   switch (metric) {
     case 'errors':
-      expr = `{${VAR_FILTERS_EXPR} && status=error} | rate() ${tagKey ? `by(${tagKey})` : ''}`;
+      expr = `{${VAR_FILTERS_EXPR} && status=error} | rate() ${tagKey ? `by(${tagKey}, status)` : ''}`;
       break;
     case 'duration':
       expr = `{${VAR_FILTERS_EXPR}} | quantile_over_time(duration, 0.9) ${tagKey ? `by(${tagKey})` : ''}`;
