@@ -53,8 +53,9 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
                 yMax: ySel?.to,
                 isRegion: true,
                 fillOpacity: 0.1,
-                lineWidth: 2,
-                lineStyle: 'dash',
+                lineWidth: 1,
+                lineStyle: 'solid',
+                color: '#CCCCDC',
                 text: 'Comparison selection',
               },
             ]);
