@@ -89,7 +89,9 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: barsPanelConfig().setHeaderActions(new ComparisonControl({})).build(),
+          body: barsPanelConfig()
+            .setHeaderActions(new ComparisonControl({ query: 'status = error' }))
+            .build(),
         }),
       ],
     });

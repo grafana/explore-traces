@@ -22,6 +22,7 @@ import {
   VAR_FILTERS_EXPR,
   VAR_DATASOURCE_EXPR,
   MetricFunction,
+  ComparisonSelection,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
@@ -29,17 +30,12 @@ import { HistogramPanel } from './HistogramPanel';
 import { TraceExploration } from 'pages/Explore';
 import { isEqual } from 'lodash';
 
-interface AxisSelection {
-  from: number;
-  to: number;
-}
-
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   actionView?: string;
 
   attributes?: string[];
-  selection?: { x?: AxisSelection; y?: AxisSelection; query?: string };
+  selection?: ComparisonSelection;
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
@@ -64,6 +60,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const exploration = sceneGraph.getAncestor(this, TraceExploration);
     exploration.getMetricVariable().subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
+        this.setState({ selection: undefined });
         this.updateBody();
       }
     });

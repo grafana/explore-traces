@@ -11,7 +11,6 @@ import {
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
-  SceneTimeRangeLike,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
@@ -37,6 +36,7 @@ import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
+import { comparisonQuery } from '../../../queries/comparisonQuery';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -84,11 +84,15 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   private updateData() {
     const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const sceneTimeRange = sceneGraph.getTimeRange(this);
+    const from = byServiceScene.state.selection?.timeRange?.from || sceneTimeRange.state.value.from.unix();
+    const to = byServiceScene.state.selection?.timeRange?.to || sceneTimeRange.state.value.to.unix();
+
     this.setState({
       $data: new SceneDataTransformer({
         $data: new SceneQueryRunner({
           datasource: explorationDS,
-          queries: [buildQuery(sceneGraph.getTimeRange(this), byServiceScene.state.selection?.query ?? '')],
+          queries: [buildQuery(from, to, comparisonQuery(byServiceScene.state.selection))],
         }),
         transformations: [
           () => (source: Observable<DataFrame[]>) => {
@@ -191,12 +195,12 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   };
 }
 
-export function buildQuery(timeRange: SceneTimeRangeLike, compareQuery: string) {
-  const dur = duration(timeRange.state.value.to.unix() - timeRange.state.value.from.unix(), 's');
+export function buildQuery(from: number, to: number, compareQuery: string) {
+  const dur = duration(to - from, 's');
   const durString = `${dur.asSeconds()}s`;
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | compare({${compareQuery}})`,
+    query: `{${VAR_FILTERS_EXPR}} | compare(${compareQuery})`,
     step: durString,
     queryType: 'traceql',
     tableType: 'spans',
@@ -322,6 +326,7 @@ function getStyles(theme: GrafanaTheme2) {
 interface SelectAttributeActionState extends SceneObjectState {
   attribute: string;
 }
+
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
   public onClick = () => {
     const attributesComparisonScene = sceneGraph.getAncestor(this, AttributesComparisonScene);

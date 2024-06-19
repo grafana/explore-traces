@@ -18,6 +18,13 @@ export const ignoredAttributes = ['duration', 'traceDuration'];
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
+export interface ComparisonSelection {
+  raw?: { x: { from: number; to: number }; y: { from: number; to: number } };
+  timeRange?: { from: number; to: number };
+  duration?: { from: string; to: string };
+  query?: string;
+}
+
 export class StartingPointSelectedEvent extends BusEventBase {
   public static type = 'start-point-selected-event';
 }
