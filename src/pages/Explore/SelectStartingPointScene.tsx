@@ -1,4 +1,4 @@
-import { css, cx } from '@emotion/css';
+import { css } from '@emotion/css';
 import React from 'react';
 import { debounce } from 'lodash';
 
@@ -23,9 +23,8 @@ import {
   MetricFunction,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getExplorationFor, getLabelValue } from '../../utils/utils';
+import { getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { primarySignalOptions } from './primary-signals';
 import { VARIABLE_ALL_VALUE } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
@@ -175,8 +174,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
-    const exploration = getExplorationFor(model);
-    const { primarySignal } = exploration.useState();
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
@@ -184,25 +181,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     return (
       <div className={styles.container}>
-        <div className={styles.primarySignalHeading}>Choose your exploration type</div>
-        <div className={styles.primarySignal}>
-          {primarySignalOptions.map((option) => {
-            const itemStyles =
-              option.value === primarySignal
-                ? [styles.primarySignalItem, styles.primarySignalItemSelected]
-                : [styles.primarySignalItem];
-            return (
-              <div
-                key={option.value}
-                className={cx(itemStyles)}
-                onClick={() => option.value && exploration.onChangePrimarySignal(option.value)}
-              >
-                <h6>{option.label}</h6>
-                <span>{option.text}</span>
-              </div>
-            );
-          })}
-        </div>
         <div className={styles.primarySignalHeading}>Select a metric</div>
         <div className={styles.primarySignal}>
           {metricCards.map((card, index) => (

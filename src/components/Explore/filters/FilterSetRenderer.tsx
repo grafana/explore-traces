@@ -11,7 +11,7 @@ import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getExplorationFor, getFilterSignature } from '../../../utils/utils';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
-import { getSignalForKey } from '../../../pages/Explore/primary-signals';
+import { getSignalForKey, primarySignalOptions } from '../../../pages/Explore/primary-signals';
 import { MetricSelect } from './MetricSelect';
 
 export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariable>) {
@@ -28,7 +28,10 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
 
   const clearFilters = () => {
     for (const filter of filters) {
-      model._removeFilter(filter);
+      // Don't remove the primary signal filter
+      if (!primarySignalOptions.find(option => option.filter.key === filter.key && option.filter.value === filter.value && option.filter.operator === filter.operator)) {
+        model._removeFilter(filter);
+      }
     }
   }
 
