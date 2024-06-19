@@ -11,7 +11,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 import { arrayToDataFrame, LoadingState } from '@grafana/data';
-import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
+import { ComparisonSelection, explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -21,11 +21,13 @@ import { TracesByServiceScene } from './TracesByServiceScene';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
+  yBuckets?: number[];
 }
 
 export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   constructor(state: HistogramPanelState) {
     super({
+      yBuckets: [],
       $data: new SceneQueryRunner({
         datasource: explorationDS,
         queries: [buildQuery()],
@@ -41,8 +43,8 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
           if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
-            const xSel = newState.selection?.x;
-            const ySel = newState.selection?.y;
+            const xSel = newState.selection?.raw?.x;
+            const ySel = newState.selection?.raw?.y;
 
             const frame = arrayToDataFrame([
               {
@@ -88,7 +90,9 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
                 }),
               });
             } else {
+              const yBuckets = data.state.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
               this.setState({
+                yBuckets,
                 panel: this.getVizPanel(),
               });
             }
@@ -127,7 +131,23 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
         // TODO remove when we the Grafana version with #88107 is released
         // @ts-ignore
         context.onSelectRange = (args) => {
-          parent.setState({ selection: args.length > 0 ? args[0] : undefined });
+          if (args.length === 0) {
+            parent.setState({ selection: undefined });
+            return;
+          }
+          const rawSelection = args[0];
+          const newSelection: ComparisonSelection = { raw: rawSelection };
+
+          newSelection.timeRange = {
+            from: Math.round(rawSelection.x.from / 1000),
+            to: Math.round(rawSelection.x.to / 1000),
+          };
+
+          const yFrom = yBucketToDuration(args[0].y.from, this.state.yBuckets);
+          const yTo = yBucketToDuration(args[0].y.to, this.state.yBuckets);
+          newSelection.duration = { from: yFrom, to: yTo };
+
+          parent.setState({ selection: newSelection });
         };
       },
     });
@@ -156,6 +176,20 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       </div>
     );
   };
+}
+
+function yBucketToDuration(yValue: number, buckets?: number[]) {
+  if (!buckets) {
+    return '';
+  }
+  const rawValue = buckets[Math.floor(yValue)];
+  if (!rawValue || isNaN(rawValue)) {
+    return '';
+  }
+  if (rawValue >= 1) {
+    return `${rawValue.toFixed(0)}s`;
+  }
+  return `${(rawValue * 1000).toFixed(0)}ms`;
 }
 
 function getStyles() {
