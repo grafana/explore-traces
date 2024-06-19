@@ -18,6 +18,7 @@ import { SkeletonComponent } from '../ByFrameRepeater';
 import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { TracesByServiceScene } from './TracesByServiceScene';
+import { ComparisonControl } from './ComparisonControl';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -125,6 +126,9 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       .setTitle('Histogram by duration')
       // @ts-ignore
       .setOption('selectionMode', 'xy')
+      .setHeaderActions(
+        new ComparisonControl({ placeholder: 'Select an area of the histogram to start an investigation' })
+      )
       .build();
     panel.setState({
       extendPanelContext: (vizPanel, context) => {

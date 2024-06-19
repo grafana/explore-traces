@@ -21,7 +21,8 @@ import {
   explorationDS,
   VAR_FILTERS_EXPR,
   VAR_DATASOURCE_EXPR,
-  MetricFunction, ComparisonSelection,
+  MetricFunction,
+  ComparisonSelection,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
@@ -59,6 +60,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const exploration = sceneGraph.getAncestor(this, TraceExploration);
     exploration.getMetricVariable().subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
+        this.setState({ selection: undefined });
         this.updateBody();
       }
     });
