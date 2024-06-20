@@ -177,7 +177,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const mainAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
+    const radioAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
 
     return (
       <div className={styles.container}>
@@ -190,7 +190,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         <div className={styles.groupBy}>
           <GroupBySelector
             options={getAttributesAsOptions(attributes || [])}
-            mainAttributes={mainAttributes}
+            radioAttributes={radioAttributes}
             value={groupByValue.toString()}
             onChange={(value) => model.onChangeGroupBy(value)}
           />

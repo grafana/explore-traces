@@ -16,9 +16,10 @@ interface ActionViewDefinition {
   getScene: () => SceneObject;
 }
 
-export type ActionViewType = 'spans' | 'breakdown' | 'structure';
+export type ActionViewType = 'spans' | 'spanBreakdown' | 'resourceBreakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
+  { displayName: 'Span Breakdown', value: 'spanBreakdown', getScene: buildBreakdownScene },
+  { displayName: 'Resource Breakdown', value: 'resourceBreakdown', getScene: buildBreakdownScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
   { displayName: 'Spans', value: 'spans', getScene: buildSpansScene },
 ];

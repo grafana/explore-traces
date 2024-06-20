@@ -168,7 +168,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
-    const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+    const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 
     return (
       <div className={styles.container}>
@@ -177,7 +177,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             <div className={styles.controlsLeft}>
               <GroupBySelector
                 options={getAttributesAsOptions(attributes)}
-                mainAttributes={mainAttributes}
+                radioAttributes={radioAttributes}
                 value={variable.getValueText()}
                 onChange={model.onChange}
               />

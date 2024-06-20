@@ -14,7 +14,7 @@ export const VAR_METRIC = 'metric';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
-export const ignoredAttributes = ['duration', 'traceDuration'];
+export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:id', 'trace:id', 'traceDuration'];
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 

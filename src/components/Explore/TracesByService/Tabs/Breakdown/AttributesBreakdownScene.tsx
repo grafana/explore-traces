@@ -139,17 +139,23 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
+    const { actionView } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
-    const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+
+    const radioAttributesResource = ['resource.cluster', 'resource.service.name'];
+    const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
+    const filterType = actionView === 'resourceBreakdown' ? 'resource.' : 'span.';
+    let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
+    filteredAttributes = actionView === 'resourceBreakdown' ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          {attributes?.length && (
+          {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
               <GroupBySelector
-                options={getAttributesAsOptions(attributes)}
-                mainAttributes={mainAttributes}
+                options={getAttributesAsOptions(filteredAttributes!)}
+                radioAttributes={actionView === 'resourceBreakdown' ? radioAttributesResource : radioAttributesSpan}
                 value={variable.getValueText()}
                 onChange={model.onChange}
               />
