@@ -20,7 +20,7 @@ import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttribute
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
-import { ALL } from '../../../../../constants';
+import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
@@ -136,15 +136,15 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
-    const [scope, setScope] = useState('Resource')
+    const [scope, setScope] = useState(RESOURCE)
     const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);  
     
-    const filterType = scope === 'Resource' ? 'resource.' : 'span.';
+    const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;
     let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
-    filteredAttributes = scope === 'Resource' ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
+    filteredAttributes = scope === RESOURCE ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
 
     return (
       <div className={styles.container}>
@@ -153,14 +153,14 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
             <div className={styles.controlsLeft}>
               <Field label="Scope">
                 <RadioButtonGroup
-                  options={getAttributesAsOptions(['Resource', 'Span'])}
+                  options={getAttributesAsOptions([RESOURCE, SPAN])}
                   value={scope}
                   onChange={setScope}
                 />
               </Field>
               <GroupBySelector
                 options={getAttributesAsOptions(filteredAttributes!)}
-                radioAttributes={scope === 'Resource' ? radioAttributesResource : radioAttributesSpan}
+                radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
                 value={variable.getValueText()}
                 onChange={model.onChange}
               />

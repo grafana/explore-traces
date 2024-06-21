@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
-import { ALL } from '../../constants';
+import { ALL, RESOURCE_ATTR, SPAN_ATTR } from '../../constants';
 import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
@@ -37,14 +37,14 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
 
   const radioOptions = radioAttributes
     .filter((attr) => !!options.find((op) => op.value === attr))
-    .map((attribute) => ({ label: attribute.replace('span.', '').replace('resource.', ''), text: attribute, value: attribute }));
+    .map((attribute) => ({ label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), text: attribute, value: attribute }));
 
   const selectOptions = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
 
   const getModifiedSelectOptions = (options: Array<SelectableValue<string>>) => {
     return options 
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
-      .map((op) => ({ label: op.label?.replace('span.', '').replace('resource.', ''), value: op.value }));
+      .map((op) => ({ label: op.label?.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), value: op.value }));
   }
 
   useEffect(() => {

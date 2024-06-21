@@ -6,6 +6,8 @@ import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { ignoredAttributes } from 'utils/shared';
+import { RESOURCE_ATTR } from 'constants';
+import { SPAN_ATTR } from 'constants';
 
 interface Props {
   filter: AdHocVariableFilter;
@@ -47,9 +49,9 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     const filteredKeys = keys.filter((k) => ignoredAttributes.indexOf(k.value!) === -1);
 
     // Ensure we always have the same order of keys
-    const resourceAttributes = filteredKeys.filter((k) => k.value?.includes('resource.'));
-    const spanAttributes = filteredKeys.filter((k) => k.value?.includes('span.'));
-    const intrinsicAttributes = filteredKeys.filter((k) => !k.value?.includes('resource.') && !k.value?.includes('span.'));
+    const resourceAttributes = filteredKeys.filter((k) => k.value?.includes(RESOURCE_ATTR));
+    const spanAttributes = filteredKeys.filter((k) => k.value?.includes(SPAN_ATTR));
+    const intrinsicAttributes = filteredKeys.filter((k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR));
     return intrinsicAttributes?.concat(resourceAttributes).concat(spanAttributes).map((key) => {
       return {
         label: key.value,

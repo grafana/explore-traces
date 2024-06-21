@@ -27,7 +27,7 @@ import {
 } from '../../utils/shared';
 import { getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { ALL } from '../../constants';
+import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
@@ -125,7 +125,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     }
 
     ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
-      const attributes = tagKeys.filter((l) => l.text.startsWith('resource.')).map((l) => l.text);
+      const attributes = tagKeys.filter((l) => l.text.startsWith(RESOURCE_ATTR)).map((l) => l.text);
       if (attributes !== this.state.attributes) {
         this.setState({ attributes });
       }
