@@ -78,7 +78,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     });
 
     if (this.state.actionView === undefined) {
-      this.setActionView('spanBreakdown');
+      this.setActionView('breakdown');
     }
   }
 
@@ -113,7 +113,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView('spanBreakdown');
+      this.setActionView('breakdown');
     }
 
     if (typeof values.selection === 'string') {
