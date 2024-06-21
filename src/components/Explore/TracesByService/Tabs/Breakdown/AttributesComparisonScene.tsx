@@ -210,10 +210,6 @@ export function buildQuery(from: number, to: number, compareQuery: string) {
   };
 }
 
-function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
-}
-
 const groupFrameListByAttribute = (frames: DataFrame[]) => {
   return frames.reduce((acc: Record<string, DataFrame[]>, series) => {
     const numberField = series.fields.find((field) => field.type === 'number');

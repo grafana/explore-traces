@@ -136,26 +136,32 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
+    const [scope, setScope] = useState('Resource')
     const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const { actionView } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
-    const styles = useStyles2(getStyles);
-
-    const radioAttributesResource = ['resource.cluster', 'resource.service.name'];
-    const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
-    const filterType = actionView === 'resourceBreakdown' ? 'resource.' : 'span.';
+    const styles = useStyles2(getStyles);  
+    
+    const filterType = scope === 'Resource' ? 'resource.' : 'span.';
     let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
-    filteredAttributes = actionView === 'resourceBreakdown' ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
+    filteredAttributes = scope === 'Resource' ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
+              <Field label="Scope">
+                <RadioButtonGroup
+                  options={getAttributesAsOptions(['Resource', 'Span'])}
+                  value={scope}
+                  onChange={setScope}
+                />
+              </Field>
               <GroupBySelector
                 options={getAttributesAsOptions(filteredAttributes!)}
-                radioAttributes={actionView === 'resourceBreakdown' ? radioAttributesResource : radioAttributesSpan}
+                radioAttributes={scope === 'Resource' ? radioAttributesResource : radioAttributesSpan}
                 value={variable.getValueText()}
                 onChange={model.onChange}
               />
@@ -174,10 +180,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       </div>
     );
   };
-}
-
-function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }
 
 function getStyles(theme: GrafanaTheme2) {

@@ -190,7 +190,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         <div className={styles.groupBy}>
           <GroupBySelector
             options={getAttributesAsOptions(attributes || [])}
-            radioAttributes={radioAttributes}
+            radioAttributes={radioAttributesResource}
             value={groupByValue.toString()}
             onChange={(value) => model.onChangeGroupBy(value)}
           />
