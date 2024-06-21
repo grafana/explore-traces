@@ -51,8 +51,9 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
     const { fontSize } = theme.typography;
     const text = radioOptions.map((option) => option.label || option.text || '').join(' ');
     const textWidth = measureText(text, fontSize).width;
-    const additionalWidthPerItem = 70;
-    setLabelSelectorRequiredWidth(textWidth + additionalWidthPerItem * radioOptions.length);
+    const additionalWidthPerItem = 40;
+    const widthOfOtherAttributes = 180;
+    setLabelSelectorRequiredWidth((textWidth + (additionalWidthPerItem * radioOptions.length) + widthOfOtherAttributes));
   }, [radioOptions, theme]);
 
   return (

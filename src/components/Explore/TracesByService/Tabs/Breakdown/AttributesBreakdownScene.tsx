@@ -151,19 +151,24 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
-              <Field label="Scope">
-                <RadioButtonGroup
-                  options={getAttributesAsOptions([RESOURCE, SPAN])}
-                  value={scope}
-                  onChange={setScope}
+              <div className={styles.scope}>
+                <Field label="Scope">
+                  <RadioButtonGroup
+                    options={getAttributesAsOptions([RESOURCE, SPAN])}
+                    value={scope}
+                    onChange={setScope}
+                  />
+                </Field>
+              </div>
+              
+              <div className={styles.groupBy}>
+                <GroupBySelector
+                  options={getAttributesAsOptions(filteredAttributes!)}
+                  radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
+                  value={variable.getValueText()}
+                  onChange={model.onChange}
                 />
-              </Field>
-              <GroupBySelector
-                options={getAttributesAsOptions(filteredAttributes!)}
-                radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
-                value={variable.getValueText()}
-                onChange={model.onChange}
-              />
+              </div>
             </div>
           )}
           {body instanceof LayoutSwitcher && (
@@ -205,12 +210,18 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       justifyContent: 'flex-end',
     }),
+    scope: css({
+      marginRight: theme.spacing(2),
+    }),
+    groupBy: css({
+      width: '100%',
+    }),
     controlsLeft: css({
       display: 'flex',
       justifyContent: 'flex-left',
       justifyItems: 'left',
       width: '100%',
-      flexDirection: 'column',
+      flexDirection: 'row',
     }),
   };
 }
