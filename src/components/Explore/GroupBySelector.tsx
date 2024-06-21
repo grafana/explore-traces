@@ -61,7 +61,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
         {useHorizontalLabelSelector ? (
           <>
             <RadioButtonGroup
-              options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...radioOptions]}
+              options={[{ value: VARIABLE_ALL_VALUE, label: VARIABLE_ALL_VALUE }, ...radioOptions]}
               value={value}
               onChange={onChange}
             />
@@ -69,7 +69,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
               value={value && getModifiedSelectOptions(selectOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
               options={getModifiedSelectOptions(selectOptions)}
-              onChange={(selected) => onChange(selected?.value ?? 'All')}
+              onChange={(selected) => onChange(selected?.value ?? VARIABLE_ALL_VALUE)}
               className={styles.select}
               isClearable={true}
             />
@@ -79,7 +79,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
             value={value}
             placeholder={'Select attribute'}
             options={getModifiedSelectOptions(options)}
-            onChange={(selected) => onChange(selected?.value ?? 'All')}
+            onChange={(selected) => onChange(selected?.value ?? VARIABLE_ALL_VALUE)}
             className={styles.select}
             isClearable={true}
           />

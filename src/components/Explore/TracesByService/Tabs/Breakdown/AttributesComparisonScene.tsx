@@ -23,6 +23,7 @@ import {
   ignoredAttributes,
   explorationDS,
   VAR_FILTERS_EXPR,
+  getAttributesAsOptions,
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';

@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
@@ -12,10 +12,10 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC } from '../../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
@@ -140,7 +140,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
-    const { actionView } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);  
     
     const filterType = scope === 'Resource' ? 'resource.' : 'span.';

@@ -22,6 +22,8 @@ import {
   explorationDS,
   MetricFunction,
   VAR_METRIC,
+  radioAttributesResource,
+  getAttributesAsOptions,
 } from '../../utils/shared';
 import { getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
@@ -177,7 +179,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const radioAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
 
     return (
       <div className={styles.container}>
@@ -234,10 +235,6 @@ export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery:
 
 export function isGroupByAll(variable: CustomVariable) {
   return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE;
-}
-
-function getAttributesAsOptions(attributes: string[]) {
-  return [...attributes.map((attribute) => ({ label: attribute, value: attribute }))];
 }
 
 function getVariableSet() {
