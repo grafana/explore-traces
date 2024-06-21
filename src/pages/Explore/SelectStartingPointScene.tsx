@@ -27,7 +27,7 @@ import {
 } from '../../utils/shared';
 import { getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { VARIABLE_ALL_VALUE } from '../../constants';
+import { ALL } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
@@ -145,7 +145,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const variable = this.getGroupByVariable();
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
@@ -234,7 +234,7 @@ export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery:
 }
 
 export function isGroupByAll(variable: CustomVariable) {
-  return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE;
+  return variable.hasAllValue() || variable.getValue() === ALL;
 }
 
 function getVariableSet() {
@@ -244,7 +244,7 @@ function getVariableSet() {
         name: VAR_GROUPBY,
         defaultToAll: true,
         includeAll: true,
-        value: VARIABLE_ALL_VALUE,
+        value: ALL,
       }),
     ],
   });

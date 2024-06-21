@@ -29,7 +29,7 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
-import { VARIABLE_ALL_VALUE } from '../../../../../constants';
+import { ALL } from '../../../../../constants';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
@@ -130,7 +130,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   private onReferencedVariableValueChanged() {
     const variable = this.getVariable();
-    variable.changeValueTo(VARIABLE_ALL_VALUE);
+    variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
@@ -151,7 +151,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllComparisonLayout((frame: DataFrame) => [])
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),

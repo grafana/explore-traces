@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
-import { VARIABLE_ALL_VALUE } from '../../constants';
+import { ALL } from '../../constants';
 import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
@@ -61,7 +61,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
         {useHorizontalLabelSelector ? (
           <>
             <RadioButtonGroup
-              options={[{ value: VARIABLE_ALL_VALUE, label: VARIABLE_ALL_VALUE }, ...radioOptions]}
+              options={[{ value: ALL, label: ALL }, ...radioOptions]}
               value={value}
               onChange={onChange}
             />
@@ -69,7 +69,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
               value={value && getModifiedSelectOptions(selectOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
               options={getModifiedSelectOptions(selectOptions)}
-              onChange={(selected) => onChange(selected?.value ?? VARIABLE_ALL_VALUE)}
+              onChange={(selected) => onChange(selected?.value ?? ALL)}
               className={styles.select}
               isClearable={true}
             />
@@ -79,7 +79,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
             value={value}
             placeholder={'Select attribute'}
             options={getModifiedSelectOptions(options)}
-            onChange={(selected) => onChange(selected?.value ?? VARIABLE_ALL_VALUE)}
+            onChange={(selected) => onChange(selected?.value ?? ALL)}
             className={styles.select}
             isClearable={true}
           />

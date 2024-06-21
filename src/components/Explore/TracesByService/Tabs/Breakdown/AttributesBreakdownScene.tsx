@@ -20,7 +20,7 @@ import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttribute
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
-import { VARIABLE_ALL_VALUE } from '../../../../../constants';
+import { ALL } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
@@ -98,7 +98,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   private onReferencedVariableValueChanged() {
     const variable = this.getVariable();
-    variable.changeValueTo(VARIABLE_ALL_VALUE);
+    variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
@@ -119,7 +119,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
