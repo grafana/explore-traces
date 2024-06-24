@@ -14,7 +14,9 @@ export const VAR_METRIC = 'metric';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
-export const ignoredAttributes = ['duration', 'traceDuration'];
+export const radioAttributesResource = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
+export const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
+export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:id', 'trace:id', 'traceDuration'];
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -34,4 +36,8 @@ export interface DetailsSceneUpdatedPayload {
 }
 export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
+}
+
+export function getAttributesAsOptions(attributes: string[]) {
+  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }

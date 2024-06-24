@@ -23,12 +23,13 @@ import {
   ignoredAttributes,
   explorationDS,
   VAR_FILTERS_EXPR,
+  getAttributesAsOptions,
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
-import { VARIABLE_ALL_VALUE } from '../../../../../constants';
+import { ALL } from '../../../../../constants';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
@@ -129,7 +130,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   private onReferencedVariableValueChanged() {
     const variable = this.getVariable();
-    variable.changeValueTo(VARIABLE_ALL_VALUE);
+    variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
@@ -150,7 +151,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllComparisonLayout((frame: DataFrame) => [])
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
@@ -168,7 +169,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
-    const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+    const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 
     return (
       <div className={styles.container}>
@@ -177,7 +178,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             <div className={styles.controlsLeft}>
               <GroupBySelector
                 options={getAttributesAsOptions(attributes)}
-                mainAttributes={mainAttributes}
+                radioAttributes={radioAttributes}
                 value={variable.getValueText()}
                 onChange={model.onChange}
               />
@@ -208,10 +209,6 @@ export function buildQuery(from: number, to: number, compareQuery: string) {
     spss: 10,
     filters: [],
   };
-}
-
-function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }
 
 const groupFrameListByAttribute = (frames: DataFrame[]) => {

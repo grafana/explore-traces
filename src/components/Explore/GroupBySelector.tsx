@@ -4,17 +4,17 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
-import { VARIABLE_ALL_VALUE } from '../../constants';
+import { ALL, RESOURCE_ATTR, SPAN_ATTR } from '../../constants';
 import { ignoredAttributes } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;
-  mainAttributes: string[];
+  radioAttributes: string[];
   value?: string;
   onChange: (label: string) => void;
 };
 
-export function GroupBySelector({ options, mainAttributes, value, onChange }: Props) {
+export function GroupBySelector({ options, radioAttributes, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
 
@@ -35,25 +35,26 @@ export function GroupBySelector({ options, mainAttributes, value, onChange }: Pr
     },
   });
 
-  const mainOptions = mainAttributes
-    .filter((at) => !!options.find((op) => op.value === at))
-    .map((attribute) => ({ label: attribute.replace('span.', '').replace('resource.', ''), text: attribute, value: attribute }));
+  const radioOptions = radioAttributes
+    .filter((attr) => !!options.find((op) => op.value === attr))
+    .map((attribute) => ({ label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), text: attribute, value: attribute }));
 
-  const otherOptions = options.filter((op) => !mainAttributes.includes(op.value?.toString()!));
+  const selectOptions = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
 
-  const getModifiedOptions = (options: Array<SelectableValue<string>>) => {
+  const getModifiedSelectOptions = (options: Array<SelectableValue<string>>) => {
     return options 
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
-      .map((op) => ({ label: op.label?.replace('span.', '').replace('resource.', ''), value: op.value }));
+      .map((op) => ({ label: op.label?.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), value: op.value }));
   }
 
   useEffect(() => {
     const { fontSize } = theme.typography;
-    const text = mainOptions.map((option) => option.label || option.text || '').join(' ');
+    const text = radioOptions.map((option) => option.label || option.text || '').join(' ');
     const textWidth = measureText(text, fontSize).width;
-    const additionalWidthPerItem = 70;
-    setLabelSelectorRequiredWidth(textWidth + additionalWidthPerItem * mainOptions.length);
-  }, [mainOptions, theme]);
+    const additionalWidthPerItem = 40;
+    const widthOfOtherAttributes = 180;
+    setLabelSelectorRequiredWidth((textWidth + (additionalWidthPerItem * radioOptions.length) + widthOfOtherAttributes));
+  }, [radioOptions, theme]);
 
   return (
     <Field label="Group by">
@@ -61,15 +62,15 @@ export function GroupBySelector({ options, mainAttributes, value, onChange }: Pr
         {useHorizontalLabelSelector ? (
           <>
             <RadioButtonGroup
-              options={[{ value: VARIABLE_ALL_VALUE, label: 'All' }, ...mainOptions]}
+              options={[{ value: ALL, label: ALL }, ...radioOptions]}
               value={value}
               onChange={onChange}
             />
             <Select
-              value={value && getModifiedOptions(otherOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
+              value={value && getModifiedSelectOptions(selectOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
-              options={getModifiedOptions(otherOptions)}
-              onChange={(selected) => onChange(selected?.value ?? 'All')}
+              options={getModifiedSelectOptions(selectOptions)}
+              onChange={(selected) => onChange(selected?.value ?? ALL)}
               className={styles.select}
               isClearable={true}
             />
@@ -78,8 +79,8 @@ export function GroupBySelector({ options, mainAttributes, value, onChange }: Pr
           <Select
             value={value}
             placeholder={'Select attribute'}
-            options={getModifiedOptions(options)}
-            onChange={(selected) => onChange(selected?.value ?? 'All')}
+            options={getModifiedSelectOptions(options)}
+            onChange={(selected) => onChange(selected?.value ?? ALL)}
             className={styles.select}
             isClearable={true}
           />

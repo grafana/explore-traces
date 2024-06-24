@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
@@ -12,15 +12,15 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC } from '../../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
-import { VARIABLE_ALL_VALUE } from '../../../../../constants';
+import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
@@ -98,7 +98,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   private onReferencedVariableValueChanged() {
     const variable = this.getVariable();
-    variable.changeValueTo(VARIABLE_ALL_VALUE);
+    variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
@@ -119,7 +119,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
@@ -136,23 +136,39 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
+    const [scope, setScope] = useState(RESOURCE)
     const { body, searchQuery } = model.useState();
     const variable = model.getVariable();
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
-    const styles = useStyles2(getStyles);
-    const mainAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
+    const styles = useStyles2(getStyles);  
+    
+    const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;
+    let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
+    filteredAttributes = scope === RESOURCE ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          {attributes?.length && (
+          {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
-              <GroupBySelector
-                options={getAttributesAsOptions(attributes)}
-                mainAttributes={mainAttributes}
-                value={variable.getValueText()}
-                onChange={model.onChange}
-              />
+              <div className={styles.scope}>
+                <Field label="Scope">
+                  <RadioButtonGroup
+                    options={getAttributesAsOptions([RESOURCE, SPAN])}
+                    value={scope}
+                    onChange={setScope}
+                  />
+                </Field>
+              </div>
+              
+              <div className={styles.groupBy}>
+                <GroupBySelector
+                  options={getAttributesAsOptions(filteredAttributes!)}
+                  radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
+                  value={variable.getValueText()}
+                  onChange={model.onChange}
+                />
+              </div>
             </div>
           )}
           {body instanceof LayoutSwitcher && (
@@ -168,10 +184,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       </div>
     );
   };
-}
-
-function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }
 
 function getStyles(theme: GrafanaTheme2) {
@@ -198,12 +210,18 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       justifyContent: 'flex-end',
     }),
+    scope: css({
+      marginRight: theme.spacing(2),
+    }),
+    groupBy: css({
+      width: '100%',
+    }),
     controlsLeft: css({
       display: 'flex',
       justifyContent: 'flex-left',
       justifyItems: 'left',
       width: '100%',
-      flexDirection: 'column',
+      flexDirection: 'row',
     }),
   };
 }
