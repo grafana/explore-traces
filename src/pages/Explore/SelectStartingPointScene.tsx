@@ -22,6 +22,7 @@ import {
   explorationDS,
   MetricFunction,
   VAR_METRIC,
+  StartingPointSelectedEvent,
   radioAttributesResource,
   getAttributesAsOptions,
 } from '../../utils/shared';
@@ -88,7 +89,8 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       }
     });
 
-    const metricVariable = sceneGraph.getAncestor(this, TraceExploration).getMetricVariable();
+    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
+    const metricVariable = traceExploration.getMetricVariable();
     metricVariable?.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
         this.buildBody();
@@ -174,6 +176,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.setState({ searchQuery: '' });
   };
 
+  public onSelectStartingPoint() {
+    this.publishEvent(new StartingPointSelectedEvent(), true);
+  }
+
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
     const { attributes, body, metricCards, searchQuery } = model.useState();
@@ -182,11 +188,17 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     return (
       <div className={styles.container}>
-        <div className={styles.primarySignalHeading}>Select a metric</div>
+        <div className={styles.primarySignalHeading}>1. Select a metric</div>
         <div className={styles.primarySignal}>
           {metricCards.map((card, index) => (
             <card.Component key={index} model={card} />
           ))}
+        </div>
+        <div className={styles.stack}>
+          <div>2. Add filters to find relevant data or</div>
+          <button onClick={() => model.onSelectStartingPoint()} className={styles.inlineButton}>
+            analyze the current selection
+          </button>
         </div>
         <div className={styles.groupBy}>
           <GroupBySelector
@@ -296,12 +308,26 @@ function getStyles(theme: GrafanaTheme2) {
         overflow: 'scroll',
       },
     }),
+    inlineButton: css({
+      border: 'none',
+      background: 'none',
+      color: theme.colors.primary.main,
+      cursor: 'pointer',
+      padding: 0,
+    }),
+    stack: css({
+      display: 'flex',
+      flexDirection: 'row',
+      gap: theme.spacing(0.5),
+      marginTop: theme.spacing(2),
+    }),
   };
 }
 
 interface SelectAttributeActionState extends SceneObjectState {
   attribute: string;
 }
+
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
   public onClick = () => {
     const startingPointScene = sceneGraph.getAncestor(this, SelectStartingPointScene);

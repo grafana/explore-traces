@@ -86,8 +86,8 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private updateData() {
     const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
     const sceneTimeRange = sceneGraph.getTimeRange(this);
-    const from = byServiceScene.state.selection?.timeRange?.from || sceneTimeRange.state.value.from.unix();
-    const to = byServiceScene.state.selection?.timeRange?.to || sceneTimeRange.state.value.to.unix();
+    const from = sceneTimeRange.state.value.from.unix();
+    const to = sceneTimeRange.state.value.to.unix();
 
     this.setState({
       $data: new SceneDataTransformer({

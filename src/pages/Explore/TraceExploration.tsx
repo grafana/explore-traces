@@ -210,6 +210,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       throw new Error('Metric variable not found');
     }
 
+    if (!variable.getValue()) {
+      variable.changeValueTo('rate');
+    }
+
     return variable;
   }
 
@@ -260,9 +264,7 @@ export class TraceExplorationScene extends SceneObjectBase {
             ))}
           </div>
         </Stack>
-        <div className={styles.filters}>
-          {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
-        </div>
+        <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
     );
