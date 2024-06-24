@@ -2,7 +2,6 @@ import { css } from '@emotion/css';
 import React from 'react';
 
 import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   CustomVariable,
@@ -24,7 +23,6 @@ import {
 } from '@grafana/scenes';
 import { Stack, useStyles2 } from '@grafana/ui';
 
-import { ExplorationHistory, ExplorationHistoryStep } from './ExplorationHistory';
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
@@ -35,7 +33,7 @@ import {
   VAR_FILTERS,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getFilterSignature, getUrlForExploration } from '../../utils/utils';
+import { getFilterSignature } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
@@ -47,7 +45,6 @@ export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
 
-  history: ExplorationHistory;
   body: SplitLayout;
 
   mode?: TraceExplorationMode;
@@ -68,7 +65,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
-      history: state.history ?? new ExplorationHistory({}),
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
@@ -112,29 +108,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       }
     });
 
-    // Pay attention to changes in history (i.e., changing the step)
-    this.state.history.subscribeToState((newState, oldState) => {
-      const oldNumberOfSteps = oldState.steps.length;
-      const newNumberOfSteps = newState.steps.length;
-
-      const newStepWasAppended = newNumberOfSteps > oldNumberOfSteps;
-
-      if (newStepWasAppended) {
-        // Do nothing because the state is already up to date -- it created a new step!
-        return;
-      }
-
-      if (oldState.currentStep === newState.currentStep) {
-        // The same step was clicked on -- no need to change anything.
-        return;
-      }
-
-      // History changed because a different node was selected
-      const step = newState.steps[newState.currentStep];
-
-      this.goBackToStep(step);
-    });
-
     return () => {
       getUrlSyncManager().cleanUp(this);
     };
@@ -155,16 +128,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       filters.unshift(newFilter);
     }
     filtersVar.setState({ filters });
-  }
-
-  private goBackToStep(step: ExplorationHistoryStep) {
-    getUrlSyncManager().cleanUp(this);
-
-    this.setState(step.explorationState);
-
-    locationService.replace(getUrlForExploration(this));
-
-    getUrlSyncManager().initSync(this);
   }
 
   private _handleStartingPointSelected(evt: StartingPointSelectedEvent) {
