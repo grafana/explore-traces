@@ -210,6 +210,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       throw new Error('Metric variable not found');
     }
 
+    if (!variable.getValue()) {
+      variable.changeValueTo('rate');
+    }
+
     return variable;
   }
 

@@ -89,9 +89,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
     const metricVariable = traceExploration.getMetricVariable();
-    if (!metricVariable.getValue()) {
-      traceExploration.onChangeMetricFunction('rate');
-    }
     metricVariable?.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
         this.buildBody();
@@ -324,7 +321,7 @@ function getStyles(theme: GrafanaTheme2) {
     stack: css({
       display: 'flex',
       flexDirection: 'row',
-      gap: theme.spacing(1),
+      gap: theme.spacing(0.5),
       marginTop: theme.spacing(2),
     }),
   };
