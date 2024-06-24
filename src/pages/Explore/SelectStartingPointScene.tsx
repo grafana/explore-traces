@@ -23,10 +23,12 @@ import {
   MetricFunction,
   VAR_METRIC,
   StartingPointSelectedEvent,
+  radioAttributesResource,
+  getAttributesAsOptions,
 } from '../../utils/shared';
 import { getLabelValue } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { VARIABLE_ALL_VALUE } from '../../constants';
+import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
@@ -125,7 +127,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     }
 
     ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
-      const attributes = tagKeys.filter((l) => l.text.startsWith('resource.')).map((l) => l.text);
+      const attributes = tagKeys.filter((l) => l.text.startsWith(RESOURCE_ATTR)).map((l) => l.text);
       if (attributes !== this.state.attributes) {
         this.setState({ attributes });
       }
@@ -145,7 +147,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const variable = this.getGroupByVariable();
     this.setState({
       body:
-        variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE
+        variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
@@ -183,7 +185,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const { attributes, body, metricCards, searchQuery } = model.useState();
     const groupByVariable = model.getGroupByVariable();
     const { value: groupByValue } = groupByVariable.useState();
-    const mainAttributes = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
 
     return (
       <div className={styles.container}>
@@ -202,7 +203,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         <div className={styles.groupBy}>
           <GroupBySelector
             options={getAttributesAsOptions(attributes || [])}
-            mainAttributes={mainAttributes}
+            radioAttributes={radioAttributesResource}
             value={groupByValue.toString()}
             onChange={(value) => model.onChangeGroupBy(value)}
           />
@@ -245,11 +246,7 @@ export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery:
 }
 
 export function isGroupByAll(variable: CustomVariable) {
-  return variable.hasAllValue() || variable.getValue() === VARIABLE_ALL_VALUE;
-}
-
-function getAttributesAsOptions(attributes: string[]) {
-  return [...attributes.map((attribute) => ({ label: attribute, value: attribute }))];
+  return variable.hasAllValue() || variable.getValue() === ALL;
 }
 
 function getVariableSet() {
@@ -259,7 +256,7 @@ function getVariableSet() {
         name: VAR_GROUPBY,
         defaultToAll: true,
         includeAll: true,
-        value: VARIABLE_ALL_VALUE,
+        value: ALL,
       }),
     ],
   });
