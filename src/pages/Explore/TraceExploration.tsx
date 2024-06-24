@@ -260,9 +260,7 @@ export class TraceExplorationScene extends SceneObjectBase {
             ))}
           </div>
         </Stack>
-        <div className={styles.filters}>
-          {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
-        </div>
+        <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
     );

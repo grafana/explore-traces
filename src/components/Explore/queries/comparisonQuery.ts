@@ -27,5 +27,7 @@ export function comparisonQuery(selection?: ComparisonSelection) {
 
   const fromTimerange = selection.timeRange?.from;
   const toTimerange = selection.timeRange?.to;
-  return `{${selector}}, 10${fromTimerange && toTimerange ? `, ${fromTimerange}, ${toTimerange}` : ``}`;
+  return `{${selector}}, 10${
+    fromTimerange && toTimerange ? `, ${fromTimerange * 1000000000}, ${toTimerange * 1000000000}` : ``
+  }`;
 }

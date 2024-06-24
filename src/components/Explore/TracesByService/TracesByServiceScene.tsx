@@ -58,7 +58,11 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     this.updateBody();
 
     const exploration = sceneGraph.getAncestor(this, TraceExploration);
-    exploration.getMetricVariable().subscribeToState((newState, prevState) => {
+    const metricVariable = exploration.getMetricVariable();
+    if (!metricVariable.getValue()) {
+      exploration.onChangeMetricFunction('rate');
+    }
+    metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
         this.setState({ selection: undefined });
         this.updateBody();
