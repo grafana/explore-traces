@@ -168,7 +168,7 @@ function buildGraphScene(type: MetricFunction, children?: SceneObject[]) {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({}) : new HistogramPanel({}),
+        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({ type }) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',
