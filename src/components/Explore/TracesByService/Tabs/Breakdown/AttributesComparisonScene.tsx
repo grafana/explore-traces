@@ -30,7 +30,6 @@ import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { ALL } from '../../../../../constants';
-import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
@@ -38,6 +37,7 @@ import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
+import { buildAttributeComparison } from '../../../layouts/attributeComparison';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -152,8 +152,8 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllComparisonLayout((frame: DataFrame) => [])
-          : buildNormalLayout(this, variable, (frame: DataFrame) => [
+          ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name }))
+          : buildAttributeComparison(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
             ]),
     });
@@ -321,16 +321,20 @@ function getStyles(theme: GrafanaTheme2) {
 }
 
 interface SelectAttributeActionState extends SceneObjectState {
-  attribute: string;
+  attribute?: string;
 }
 
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
   public onClick = () => {
     const attributesComparisonScene = sceneGraph.getAncestor(this, AttributesComparisonScene);
-    attributesComparisonScene.onChange(this.state.attribute);
+    attributesComparisonScene.onChange(this.state.attribute || '');
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
+    if (!model.state.attribute) {
+      return null;
+    }
+
     return (
       <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
         Select
