@@ -10,7 +10,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 import { FieldType, LoadingState } from '@grafana/data';
-import { explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
+import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -19,6 +19,7 @@ import { ComparisonControl } from './ComparisonControl';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
+  type: MetricFunction;
 }
 
 export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
@@ -26,7 +27,7 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildQuery(state.type)],
       }),
       ...state,
     });
@@ -108,10 +109,11 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
   };
 }
 
-function buildQuery() {
+function buildQuery(type: MetricFunction) {
+  const typeQuery = type === 'rate' ? '' : ' && status = error';
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | rate() by (status)`,
+    query: `{${VAR_FILTERS_EXPR}${typeQuery}} | rate() by (status)`,
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,
