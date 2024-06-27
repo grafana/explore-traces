@@ -5,7 +5,7 @@ import { TraceExploration } from '../pages/Explore';
 import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 
-export function getExplorationFor(model: SceneObject): TraceExploration {
+export function getExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
 }
 

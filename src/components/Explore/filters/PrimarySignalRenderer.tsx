@@ -5,7 +5,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
-import { getExplorationFor } from '../../../utils/utils';
+import { getExplorationScene } from '../../../utils/utils';
 import { primarySignalOptions } from '../../../pages/Explore/primary-signals';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function PrimarySignalRenderer({ model }: Props) {
-  const exploration = getExplorationFor(model);
+  const exploration = getExplorationScene(model);
   const { primarySignal } = exploration.useState();
 
   return (
