@@ -37,9 +37,15 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
 
     const labelName = this.state.labelKey ?? Object.keys(labels)[0];
 
+    // ensure we set the new filter with latest value
+    // and remove any existing filter for the same key
+    const filtersWithoutNew = variable.state.filters.filter(
+      (f) => f.key !== labelName
+    );
+
     variable.setState({
       filters: [
-        ...variable.state.filters,
+        ...filtersWithoutNew,
         {
           key: labelName,
           operator: '=',
