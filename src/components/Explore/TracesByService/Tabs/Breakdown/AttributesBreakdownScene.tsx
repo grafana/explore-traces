@@ -32,6 +32,7 @@ import {
   isGroupByAll,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
+import { getGroupByVariable } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -59,7 +60,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private _onActivate() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
 
     variable.subscribeToState(() => {
       this.updateBody(variable);
@@ -84,20 +85,11 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
     const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
-    this.setBody(filtered, this.getVariable());
+    this.setBody(filtered, getGroupByVariable(this));
   }, 250);
 
-  private getVariable(): CustomVariable {
-    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
-
-    return variable;
-  }
-
   private onReferencedVariableValueChanged() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
@@ -128,7 +120,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   };
 
   public onChange = (value: string) => {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
 
     // reset searchQuery
@@ -138,7 +130,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
     const [scope, setScope] = useState(RESOURCE)
     const { body, searchQuery } = model.useState();
-    const variable = model.getVariable();
+    const variable = getGroupByVariable(model);
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);  
     

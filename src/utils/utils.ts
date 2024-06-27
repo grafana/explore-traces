@@ -1,8 +1,8 @@
 import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
-import { getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
+import { CustomVariable, getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
-import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR } from './shared';
+import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 
 export function getExplorationFor(model: SceneObject): TraceExploration {
@@ -47,4 +47,12 @@ export function getLabelValue(frame: DataFrame, labelName?: string) {
   }
 
   return labels[labelName || keys[0]].replace(/"/g, '');
+}
+
+export function getGroupByVariable(sceneObject: SceneObject): CustomVariable {
+  const variable = sceneGraph.lookupVariable(VAR_GROUPBY, sceneObject);
+  if (!(variable instanceof CustomVariable)) {
+    throw new Error('Group by variable not found');
+  }
+  return variable;
 }

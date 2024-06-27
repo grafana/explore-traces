@@ -38,6 +38,7 @@ import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
+import { getGroupByVariable } from 'utils/utils';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -64,7 +65,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private _onActivate() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
 
     this.updateData();
 
@@ -119,17 +120,8 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     });
   }
 
-  private getVariable(): CustomVariable {
-    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
-
-    return variable;
-  }
-
   private onReferencedVariableValueChanged() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
@@ -160,13 +152,13 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   };
 
   public onChange = (value: string) => {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {
     const { body } = model.useState();
-    const variable = model.getVariable();
+    const variable = getGroupByVariable(model);
     const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
     const styles = useStyles2(getStyles);
     const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];

@@ -6,11 +6,11 @@ import {
   SceneComponentProps,
   sceneGraph,
   AdHocFiltersVariable,
-  CustomVariable,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent, VAR_GROUPBY } from '../../utils/shared';
+import { StartingPointSelectedEvent } from '../../utils/shared';
+import { getGroupByVariable } from 'utils/utils';
 
 export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
   value: string;
@@ -27,10 +27,7 @@ export class InvestigateAttributeWithValueAction extends SceneObjectBase<Investi
       return;
     }
 
-    const groupByVariable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
-    if (!(groupByVariable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
+    const groupByVariable = getGroupByVariable(this)
 
     // ensure we set the new filter with latest value
     // and remove any existing filter for the same key
