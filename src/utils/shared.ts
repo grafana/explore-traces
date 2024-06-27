@@ -5,10 +5,10 @@ export type MetricFunction = 'rate' | 'errors' | 'duration';
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
-export const VAR_FILTERS = 'filters';
-export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
+export const VAR_FILTERS = 'filters';
+export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_GROUPBY = 'groupBy';
 export const VAR_METRIC = 'metric';
 

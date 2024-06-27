@@ -1,8 +1,8 @@
 import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
-import { CustomVariable, getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
+import { AdHocFiltersVariable, CustomVariable, getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
-import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_GROUPBY } from './shared';
+import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 
 export function getExplorationFor(model: SceneObject): TraceExploration {
@@ -53,6 +53,14 @@ export function getGroupByVariable(sceneObject: SceneObject): CustomVariable {
   const variable = sceneGraph.lookupVariable(VAR_GROUPBY, sceneObject);
   if (!(variable instanceof CustomVariable)) {
     throw new Error('Group by variable not found');
+  }
+  return variable;
+}
+
+export function getFiltersVariable(sceneObject: SceneObject): AdHocFiltersVariable {
+  const variable = sceneGraph.lookupVariable(VAR_FILTERS, sceneObject);
+  if (!(variable instanceof AdHocFiltersVariable)) {
+    throw new Error('Filters variable not found');
   }
   return variable;
 }

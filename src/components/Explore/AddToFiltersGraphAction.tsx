@@ -5,12 +5,9 @@ import {
   SceneObjectState,
   SceneObjectBase,
   SceneComponentProps,
-  sceneGraph,
-  AdHocFiltersVariable,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
-import { getLabelValue } from '../../utils/utils';
-import { VAR_FILTERS } from 'utils/shared';
+import { getFiltersVariable, getLabelValue } from '../../utils/utils';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;
@@ -19,10 +16,7 @@ export interface AddToFiltersGraphActionState extends SceneObjectState {
 
 export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphActionState> {
   public onClick = () => {
-    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      throw new Error(`${VAR_FILTERS} variable not found`);
-    }
+    const variable = getFiltersVariable(this)
 
     const labels = this.state.frame.fields.find((f) => f.labels)?.labels ?? {};
     if (this.state.labelKey) {

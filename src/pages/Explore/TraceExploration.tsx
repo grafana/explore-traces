@@ -3,7 +3,6 @@ import React from 'react';
 
 import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
-  AdHocFiltersVariable,
   CustomVariable,
   DataSourceVariable,
   getUrlSyncManager,
@@ -30,10 +29,9 @@ import {
   DetailsSceneUpdated,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
-  VAR_FILTERS,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getFilterSignature } from '../../utils/utils';
+import { getFilterSignature, getFiltersVariable } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
@@ -116,7 +114,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
     let signal = newSignal ?? this.state.primarySignal;
 
-    const filtersVar = this.getFiltersVariable();
+    const filtersVar = getFiltersVariable(this);
     let filters = filtersVar.state.filters;
     // Remove previous filter for primary signal
     if (oldSignal) {
@@ -156,15 +154,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     }
 
     this.setState(stateUpdate);
-  }
-
-  public getFiltersVariable() {
-    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
-      throw new Error('Filters variable not found');
-    }
-
-    return variable;
   }
 
   public getMetricVariable() {
@@ -210,7 +199,7 @@ export class TraceExplorationScene extends SceneObjectBase {
     const styles = useStyles2(getStyles);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
-    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, traceExploration);
+    const filtersVariable = getFiltersVariable(traceExploration);
 
     return (
       <div className={styles.container}>
