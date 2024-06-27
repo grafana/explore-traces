@@ -31,7 +31,7 @@ import {
   VAR_DATASOURCE,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getFilterSignature, getFiltersVariable } from '../../utils/utils';
+import { getExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
@@ -194,7 +194,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
-    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
+    const traceExploration = getExplorationScene(model);
     const { controls, topScene } = traceExploration.useState();
     const styles = useStyles2(getStyles);
 

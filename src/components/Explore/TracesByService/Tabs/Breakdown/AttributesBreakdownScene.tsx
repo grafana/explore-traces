@@ -18,13 +18,11 @@ import { GroupBySelector } from '../../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
-import { TraceExploration } from 'pages/Explore';
 import {
   AllLayoutRunners,
   getAllLayoutRunners,
@@ -32,7 +30,7 @@ import {
   isGroupByAll,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
-import { getGroupByVariable } from 'utils/utils';
+import { getExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -72,7 +70,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       }
     });
 
-    sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
+    getTraceByServiceScene(this).subscribeToState(() => {
       this.updateBody(variable);
     });
 
@@ -95,13 +93,13 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private getAttributes() {
-    const allAttributes = sceneGraph.getAncestor(this, TracesByServiceScene).state.attributes;
+    const allAttributes = getTraceByServiceScene(this).state.attributes;
     return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
   }
 
   private async updateBody(variable: CustomVariable) {
     const allLayoutRunners = getAllLayoutRunners(
-      sceneGraph.getAncestor(this, TraceExploration),
+      getExplorationScene(this),
       this.getAttributes() ?? []
     );
     this.setState({ allLayoutRunners });
@@ -131,7 +129,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const [scope, setScope] = useState(RESOURCE)
     const { body, searchQuery } = model.useState();
     const variable = getGroupByVariable(model);
-    const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
+    const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);  
     
     const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;

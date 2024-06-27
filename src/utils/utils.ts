@@ -4,9 +4,14 @@ import { AdHocFiltersVariable, CustomVariable, getUrlSyncManager, sceneGraph, Sc
 import { TraceExploration } from '../pages/Explore';
 import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
+import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
 
 export function getExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
+}
+
+export function getTraceByServiceScene(model: SceneObject): TracesByServiceScene {
+  return sceneGraph.getAncestor(model, TracesByServiceScene);
 }
 
 export function newTracesExploration(initialDS?: string): TraceExploration {
@@ -49,16 +54,16 @@ export function getLabelValue(frame: DataFrame, labelName?: string) {
   return labels[labelName || keys[0]].replace(/"/g, '');
 }
 
-export function getGroupByVariable(sceneObject: SceneObject): CustomVariable {
-  const variable = sceneGraph.lookupVariable(VAR_GROUPBY, sceneObject);
+export function getGroupByVariable(scene: SceneObject): CustomVariable {
+  const variable = sceneGraph.lookupVariable(VAR_GROUPBY, scene);
   if (!(variable instanceof CustomVariable)) {
     throw new Error('Group by variable not found');
   }
   return variable;
 }
 
-export function getFiltersVariable(sceneObject: SceneObject): AdHocFiltersVariable {
-  const variable = sceneGraph.lookupVariable(VAR_FILTERS, sceneObject);
+export function getFiltersVariable(scene: SceneObject): AdHocFiltersVariable {
+  const variable = sceneGraph.lookupVariable(VAR_FILTERS, scene);
   if (!(variable instanceof AdHocFiltersVariable)) {
     throw new Error('Filters variable not found');
   }

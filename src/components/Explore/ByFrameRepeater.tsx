@@ -9,7 +9,6 @@ import {
   SceneComponentProps,
   SceneLayout,
   SceneCSSGridLayout,
-  CustomVariable,
 } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';

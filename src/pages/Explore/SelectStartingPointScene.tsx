@@ -26,7 +26,7 @@ import {
   radioAttributesResource,
   getAttributesAsOptions,
 } from '../../utils/shared';
-import { getLabelValue, getGroupByVariable } from '../../utils/utils';
+import { getLabelValue, getGroupByVariable, getExplorationScene } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
@@ -89,7 +89,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       }
     });
 
-    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
+    const traceExploration = getExplorationScene(this);
     const metricVariable = traceExploration.getMetricVariable();
     metricVariable?.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
@@ -136,7 +136,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   private buildBody() {
     const allLayoutRunners = getAllLayoutRunners(
-      sceneGraph.getAncestor(this, TraceExploration),
+      getExplorationScene(this),
       this.state.attributes ?? []
     );
     this.setState({ allLayoutRunners });
