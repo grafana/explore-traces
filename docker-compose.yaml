@@ -23,14 +23,19 @@ services:
     ports:
       - "3200:3200"   # tempo
 
-  # generates uninteresting traces, but is useful for testing
+  # generates interesting traces, and is useful for testing
   k6-tracing:
     image: ghcr.io/grafana/xk6-client-tracing:latest
+    command:
+      - run
+      - /template.js
+    volumes:
+      - ./devenv/k6-tracing.js:/template.js:ro
     environment:
       - ENDPOINT=tempo:4317
-    restart: always
     depends_on:
       - tempo
+    restart: always
 
   # A collection of services designed to generate real telemetry
   # Two regions are created: eu-east and us-west. Each region has a server and a requester.
