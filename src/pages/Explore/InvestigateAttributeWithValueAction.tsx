@@ -9,7 +9,7 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent } from '../../utils/shared';
+import { StartingPointSelectedEvent, VAR_FILTERS } from '../../utils/shared';
 import { getGroupByVariable } from 'utils/utils';
 
 export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
@@ -18,9 +18,9 @@ export interface InvestigateAttributeWithValueActionState extends SceneObjectSta
 
 export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
   public onClick = () => {
-    const variable = sceneGraph.lookupVariable('filters', this);
+    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (!(variable instanceof AdHocFiltersVariable)) {
-      throw new Error('Filters variable not found');
+      throw new Error(`${VAR_FILTERS} variable not found`);
     }
 
     if (!this.state.value) {

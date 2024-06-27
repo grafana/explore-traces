@@ -150,7 +150,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
               new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });

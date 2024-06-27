@@ -146,7 +146,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };
