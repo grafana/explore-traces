@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { SceneObjectBase, SceneComponentProps, sceneGraph, SceneObjectState } from '@grafana/scenes';
+import { SceneObjectBase, SceneComponentProps, SceneObjectState } from '@grafana/scenes';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { TracesByServiceScene } from './TracesByServiceScene';
+import { getTraceByServiceScene } from 'utils/utils';
 
 export interface ComparisonControlState extends SceneObjectState {
   query?: string;
@@ -17,18 +17,18 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
   }
 
   public startInvestigation = () => {
-    const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const byServiceScene = getTraceByServiceScene(this);
     byServiceScene.setState({ selection: { query: this.state.query } });
   };
 
   public stopInvestigation = () => {
-    const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const byServiceScene = getTraceByServiceScene(this);
     byServiceScene.setState({ selection: undefined });
   };
 
   public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {
     const { query, placeholder } = model.useState();
-    const { selection } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
+    const { selection } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
 
     if (!query && !selection) {

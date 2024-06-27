@@ -5,7 +5,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
-import { getExplorationFor } from '../../../utils/utils';
+import { getTraceExplorationScene } from '../../../utils/utils';
 import { MetricFunction } from '../../../utils/shared';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function MetricSelect({ model }: Props) {
-  const exploration = getExplorationFor(model);
+  const exploration = getTraceExplorationScene(model);
   const { value: metric } = exploration.getMetricVariable().useState();
 
   return (

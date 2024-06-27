@@ -17,8 +17,8 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { SkeletonComponent } from '../ByFrameRepeater';
 import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { TracesByServiceScene } from './TracesByServiceScene';
 import { ComparisonControl } from './ComparisonControl';
+import { getTraceByServiceScene } from 'utils/utils';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -40,7 +40,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._onActivate();
       const data = sceneGraph.getData(this);
 
-      const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
+      const parent = getTraceByServiceScene(this);
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
           if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
@@ -121,7 +121,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   }
 
   private getVizPanel() {
-    const parent = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const parent = getTraceByServiceScene(this);
     const panel = histogramPanelConfig()
       .setTitle('Histogram by duration')
       // @ts-ignore

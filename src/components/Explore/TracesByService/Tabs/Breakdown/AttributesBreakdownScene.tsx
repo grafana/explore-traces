@@ -18,13 +18,11 @@ import { GroupBySelector } from '../../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { debounce } from 'lodash';
-import { TraceExploration } from 'pages/Explore';
 import {
   AllLayoutRunners,
   getAllLayoutRunners,
@@ -32,6 +30,7 @@ import {
   isGroupByAll,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
+import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -59,7 +58,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private _onActivate() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
 
     variable.subscribeToState(() => {
       this.updateBody(variable);
@@ -71,7 +70,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       }
     });
 
-    sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
+    getTraceByServiceScene(this).subscribeToState(() => {
       this.updateBody(variable);
     });
 
@@ -84,32 +83,23 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
     const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
-    this.setBody(filtered, this.getVariable());
+    this.setBody(filtered, getGroupByVariable(this));
   }, 250);
 
-  private getVariable(): CustomVariable {
-    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
-
-    return variable;
-  }
-
   private onReferencedVariableValueChanged() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
   private getAttributes() {
-    const allAttributes = sceneGraph.getAncestor(this, TracesByServiceScene).state.attributes;
+    const allAttributes = getTraceByServiceScene(this).state.attributes;
     return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
   }
 
   private async updateBody(variable: CustomVariable) {
     const allLayoutRunners = getAllLayoutRunners(
-      sceneGraph.getAncestor(this, TraceExploration),
+      getTraceExplorationScene(this),
       this.getAttributes() ?? []
     );
     this.setState({ allLayoutRunners });
@@ -122,13 +112,13 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };
 
   public onChange = (value: string) => {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
 
     // reset searchQuery
@@ -138,8 +128,8 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
     const [scope, setScope] = useState(RESOURCE)
     const { body, searchQuery } = model.useState();
-    const variable = model.getVariable();
-    const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
+    const variable = getGroupByVariable(model);
+    const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);  
     
     const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;

@@ -7,7 +7,6 @@ import {
   SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
-  sceneGraph,
   SceneObject,
   SceneQueryRunner,
   VizPanelState,
@@ -15,12 +14,11 @@ import {
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getLabelValue } from '../../../utils/utils';
+import { getTraceExplorationScene, getLabelValue } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
-import { TraceExploration } from '../../../pages/Explore';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 
@@ -29,7 +27,7 @@ export function buildNormalLayout(
   variable: CustomVariable,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
-  const traceExploration = sceneGraph.getAncestor(scene, TraceExploration);
+  const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
   const query = rateByWithStatus(metric, variable.getValueText());
 

@@ -26,7 +26,7 @@ import {
   radioAttributesResource,
   getAttributesAsOptions,
 } from '../../utils/shared';
-import { getLabelValue } from '../../utils/utils';
+import { getLabelValue, getGroupByVariable, getTraceExplorationScene } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
@@ -81,7 +81,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   private _onActivate() {
     this.updateAttributes();
 
-    const groupByVariable = this.getGroupByVariable();
+    const groupByVariable = getGroupByVariable(this);
 
     this.subscribeToState((newState, prevState) => {
       if (newState.attributes !== prevState.attributes) {
@@ -89,7 +89,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       }
     });
 
-    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
+    const traceExploration = getTraceExplorationScene(this);
     const metricVariable = traceExploration.getMetricVariable();
     metricVariable?.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
@@ -136,7 +136,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   private buildBody() {
     const allLayoutRunners = getAllLayoutRunners(
-      sceneGraph.getAncestor(this, TraceExploration),
+      getTraceExplorationScene(this),
       this.state.attributes ?? []
     );
     this.setState({ allLayoutRunners });
@@ -144,33 +144,21 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   }
 
   private setBody = (runners: AllLayoutRunners[]) => {
-    const variable = this.getGroupByVariable();
+    const variable = getGroupByVariable(this);
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
               new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });
   };
 
-  public getGroupByVariable() {
-    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this);
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
-
-    return variable;
-  }
-
-  public onChangeGroupBy = (value?: string) => {
-    if (!value) {
-      return;
-    }
-    const groupByVariable = this.getGroupByVariable();
-    groupByVariable.changeValueTo(value);
+  public onChange = (value: string) => {
+    const variable = getGroupByVariable(this);
+    variable.changeValueTo(value);
 
     // reset searchQuery
     this.setState({ searchQuery: '' });
@@ -183,7 +171,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
     const { attributes, body, metricCards, searchQuery } = model.useState();
-    const groupByVariable = model.getGroupByVariable();
+    const groupByVariable = getGroupByVariable(model);
     const { value: groupByValue } = groupByVariable.useState();
 
     return (
@@ -205,7 +193,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             options={getAttributesAsOptions(attributes || [])}
             radioAttributes={radioAttributesResource}
             value={groupByValue.toString()}
-            onChange={(value) => model.onChangeGroupBy(value)}
+            onChange={(value) => model.onChange(value)}
           />
         </div>
         {isGroupByAll(groupByVariable) && (
@@ -331,7 +319,7 @@ interface SelectAttributeActionState extends SceneObjectState {
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
   public onClick = () => {
     const startingPointScene = sceneGraph.getAncestor(this, SelectStartingPointScene);
-    startingPointScene.onChangeGroupBy(this.state.attribute);
+    startingPointScene.onChange(this.state.attribute);
   };
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {

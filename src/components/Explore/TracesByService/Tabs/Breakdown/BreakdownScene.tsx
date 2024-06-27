@@ -3,16 +3,15 @@ import React from 'react';
 import {
   SceneComponentProps,
   SceneFlexItem,
-  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AttributesComparisonScene } from './AttributesComparisonScene';
 import { AttributesBreakdownScene } from './AttributesBreakdownScene';
 import { VAR_METRIC } from '../../../../../utils/shared';
+import { getTraceByServiceScene } from 'utils/utils';
 
 interface BreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -29,7 +28,7 @@ export class BreakdownScene extends SceneObjectBase<BreakdownSceneState> {
   }
 
   private _onActivate() {
-    sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState((newState, prevState) => {
+    getTraceByServiceScene(this).subscribeToState((newState, prevState) => {
       if (newState.selection !== prevState.selection) {
         this.updateBody();
       }
@@ -39,7 +38,7 @@ export class BreakdownScene extends SceneObjectBase<BreakdownSceneState> {
   }
 
   private updateBody() {
-    const ancestor = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const ancestor = getTraceByServiceScene(this);
     const { selection } = ancestor.state;
     this.setState({ body: selection ? new AttributesComparisonScene({}) : new AttributesBreakdownScene({}) });
   }

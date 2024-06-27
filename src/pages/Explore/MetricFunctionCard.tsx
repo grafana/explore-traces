@@ -2,7 +2,6 @@ import {
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
@@ -12,10 +11,10 @@ import { barsPanelConfig } from '../../components/Explore/panels/barsPanel';
 import { rateByWithStatus } from '../../components/Explore/queries/rateByWithStatus';
 import React from 'react';
 import { css, cx } from '@emotion/css';
-import { TraceExploration } from './TraceExploration';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
+import { getTraceExplorationScene } from 'utils/utils';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -105,7 +104,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
 
   public static Component = ({ model }: SceneComponentProps<MetricFunctionCard>) => {
     const { body, metric } = model.useState();
-    const traceExploration = sceneGraph.getAncestor(model, TraceExploration);
+    const traceExploration = getTraceExplorationScene(model);
     const { value: selectedMetric } = traceExploration.getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 

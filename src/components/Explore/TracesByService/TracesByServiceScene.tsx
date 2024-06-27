@@ -6,7 +6,6 @@ import {
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -27,8 +26,8 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
-import { TraceExploration } from 'pages/Explore';
 import { isEqual } from 'lodash';
+import { getTraceExplorationScene } from 'utils/utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -57,7 +56,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   private _onActivate() {
     this.updateBody();
 
-    const exploration = sceneGraph.getAncestor(this, TraceExploration);
+    const exploration = getTraceExplorationScene(this);
     const metricVariable = exploration.getMetricVariable();
     metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
@@ -70,7 +69,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   updateBody() {
-    const traceExploration = sceneGraph.getAncestor(this, TraceExploration);
+    const traceExploration = getTraceExplorationScene(this);
     const metric = traceExploration.getMetricVariable().getValue();
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === this.state.actionView);
 

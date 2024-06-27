@@ -27,10 +27,8 @@ import {
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { TracesByServiceScene } from '../../TracesByServiceScene';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { ALL } from '../../../../../constants';
-import { TraceExploration } from 'pages/Explore';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
@@ -38,6 +36,7 @@ import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
+import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -64,7 +63,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private _onActivate() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
 
     this.updateData();
 
@@ -72,7 +71,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
       this.updateBody(variable);
     });
 
-    sceneGraph.getAncestor(this, TracesByServiceScene).subscribeToState(() => {
+    getTraceByServiceScene(this).subscribeToState(() => {
       this.updateBody(variable);
     });
 
@@ -84,7 +83,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private updateData() {
-    const byServiceScene = sceneGraph.getAncestor(this, TracesByServiceScene);
+    const byServiceScene = getTraceByServiceScene(this);
     const sceneTimeRange = sceneGraph.getTimeRange(this);
     const from = sceneTimeRange.state.value.from.unix();
     const to = sceneTimeRange.state.value.to.unix();
@@ -119,29 +118,20 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     });
   }
 
-  private getVariable(): CustomVariable {
-    const variable = sceneGraph.lookupVariable(VAR_GROUPBY, this)!;
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Group by variable not found');
-    }
-
-    return variable;
-  }
-
   private onReferencedVariableValueChanged() {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(ALL);
     this.updateBody(variable);
   }
 
   private getAttributes() {
-    const allAttributes = sceneGraph.getAncestor(this, TracesByServiceScene).state.attributes;
+    const allAttributes = getTraceByServiceScene(this).state.attributes;
     return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
   }
 
   private async updateBody(variable: CustomVariable) {
     const allLayoutRunners = getAllLayoutRunners(
-      sceneGraph.getAncestor(this, TraceExploration),
+      getTraceExplorationScene(this),
       this.getAttributes() ?? []
     );
     this.setState({ allLayoutRunners });
@@ -154,20 +144,20 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, variableName: VAR_FILTERS, labelKey: variable.getValueText() }),
+              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };
 
   public onChange = (value: string) => {
-    const variable = this.getVariable();
+    const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {
     const { body } = model.useState();
-    const variable = model.getVariable();
-    const { attributes } = sceneGraph.getAncestor(model, TracesByServiceScene).useState();
+    const variable = getGroupByVariable(model);
+    const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
     const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 

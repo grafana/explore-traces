@@ -1,11 +1,10 @@
 import { css } from '@emotion/css';
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, sceneGraph, SceneObject } from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject } from '@grafana/scenes';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
 import React from 'react';
-import { getExplorationFor } from 'utils/utils';
+import { getTraceExplorationScene, getTraceByServiceScene } from 'utils/utils';
 import { ShareExplorationButton } from '../ShareExplorationButton';
-import { TracesByServiceScene } from '../TracesByServiceScene';
 import { buildSpansScene } from './Spans/SpansScene';
 import { buildStructureScene } from './Structure/StructureScene';
 import { buildBreakdownScene } from './Breakdown/BreakdownScene';
@@ -27,9 +26,9 @@ export interface TabsBarSceneState extends SceneObjectState {}
 
 export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
   public static Component = ({ model }: SceneComponentProps<TabsBarScene>) => {
-    const metricScene = sceneGraph.getAncestor(model, TracesByServiceScene);
+    const metricScene = getTraceByServiceScene(model);
     const styles = useStyles2(getStyles);
-    const exploration = getExplorationFor(model);
+    const exploration = getTraceExplorationScene(model);
     const { actionView } = metricScene.useState();
 
     return (
