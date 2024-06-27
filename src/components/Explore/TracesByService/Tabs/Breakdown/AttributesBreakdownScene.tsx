@@ -30,7 +30,7 @@ import {
   isGroupByAll,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
-import { getExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -99,7 +99,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   private async updateBody(variable: CustomVariable) {
     const allLayoutRunners = getAllLayoutRunners(
-      getExplorationScene(this),
+      getTraceExplorationScene(this),
       this.getAttributes() ?? []
     );
     this.setState({ allLayoutRunners });

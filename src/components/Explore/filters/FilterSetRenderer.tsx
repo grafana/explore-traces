@@ -9,13 +9,13 @@ import { FilterRenderer } from './FilterRenderer';
 import { AddFilter } from './AddFilter';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { getExplorationScene, getFilterSignature } from '../../../utils/utils';
+import { getTraceExplorationScene, getFilterSignature } from '../../../utils/utils';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
 import { getSignalForKey, primarySignalOptions } from '../../../pages/Explore/primary-signals';
 import { MetricSelect } from './MetricSelect';
 
 export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariable>) {
-  const exploration = getExplorationScene(model);
+  const exploration = getTraceExplorationScene(model);
   const { primarySignal } = exploration.useState();
   const { filters } = model.useState();
   const styles = useStyles2(getStyles);

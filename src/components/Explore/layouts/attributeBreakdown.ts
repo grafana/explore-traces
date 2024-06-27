@@ -14,7 +14,7 @@ import {
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getExplorationScene, getLabelValue } from '../../../utils/utils';
+import { getTraceExplorationScene, getLabelValue } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
@@ -27,7 +27,7 @@ export function buildNormalLayout(
   variable: CustomVariable,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
-  const traceExploration = getExplorationScene(scene);
+  const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
   const query = rateByWithStatus(metric, variable.getValueText());
 

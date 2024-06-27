@@ -14,7 +14,7 @@ import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
-import { getExplorationScene } from 'utils/utils';
+import { getTraceExplorationScene } from 'utils/utils';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -104,7 +104,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
 
   public static Component = ({ model }: SceneComponentProps<MetricFunctionCard>) => {
     const { body, metric } = model.useState();
-    const traceExploration = getExplorationScene(model);
+    const traceExploration = getTraceExplorationScene(model);
     const { value: selectedMetric } = traceExploration.getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 

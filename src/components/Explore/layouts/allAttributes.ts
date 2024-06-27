@@ -13,7 +13,7 @@ import { barsPanelConfig } from '../panels/barsPanel';
 import { AllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { MetricFunction } from '../../../utils/shared';
-import { getExplorationScene } from 'utils/utils';
+import { getTraceExplorationScene } from 'utils/utils';
 
 const MAX_PANELS_IN_ALL_ATTRIBUTES_BREAKDOWN = 100;
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -24,7 +24,7 @@ export function buildAllLayout(
   runners: AllLayoutRunners[]
 ) {
   const children: SceneFlexItemLike[] = [];
-  const traceExploration = getExplorationScene(scene);
+  const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
 
   for (const runner of runners) {

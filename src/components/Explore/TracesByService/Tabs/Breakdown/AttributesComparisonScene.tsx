@@ -36,7 +36,7 @@ import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
-import { getExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -131,7 +131,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   private async updateBody(variable: CustomVariable) {
     const allLayoutRunners = getAllLayoutRunners(
-      getExplorationScene(this),
+      getTraceExplorationScene(this),
       this.getAttributes() ?? []
     );
     this.setState({ allLayoutRunners });

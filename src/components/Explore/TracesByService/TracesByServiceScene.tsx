@@ -27,7 +27,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
-import { getExplorationScene } from 'utils/utils';
+import { getTraceExplorationScene } from 'utils/utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -56,7 +56,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   private _onActivate() {
     this.updateBody();
 
-    const exploration = getExplorationScene(this);
+    const exploration = getTraceExplorationScene(this);
     const metricVariable = exploration.getMetricVariable();
     metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
@@ -69,7 +69,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   updateBody() {
-    const traceExploration = getExplorationScene(this);
+    const traceExploration = getTraceExplorationScene(this);
     const metric = traceExploration.getMetricVariable().getValue();
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === this.state.actionView);
 

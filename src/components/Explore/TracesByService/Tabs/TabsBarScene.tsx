@@ -3,7 +3,7 @@ import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject } f
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
 import React from 'react';
-import { getExplorationScene, getTraceByServiceScene } from 'utils/utils';
+import { getTraceExplorationScene, getTraceByServiceScene } from 'utils/utils';
 import { ShareExplorationButton } from '../ShareExplorationButton';
 import { buildSpansScene } from './Spans/SpansScene';
 import { buildStructureScene } from './Structure/StructureScene';
@@ -28,7 +28,7 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
   public static Component = ({ model }: SceneComponentProps<TabsBarScene>) => {
     const metricScene = getTraceByServiceScene(model);
     const styles = useStyles2(getStyles);
-    const exploration = getExplorationScene(model);
+    const exploration = getTraceExplorationScene(model);
     const { actionView } = metricScene.useState();
 
     return (
