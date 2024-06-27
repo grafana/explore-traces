@@ -32,14 +32,22 @@ export class InvestigateAttributeWithValueAction extends SceneObjectBase<Investi
       throw new Error('Group by variable not found');
     }
 
-    let newFilters = variable.state.filters;
-    newFilters.push({
-      key: groupByVariable.getValue().toString(),
-      operator: '=',
-      value: this.state.value,
-    });
+    // ensure we set the new filter with latest value
+    // and remove any existing filter for the same key
+    const filtersWithoutNew = variable.state.filters.filter(
+      (f) => f.key !== groupByVariable.getValue().toString()
+    );
 
-    variable.setState({ filters: newFilters });
+    variable.setState({
+      filters: [
+        ...filtersWithoutNew,
+        {
+          key: groupByVariable.getValue().toString(),
+          operator: '=',
+          value: this.state.value,
+        },
+      ],
+    });
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
