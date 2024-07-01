@@ -14,7 +14,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -27,7 +27,7 @@ import {
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
+import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { ALL } from '../../../../../constants';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
@@ -37,6 +37,7 @@ import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -142,9 +143,9 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name }))
+          ? buildAllComparisonLayout((frame) => new InspectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
+              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };
@@ -307,28 +308,5 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       flexDirection: 'column',
     }),
-  };
-}
-
-interface SelectAttributeActionState extends SceneObjectState {
-  attribute?: string;
-}
-
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public onClick = () => {
-    const attributesComparisonScene = sceneGraph.getAncestor(this, AttributesComparisonScene);
-    attributesComparisonScene.onChange(this.state.attribute || '');
-  };
-
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
-    if (!model.state.attribute) {
-      return null;
-    }
-
-    return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        Select
-      </Button>
-    );
   };
 }

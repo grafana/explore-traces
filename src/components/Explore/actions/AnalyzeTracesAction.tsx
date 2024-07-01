@@ -7,46 +7,45 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent } from '../../utils/shared';
+import { StartingPointSelectedEvent } from '../../../utils/shared';
 import { getFiltersVariable, getGroupByVariable } from 'utils/utils';
 
-export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
-  value: string;
+export interface AnalyzeTracesActionState extends SceneObjectState {
+  attribute: string;
 }
 
-export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
+export class AnalyzeTracesAction extends SceneObjectBase<AnalyzeTracesActionState> {
   public onClick = () => {
-    const variable = getFiltersVariable(this);
-
-    if (!this.state.value) {
+    if (!this.state.attribute) {
       return;
     }
 
-    const groupByVariable = getGroupByVariable(this)
+    const groupByVariable = getGroupByVariable(this);
+    const filtersVariable = getFiltersVariable(this);
 
     // ensure we set the new filter with latest value
     // and remove any existing filter for the same key
-    const filtersWithoutNew = variable.state.filters.filter(
+    const filtersWithoutNew = filtersVariable.state.filters.filter(
       (f) => f.key !== groupByVariable.getValue().toString()
     );
 
-    variable.setState({
+    filtersVariable.setState({
       filters: [
         ...filtersWithoutNew,
         {
           key: groupByVariable.getValue().toString(),
           operator: '=',
-          value: this.state.value,
+          value: this.state.attribute,
         },
       ],
     });
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<InvestigateAttributeWithValueAction>) => {
+  public static Component = ({ model }: SceneComponentProps<AnalyzeTracesAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        Select
+        Analyze Traces
       </Button>
     );
   };

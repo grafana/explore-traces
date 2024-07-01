@@ -6,14 +6,13 @@ import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
   CustomVariable,
   SceneComponentProps,
-  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 
 import {
   VAR_DATASOURCE_EXPR,
@@ -32,13 +31,14 @@ import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
-import { AddToFiltersGraphAction } from '../../components/Explore/AddToFiltersGraphAction';
-import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithValueAction';
+import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';
+import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
 import { Search } from './Search';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
+import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -148,10 +148,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          ? buildAllLayout(this, (attribute) => new InspectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
-              new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
+              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+              new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });
   };
@@ -309,24 +309,5 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(0.5),
       marginTop: theme.spacing(2),
     }),
-  };
-}
-
-interface SelectAttributeActionState extends SceneObjectState {
-  attribute: string;
-}
-
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public onClick = () => {
-    const startingPointScene = sceneGraph.getAncestor(this, SelectStartingPointScene);
-    startingPointScene.onChange(this.state.attribute);
-  };
-
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
-    return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        Select
-      </Button>
-    );
   };
 }
