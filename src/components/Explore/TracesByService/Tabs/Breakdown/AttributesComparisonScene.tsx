@@ -238,6 +238,7 @@ const frameGroupToDataframe = (attribute: string, frames: DataFrame[]): DataFram
     type: FieldType.string,
     values: [],
     config: {},
+    labels: { [attribute]: attribute },
   };
   const baselineField: Field = {
     name: 'Baseline',

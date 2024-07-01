@@ -50,18 +50,23 @@ export function getLayoutChild(
       .setTitle(getTitle(frame))
       .setOption('legend', { showLegend: false })
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-      .setUnit('percentunit')
       .setMax(1)
       .setOverrides((overrides) => {
         overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
-        overrides.matchFieldsWithName('Baseline').overrideColor({
-          mode: 'fixed',
-          fixedColor: BaselineColor,
-        });
-        overrides.matchFieldsWithName('Selection').overrideColor({
-          mode: 'fixed',
-          fixedColor: SelectionColor,
-        });
+        overrides
+          .matchFieldsWithName('Baseline')
+          .overrideColor({
+            mode: 'fixed',
+            fixedColor: BaselineColor,
+          })
+          .overrideUnit('percentunit');
+        overrides
+          .matchFieldsWithName('Selection')
+          .overrideColor({
+            mode: 'fixed',
+            fixedColor: SelectionColor,
+          })
+          .overrideUnit('percentunit');
       })
       .setData(
         new SceneDataNode({
