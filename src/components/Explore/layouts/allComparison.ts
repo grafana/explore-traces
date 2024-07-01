@@ -6,6 +6,9 @@ import { DataFrame, PanelData } from '@grafana/data';
 import { AxisPlacement } from '@grafana/ui';
 import { TooltipDisplayMode } from '@grafana/schema';
 
+export const BaselineColor = '#CCCCDC';
+export const SelectionColor = '#FF9830';
+
 export function buildAllComparisonLayout(actionsFn: (df: DataFrame) => VizPanelState['headerActions']) {
   return new LayoutSwitcher({
     options: [
@@ -51,6 +54,14 @@ export function getLayoutChild(
       .setMax(1)
       .setOverrides((overrides) => {
         overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
+        overrides.matchFieldsWithName('Baseline').overrideColor({
+          mode: 'fixed',
+          fixedColor: BaselineColor,
+        });
+        overrides.matchFieldsWithName('Selection').overrideColor({
+          mode: 'fixed',
+          fixedColor: SelectionColor,
+        });
       })
       .setData(
         new SceneDataNode({
