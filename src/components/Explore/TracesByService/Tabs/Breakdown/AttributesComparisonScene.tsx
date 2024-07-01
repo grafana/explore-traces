@@ -14,7 +14,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -29,7 +29,7 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
 import { ALL } from '../../../../../constants';
-import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { AllLayoutRunners, SelectAttributeAction, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
@@ -142,7 +142,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name }))
+          ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
             ]),
@@ -307,28 +307,5 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       flexDirection: 'column',
     }),
-  };
-}
-
-interface SelectAttributeActionState extends SceneObjectState {
-  attribute?: string;
-}
-
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public onClick = () => {
-    const attributesComparisonScene = sceneGraph.getAncestor(this, AttributesComparisonScene);
-    attributesComparisonScene.onChange(this.state.attribute || '');
-  };
-
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
-    if (!model.state.attribute) {
-      return null;
-    }
-
-    return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        Select
-      </Button>
-    );
   };
 }

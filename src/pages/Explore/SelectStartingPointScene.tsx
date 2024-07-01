@@ -6,7 +6,6 @@ import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
   CustomVariable,
   SceneComponentProps,
-  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
@@ -148,7 +147,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
               new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
@@ -313,18 +312,18 @@ function getStyles(theme: GrafanaTheme2) {
 }
 
 interface SelectAttributeActionState extends SceneObjectState {
-  attribute: string;
+  attribute?: string;
+  onClick: () => void;
 }
 
 export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public onClick = () => {
-    const startingPointScene = sceneGraph.getAncestor(this, SelectStartingPointScene);
-    startingPointScene.onChange(this.state.attribute);
-  };
+  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
+    if (!model.state.attribute) {
+      return null;
+    }
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="solid" onClick={() => model.state.onClick()}>
         Select
       </Button>
     );

@@ -5,14 +5,13 @@ import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import {
   CustomVariable,
   SceneComponentProps,
-  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
@@ -28,6 +27,7 @@ import {
   getAllLayoutRunners,
   filterAllLayoutRunners,
   isGroupByAll,
+  SelectAttributeAction,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
@@ -110,7 +110,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute }), runners)
+          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
             ]),
@@ -213,23 +213,5 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       flexDirection: 'row',
     }),
-  };
-}
-
-interface SelectAttributeActionState extends SceneObjectState {
-  attribute: string;
-}
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public onClick = () => {
-    const attributesBreakdownScene = sceneGraph.getAncestor(this, AttributesBreakdownScene);
-    attributesBreakdownScene.onChange(this.state.attribute);
-  };
-
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
-    return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        Select
-      </Button>
-    );
   };
 }

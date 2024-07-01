@@ -16,21 +16,20 @@ export interface InvestigateAttributeWithValueActionState extends SceneObjectSta
 
 export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
   public onClick = () => {
-    const variable = getFiltersVariable(this);
-
     if (!this.state.value) {
       return;
     }
 
-    const groupByVariable = getGroupByVariable(this)
+    const groupByVariable = getGroupByVariable(this);
+    const filtersVariable = getFiltersVariable(this);
 
     // ensure we set the new filter with latest value
     // and remove any existing filter for the same key
-    const filtersWithoutNew = variable.state.filters.filter(
+    const filtersWithoutNew = filtersVariable.state.filters.filter(
       (f) => f.key !== groupByVariable.getValue().toString()
     );
 
-    variable.setState({
+    filtersVariable.setState({
       filters: [
         ...filtersWithoutNew,
         {
