@@ -37,7 +37,7 @@ import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
-import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
+import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -143,7 +143,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
+          ? buildAllComparisonLayout((frame) => new InspectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
               new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),

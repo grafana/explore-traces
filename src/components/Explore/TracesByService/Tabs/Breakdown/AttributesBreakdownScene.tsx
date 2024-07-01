@@ -30,7 +30,7 @@ import {
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
-import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
+import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -110,7 +110,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
+          ? buildAllLayout(this, (attribute) => new InspectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),

@@ -7,20 +7,20 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-interface SelectAttributeActionState extends SceneObjectState {
+interface InspectAttributeActionState extends SceneObjectState {
   attribute?: string;
   onClick: () => void;
 }
 
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
+export class InspectAttributeAction extends SceneObjectBase<InspectAttributeActionState> {
+  public static Component = ({ model }: SceneComponentProps<InspectAttributeAction>) => {
     if (!model.state.attribute) {
       return null;
     }
 
     return (
       <Button variant="secondary" size="sm" fill="solid" onClick={() => model.state.onClick()}>
-        Select
+        Inspect
       </Button>
     );
   };

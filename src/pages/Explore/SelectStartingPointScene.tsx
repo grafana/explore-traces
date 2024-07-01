@@ -32,13 +32,13 @@ import { buildNormalLayout } from '../../components/Explore/layouts/attributeBre
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
 import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';
-import { InvestigateAttributeAction } from '../../components/Explore/actions/InvestigateAttributeAction';
+import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
 import { Search } from './Search';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
-import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
+import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -148,10 +148,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
+          ? buildAllLayout(this, (attribute) => new InspectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-              new InvestigateAttributeAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
+              new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });
   };
