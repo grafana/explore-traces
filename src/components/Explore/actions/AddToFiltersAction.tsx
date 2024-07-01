@@ -7,14 +7,14 @@ import {
   SceneComponentProps,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
-import { getFiltersVariable, getLabelValue } from '../../utils/utils';
+import { getFiltersVariable, getLabelValue } from '../../../utils/utils';
 
-export interface AddToFiltersGraphActionState extends SceneObjectState {
+export interface AddToFiltersActionState extends SceneObjectState {
   frame: DataFrame;
   labelKey?: string;
 }
 
-export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphActionState> {
+export class AddToFiltersAction extends SceneObjectBase<AddToFiltersActionState> {
   public onClick = () => {
     const variable = getFiltersVariable(this)
 
@@ -49,7 +49,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
     });
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+  public static Component = ({ model }: SceneComponentProps<AddToFiltersAction>) => {
     return (
       <Button variant="primary" size="sm" fill="text" onClick={model.onClick} icon={'search-plus'}>
         Add to filters
