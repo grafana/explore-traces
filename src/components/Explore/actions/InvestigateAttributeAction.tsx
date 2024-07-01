@@ -7,16 +7,16 @@ import {
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
-import { StartingPointSelectedEvent } from '../../utils/shared';
+import { StartingPointSelectedEvent } from '../../../utils/shared';
 import { getFiltersVariable, getGroupByVariable } from 'utils/utils';
 
 export interface InvestigateAttributeActionState extends SceneObjectState {
-  value: string;
+  attribute: string;
 }
 
 export class InvestigateAttributeAction extends SceneObjectBase<InvestigateAttributeActionState> {
   public onClick = () => {
-    if (!this.state.value) {
+    if (!this.state.attribute) {
       return;
     }
 
@@ -35,7 +35,7 @@ export class InvestigateAttributeAction extends SceneObjectBase<InvestigateAttri
         {
           key: groupByVariable.getValue().toString(),
           operator: '=',
-          value: this.state.value,
+          value: this.state.attribute,
         },
       ],
     });

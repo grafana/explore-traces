@@ -27,9 +27,9 @@ import {
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { AddToFiltersAction } from '../../../AddToFiltersAction';
+import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { ALL } from '../../../../../constants';
-import { AllLayoutRunners, SelectAttributeAction, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
+import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { buildAllComparisonLayout } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
@@ -37,6 +37,7 @@ import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;

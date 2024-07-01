@@ -12,7 +12,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 
 import {
   VAR_DATASOURCE_EXPR,
@@ -31,13 +31,14 @@ import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
-import { AddToFiltersAction } from '../../components/Explore/AddToFiltersAction';
-import { InvestigateAttributeAction } from './InvestigateAttributeAction';
+import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';
+import { InvestigateAttributeAction } from '../../components/Explore/actions/InvestigateAttributeAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
 import { Search } from './Search';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
+import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
 
 export type AllLayoutRunners = {
   attribute: string;
@@ -150,7 +151,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
               new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-              new InvestigateAttributeAction({ value: getLabelValue(frame, variable.getValueText()) }),
+              new InvestigateAttributeAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });
   };
@@ -308,24 +309,5 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(0.5),
       marginTop: theme.spacing(2),
     }),
-  };
-}
-
-interface SelectAttributeActionState extends SceneObjectState {
-  attribute?: string;
-  onClick: () => void;
-}
-
-export class SelectAttributeAction extends SceneObjectBase<SelectAttributeActionState> {
-  public static Component = ({ model }: SceneComponentProps<SelectAttributeAction>) => {
-    if (!model.state.attribute) {
-      return null;
-    }
-
-    return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={() => model.state.onClick()}>
-        Select
-      </Button>
-    );
   };
 }

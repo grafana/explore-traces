@@ -17,7 +17,7 @@ import { GroupBySelector } from '../../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { AddToFiltersAction } from '../../../AddToFiltersAction';
+import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
@@ -27,10 +27,10 @@ import {
   getAllLayoutRunners,
   filterAllLayoutRunners,
   isGroupByAll,
-  SelectAttributeAction,
 } from 'pages/Explore/SelectStartingPointScene';
 import { Search } from 'pages/Explore/Search';
 import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { SelectAttributeAction } from 'components/Explore/actions/SelectAction';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;

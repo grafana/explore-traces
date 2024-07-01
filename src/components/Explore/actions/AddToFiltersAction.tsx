@@ -7,7 +7,7 @@ import {
   SceneComponentProps,
 } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
-import { getFiltersVariable, getLabelValue } from '../../utils/utils';
+import { getFiltersVariable, getLabelValue } from '../../../utils/utils';
 
 export interface AddToFiltersActionState extends SceneObjectState {
   frame: DataFrame;
