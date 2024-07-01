@@ -27,7 +27,7 @@ import {
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
+import { AddToFiltersAction } from '../../../AddToFiltersAction';
 import { ALL } from '../../../../../constants';
 import { AllLayoutRunners, SelectAttributeAction, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
@@ -144,7 +144,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllComparisonLayout((frame) => new SelectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
+              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };

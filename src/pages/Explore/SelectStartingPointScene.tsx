@@ -31,8 +31,8 @@ import { ALL, RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
-import { AddToFiltersGraphAction } from '../../components/Explore/AddToFiltersGraphAction';
-import { InvestigateAttributeWithValueAction } from './InvestigateAttributeWithValueAction';
+import { AddToFiltersAction } from '../../components/Explore/AddToFiltersAction';
+import { InvestigateAttributeAction } from './InvestigateAttributeAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { TraceExploration } from './TraceExploration';
 import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
@@ -149,8 +149,8 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
-              new InvestigateAttributeWithValueAction({ value: getLabelValue(frame, variable.getValueText()) }),
+              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+              new InvestigateAttributeAction({ value: getLabelValue(frame, variable.getValueText()) }),
             ]),
     });
   };

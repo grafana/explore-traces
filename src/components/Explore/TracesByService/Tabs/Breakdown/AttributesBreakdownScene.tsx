@@ -17,7 +17,7 @@ import { GroupBySelector } from '../../../GroupBySelector';
 import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
-import { AddToFiltersGraphAction } from '../../../AddToFiltersGraphAction';
+import { AddToFiltersAction } from '../../../AddToFiltersAction';
 import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildAllLayout } from '../../../layouts/allAttributes';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
@@ -112,7 +112,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
         variable.hasAllValue() || variable.getValue() === ALL
           ? buildAllLayout(this, (attribute) => new SelectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
           : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersGraphAction({ frame, labelKey: variable.getValueText() }),
+              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),
     });
   };

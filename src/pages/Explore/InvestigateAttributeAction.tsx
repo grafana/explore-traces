@@ -10,11 +10,11 @@ import { Button } from '@grafana/ui';
 import { StartingPointSelectedEvent } from '../../utils/shared';
 import { getFiltersVariable, getGroupByVariable } from 'utils/utils';
 
-export interface InvestigateAttributeWithValueActionState extends SceneObjectState {
+export interface InvestigateAttributeActionState extends SceneObjectState {
   value: string;
 }
 
-export class InvestigateAttributeWithValueAction extends SceneObjectBase<InvestigateAttributeWithValueActionState> {
+export class InvestigateAttributeAction extends SceneObjectBase<InvestigateAttributeActionState> {
   public onClick = () => {
     if (!this.state.value) {
       return;
@@ -42,7 +42,7 @@ export class InvestigateAttributeWithValueAction extends SceneObjectBase<Investi
     this.publishEvent(new StartingPointSelectedEvent(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<InvestigateAttributeWithValueAction>) => {
+  public static Component = ({ model }: SceneComponentProps<InvestigateAttributeAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
         Select
