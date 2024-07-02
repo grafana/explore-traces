@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { LoadingState, PanelData, DataFrame, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, FieldType, GrafanaTheme2, LoadingState, PanelData } from '@grafana/data';
 import {
-  SceneObjectState,
-  SceneFlexItem,
-  SceneObjectBase,
-  sceneGraph,
   SceneComponentProps,
-  SceneLayout,
   SceneCSSGridLayout,
+  SceneFlexItem,
+  sceneGraph,
+  SceneLayout,
+  SceneObjectBase,
+  SceneObjectState,
 } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
@@ -25,7 +25,9 @@ import { getGroupByVariable } from 'utils/utils';
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
   groupBy?: boolean;
+
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneFlexItem;
+
   searchQuery?: string;
 }
 
@@ -111,7 +113,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
           return matchFound ? true : false;
         });
       }),
-    }
+    };
 
     if (filtered.series && filtered.series.length > 0) {
       this.performRepeat(filtered as PanelData);
@@ -137,6 +139,15 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     }
 
     for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {
+      const currentFrame = frames[frameIndex];
+      // Skip frames with no data
+      const sum = currentFrame.fields
+        .filter((f) => f.type === FieldType.number)
+        .reduce((sum, f) => sum + f.values.reduce((vSum, v) => vSum + (v || 0), 0) || 0, 0);
+      if (sum === 0) {
+        continue;
+      }
+      // Build the layout child
       const layoutChild = this.state.getLayoutChild(data, frames[frameIndex], frameIndex);
       newChildren.push(layoutChild);
     }

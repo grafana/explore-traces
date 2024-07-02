@@ -1,21 +1,18 @@
 import {
   CustomVariable,
-  PanelBuilders,
+  SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
   SceneDataTransformer,
-  SceneFlexItem,
-  SceneFlexLayout,
   sceneGraph,
   SceneObject,
   VizPanelState,
 } from '@grafana/scenes';
-import { LayoutSwitcher } from '../LayoutSwitcher';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
-import { DataFrame, FieldType, LoadingState, reduceField, ReducerID } from '@grafana/data';
-import { getLayoutChild } from './allComparison';
+import { DataFrame, FieldType, LoadingState, PanelData, reduceField, ReducerID } from '@grafana/data';
+import { getPanelConfig } from './allComparison';
 
 export function buildAttributeComparison(
   scene: SceneObject,
@@ -66,7 +63,7 @@ export function buildAttributeComparison(
     }
   }
 
-  return new LayoutSwitcher({
+  return new ByFrameRepeater({
     $data: new SceneDataTransformer({
       $data: new SceneDataNode({
         data: {
@@ -88,42 +85,44 @@ export function buildAttributeComparison(
         },
       ],
     }),
-    options: [
-      { value: 'single', label: 'Single' },
-      { value: 'grid', label: 'Grid' },
-      { value: 'rows', label: 'Rows' },
-    ],
-    active: 'grid',
-    layouts: [
-      new SceneFlexLayout({
-        direction: 'column',
-        children: [
-          new SceneFlexItem({
-            minHeight: 300,
-            body: PanelBuilders.timeseries().build(),
-          }),
-        ],
-      }),
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getLabel, actionsFn),
-      }),
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: '1fr',
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getLabel, actionsFn),
-      }),
-    ],
+    body: new SceneCSSGridLayout({
+      templateColumns: GRID_TEMPLATE_COLUMNS,
+      autoRows: '200px',
+      children: [],
+    }),
+    getLayoutChild: getLayoutChild(getLabel, actionsFn),
   });
 }
 
 const getLabel = (df: DataFrame) => {
   return df.name || 'No name available';
 };
+
+function getLayoutChild(
+  getTitle: (df: DataFrame) => string,
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
+) {
+  return (data: PanelData, frame: DataFrame) => {
+    const panel = getPanelConfig()
+      .setTitle(getTitle(frame))
+      .setData(
+        new SceneDataNode({
+          data: {
+            ...data,
+            series: [
+              {
+                ...frame,
+              },
+            ],
+          },
+        })
+      );
+    const actions = actionsFn(frame);
+    if (actions) {
+      panel.setHeaderActions(actions);
+    }
+    return new SceneCSSGridItem({
+      body: panel.build(),
+    });
+  };
+}

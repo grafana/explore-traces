@@ -14,7 +14,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Icon, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -31,7 +31,7 @@ import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { ALL } from '../../../../../constants';
 import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
-import { buildAllComparisonLayout } from '../../../layouts/allComparison';
+import { BaselineColor, buildAllComparisonLayout, SelectionColor } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
@@ -131,10 +131,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private async updateBody(variable: CustomVariable) {
-    const allLayoutRunners = getAllLayoutRunners(
-      getTraceExplorationScene(this),
-      this.getAttributes() ?? []
-    );
+    const allLayoutRunners = getAllLayoutRunners(getTraceExplorationScene(this), this.getAttributes() ?? []);
     this.setState({ allLayoutRunners });
     this.setBody(allLayoutRunners, variable);
   }
@@ -181,6 +178,22 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             </div>
           )}
         </div>
+        <div className={styles.infoFlex}>
+          <div className={styles.tagsFlex}>
+            <Icon name={'info-circle'} />
+            <div>
+              Attributes are ordered by the difference between the baseline and selection values for each value.
+            </div>
+          </div>
+          <div className={styles.tagsFlex}>
+            <div className={styles.baselineTag} />
+            <div>Baseline</div>
+          </div>
+          <div className={styles.tagsFlex}>
+            <div className={styles.selectionTag} />
+            <div>Selection</div>
+          </div>
+        </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );
@@ -226,6 +239,7 @@ const frameGroupToDataframe = (attribute: string, frames: DataFrame[]): DataFram
     type: FieldType.string,
     values: [],
     config: {},
+    labels: { [attribute]: attribute },
   };
   const baselineField: Field = {
     name: 'Baseline',
@@ -307,6 +321,31 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
+    }),
+    baselineTag: css({
+      display: 'inline-block',
+      width: '16px',
+      height: '4px',
+      borderRadius: '4px',
+      backgroundColor: BaselineColor,
+    }),
+    selectionTag: css({
+      display: 'inline-block',
+      width: '16px',
+      height: '4px',
+      borderRadius: '4px',
+      backgroundColor: SelectionColor,
+    }),
+    infoFlex: css({
+      display: 'flex',
+      gap: '16px',
+      alignItems: 'center',
+      padding: '8px',
+    }),
+    tagsFlex: css({
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'center',
     }),
   };
 }

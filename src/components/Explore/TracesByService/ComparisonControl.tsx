@@ -41,7 +41,7 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
     }
 
     return (
-      <div className={styles.button}>
+      <div className={styles.wrapper}>
         <Button
           variant={selection ? 'destructive' : 'primary'}
           size="sm"
@@ -58,8 +58,10 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    button: css({
+    wrapper: css({
       marginTop: theme.spacing(1),
+      display: 'flex',
+      gap: '16px',
     }),
     placeholder: css({
       color: theme.colors.text.secondary,
