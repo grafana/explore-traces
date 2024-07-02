@@ -1,39 +1,22 @@
 import { PanelBuilders, SceneCSSGridItem, SceneCSSGridLayout, SceneDataNode, VizPanelState } from '@grafana/scenes';
-import { LayoutSwitcher } from '../LayoutSwitcher';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { DataFrame, PanelData } from '@grafana/data';
 import { AxisPlacement } from '@grafana/ui';
 import { TooltipDisplayMode } from '@grafana/schema';
+import { HighestDifferencePanel } from './HighestDifferencePanel';
 
 export const BaselineColor = '#CCCCDC';
 export const SelectionColor = '#FF9830';
 
 export function buildAllComparisonLayout(actionsFn: (df: DataFrame) => VizPanelState['headerActions']) {
-  return new LayoutSwitcher({
-    options: [
-      { value: 'grid', label: 'Grid' },
-      { value: 'rows', label: 'Rows' },
-    ],
-    active: 'grid',
-    layouts: [
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getFrameName, actionsFn),
-      }),
-      new ByFrameRepeater({
-        body: new SceneCSSGridLayout({
-          templateColumns: '1fr',
-          autoRows: '200px',
-          children: [],
-        }),
-        getLayoutChild: getLayoutChild(getFrameName, actionsFn),
-      }),
-    ],
+  return new ByFrameRepeater({
+    body: new SceneCSSGridLayout({
+      templateColumns: GRID_TEMPLATE_COLUMNS,
+      autoRows: '300px',
+      children: [],
+    }),
+    getLayoutChild: getLayoutChild(getFrameName, actionsFn),
   });
 }
 
@@ -87,7 +70,7 @@ export function getLayoutChild(
       panel.setHeaderActions(actions);
     }
     return new SceneCSSGridItem({
-      body: panel.build(),
+      body: new HighestDifferencePanel({ frame, panel: panel.build() }),
     });
   };
 }
