@@ -27,6 +27,7 @@ import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
   DATASOURCE_LS_KEY,
   DetailsSceneUpdated,
+  MetricFunction,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
   VAR_METRIC,
@@ -74,7 +75,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
   public _onActivate() {
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopScene(this.state.mode) });
+      this.setState({ topScene: getTopScene(this.state.mode, this.getMetricVariable().getValue() as MetricFunction) });
     }
 
     // Some scene elements publish this
@@ -99,7 +100,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       }
       if (newState.mode !== oldState.mode) {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
-        this.setState({ topScene: getTopScene(newState.mode) });
+        this.setState({ topScene: getTopScene(newState.mode, this.getMetricVariable().getValue() as MetricFunction) });
       }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
@@ -146,7 +147,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (values.mode !== this.state.mode) {
       const mode: TraceExplorationMode = (values.mode as TraceExplorationMode) ?? 'start';
       stateUpdate.mode = mode;
-      stateUpdate.topScene = getTopScene(mode);
+      stateUpdate.topScene = getTopScene(mode, this.getMetricVariable().getValue() as MetricFunction);
     }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
@@ -233,9 +234,9 @@ function buildSplitLayout() {
   });
 }
 
-function getTopScene(mode?: TraceExplorationMode) {
+function getTopScene(mode?: TraceExplorationMode, metric?: MetricFunction) {
   if (mode === 'traces') {
-    return new TracesByServiceScene({});
+    return new TracesByServiceScene({ metric });
   }
   return new SelectStartingPointScene({});
 }
