@@ -59,6 +59,9 @@ export function getGroupByVariable(scene: SceneObject): CustomVariable {
   if (!(variable instanceof CustomVariable)) {
     throw new Error('Group by variable not found');
   }
+  if (!variable.getValue()) {
+    variable.changeValueTo('resource.service.name');
+  }
   return variable;
 }
 

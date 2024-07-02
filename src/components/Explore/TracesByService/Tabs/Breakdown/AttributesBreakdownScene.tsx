@@ -14,34 +14,21 @@ import {
 import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, ignoredAttributes, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
+import { VAR_GROUPBY, VAR_FILTERS, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
-import { ALL, RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
-import { buildAllLayout } from '../../../layouts/allAttributes';
+import { RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { debounce } from 'lodash';
-import {
-  AllLayoutRunners,
-  getAllLayoutRunners,
-  filterAllLayoutRunners,
-  isGroupByAll,
-} from 'pages/Explore/SelectStartingPointScene';
-import { Search } from 'pages/Explore/Search';
-import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
-import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
+import { getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
-  allLayoutRunners?: any;
-  searchQuery?: string;
 }
 
 export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdownSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS, VAR_METRIC],
-    onReferencedVariableValueChanged: this.onReferencedVariableValueChanged.bind(this),
   });
 
   constructor(state: Partial<AttributesBreakdownSceneState>) {
@@ -49,7 +36,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       $variables:
         state.$variables ??
         new SceneVariableSet({
-          variables: [new CustomVariable({ name: VAR_GROUPBY, defaultToAll: true, includeAll: true })],
+          variables: [new CustomVariable({ name: VAR_GROUPBY })],
         }),
       ...state,
     });
@@ -61,73 +48,32 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const variable = getGroupByVariable(this);
 
     variable.subscribeToState(() => {
-      this.updateBody(variable);
-    });
-
-    this.subscribeToState((newState, prevState) => {
-      if (newState.searchQuery !== prevState.searchQuery) {
-        this.onSearchQueryChangeDebounced(newState.searchQuery ?? '');
-      }
+      this.setBody(variable);
     });
 
     getTraceByServiceScene(this).subscribeToState(() => {
-      this.updateBody(variable);
+      this.setBody(variable);
     });
 
-    this.updateBody(variable);
+    this.setBody(variable);
   }
 
-  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
-    this.setState({ searchQuery: evt.currentTarget.value });
-  };
-
-  private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
-    const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
-    this.setBody(filtered, getGroupByVariable(this));
-  }, 250);
-
-  private onReferencedVariableValueChanged() {
-    const variable = getGroupByVariable(this);
-    variable.changeValueTo(ALL);
-    this.updateBody(variable);
-  }
-
-  private getAttributes() {
-    const allAttributes = getTraceByServiceScene(this).state.attributes;
-    return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
-  }
-
-  private async updateBody(variable: CustomVariable) {
-    const allLayoutRunners = getAllLayoutRunners(
-      getTraceExplorationScene(this),
-      this.getAttributes() ?? []
-    );
-    this.setState({ allLayoutRunners });
-    this.setBody(allLayoutRunners, variable);
-  }
-
-  private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
+  private setBody = (variable: CustomVariable) => {
     this.setState({
-      body:
-        variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new InspectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
-          : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-            ]),
+      body: buildNormalLayout(this, variable, (frame: DataFrame) => [
+        new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+      ]),
     });
   };
 
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
-
-    // reset searchQuery
-    this.setState({ searchQuery: '' });
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
     const [scope, setScope] = useState(RESOURCE)
-    const { body, searchQuery } = model.useState();
+    const { body } = model.useState();
     const variable = getGroupByVariable(model);
     const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);  
@@ -167,9 +113,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
             </div>
           )}
         </div>
-        {isGroupByAll(variable) && (
-          <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
-        )}
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
     );

@@ -1,6 +1,7 @@
 import {
   CustomVariable,
   PanelBuilders,
+  SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
   SceneDataTransformer,
@@ -14,8 +15,9 @@ import { LayoutSwitcher } from '../LayoutSwitcher';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
-import { DataFrame, FieldType, LoadingState, reduceField, ReducerID } from '@grafana/data';
-import { getLayoutChild } from './allComparison';
+import { DataFrame, PanelData, FieldType, LoadingState, reduceField, ReducerID } from '@grafana/data';
+import { AxisPlacement } from '@grafana/ui';
+import { TooltipDisplayMode } from '@grafana/schema';
 
 export function buildAttributeComparison(
   scene: SceneObject,
@@ -122,6 +124,44 @@ export function buildAttributeComparison(
       }),
     ],
   });
+}
+
+function getLayoutChild(
+  getTitle: (df: DataFrame) => string,
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
+) {
+  return (data: PanelData, frame: DataFrame) => {
+    const panel = PanelBuilders.barchart()
+      .setTitle(getTitle(frame))
+      .setOption('legend', { showLegend: false })
+      .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
+      .setUnit('percentunit')
+      .setMax(1)
+      .setOverrides((overrides) => {
+        overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
+      })
+      .setData(
+        new SceneDataNode({
+          data: {
+            ...data,
+            series: [
+              {
+                ...frame,
+                fields: frame.fields.sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0),
+              },
+            ],
+          },
+        })
+      );
+
+    const actions = actionsFn(frame);
+    if (actions) {
+      panel.setHeaderActions(actions);
+    }
+    return new SceneCSSGridItem({
+      body: panel.build(),
+    });
+  };
 }
 
 const getLabel = (df: DataFrame) => {
