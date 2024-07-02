@@ -24,33 +24,13 @@ const getFrameName = (df: DataFrame) => {
   return df.name || 'No name available';
 };
 
-export function getLayoutChild(
+function getLayoutChild(
   getTitle: (df: DataFrame) => string,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = PanelBuilders.barchart()
+    const panel = getPanelConfig()
       .setTitle(getTitle(frame))
-      .setOption('legend', { showLegend: false })
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
-      .setMax(1)
-      .setOverrides((overrides) => {
-        overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
-        overrides
-          .matchFieldsWithName('Baseline')
-          .overrideColor({
-            mode: 'fixed',
-            fixedColor: BaselineColor,
-          })
-          .overrideUnit('percentunit');
-        overrides
-          .matchFieldsWithName('Selection')
-          .overrideColor({
-            mode: 'fixed',
-            fixedColor: SelectionColor,
-          })
-          .overrideUnit('percentunit');
-      })
       .setData(
         new SceneDataNode({
           data: {
@@ -58,7 +38,6 @@ export function getLayoutChild(
             series: [
               {
                 ...frame,
-                fields: frame.fields.sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0),
               },
             ],
           },
@@ -73,4 +52,28 @@ export function getLayoutChild(
       body: new HighestDifferencePanel({ frame, panel: panel.build() }),
     });
   };
+}
+
+export function getPanelConfig() {
+  return PanelBuilders.barchart()
+    .setOption('legend', { showLegend: false })
+    .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
+    .setMax(1)
+    .setOverrides((overrides) => {
+      overrides.matchFieldsWithName('Value').overrideCustomFieldConfig('axisPlacement', AxisPlacement.Hidden);
+      overrides
+        .matchFieldsWithName('Baseline')
+        .overrideColor({
+          mode: 'fixed',
+          fixedColor: BaselineColor,
+        })
+        .overrideUnit('percentunit');
+      overrides
+        .matchFieldsWithName('Selection')
+        .overrideColor({
+          mode: 'fixed',
+          fixedColor: SelectionColor,
+        })
+        .overrideUnit('percentunit');
+    });
 }
