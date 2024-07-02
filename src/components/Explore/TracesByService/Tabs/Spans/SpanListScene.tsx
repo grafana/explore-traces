@@ -12,7 +12,7 @@ import {
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { explorationDS } from 'utils/shared';
+import { MakeOptional, MetricFunction, explorationDS } from 'utils/shared';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
@@ -22,14 +22,15 @@ import { buildQuery } from '../../TracesByServiceScene';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
+  metric?: MetricFunction;
 }
 
 export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
-  constructor() {
+  constructor(state: MakeOptional<SpanListSceneState, 'metric'>) {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildQuery(state.metric as MetricFunction)],
       }),
     });
 

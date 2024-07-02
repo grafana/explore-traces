@@ -31,6 +31,7 @@ import { getTraceExplorationScene } from 'utils/utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
+  metric?: MetricFunction;
   actionView?: string;
 
   attributes?: string[];
@@ -45,7 +46,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       body: state.body ?? new SceneFlexLayout({ children: [] }),
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildQuery(state.metric as MetricFunction)],
       }),
       ...state,
     });
@@ -147,10 +148,11 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 const MAIN_PANEL_MIN_HEIGHT = 205;
 const MAIN_PANEL_MAX_HEIGHT = '30%';
 
-export function buildQuery() {
+export function buildQuery(type: MetricFunction) {
+  const typeQuery = type === 'errors' ? ' && status = error' : '';
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} | select(status)`,
+    query: `{${VAR_FILTERS_EXPR}${typeQuery}} | select(status)`,
     queryType: 'traceql',
     tableType: 'spans',
     limit: 100,
