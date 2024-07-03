@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
 import React from 'react';
-import { debounce } from 'lodash';
 
 import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
@@ -8,7 +7,6 @@ import {
   SceneComponentProps,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
@@ -18,8 +16,6 @@ import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
   VAR_GROUPBY,
-  explorationDS,
-  MetricFunction,
   VAR_METRIC,
   StartingPointSelectedEvent,
   radioAttributesResource,
@@ -27,29 +23,17 @@ import {
 } from '../../utils/shared';
 import { getLabelValue, getGroupByVariable, getTraceExplorationScene } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { ALL, RESOURCE_ATTR } from '../../constants';
+import { RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
-import { buildAllLayout } from '../../components/Explore/layouts/allAttributes';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
 import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';
 import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
-import { TraceExploration } from './TraceExploration';
-import { rateByWithStatus } from 'components/Explore/queries/rateByWithStatus';
-import { Search } from './Search';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
-import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
-
-export type AllLayoutRunners = {
-  attribute: string;
-  runner: SceneQueryRunner;
-};
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body?: LayoutSwitcher;
-  allLayoutRunners?: AllLayoutRunners[];
   showHeading?: boolean;
-  searchQuery?: string;
   showPreviews?: boolean;
 
   attributes?: string[];
@@ -85,7 +69,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
     this.subscribeToState((newState, prevState) => {
       if (newState.attributes !== prevState.attributes) {
-        this.buildBody();
+        this.setBody();
       }
     });
 
@@ -93,31 +77,16 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const metricVariable = traceExploration.getMetricVariable();
     metricVariable?.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.buildBody();
+        this.setBody();
       }
     });
 
     groupByVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.buildBody();
-      }
-    });
-
-    this.subscribeToState((newState, prevState) => {
-      if (newState.searchQuery !== prevState.searchQuery) {
-        this.onSearchQueryChangeDebounced(newState.searchQuery ?? '');
+        this.setBody();
       }
     });
   }
-
-  private onSearchQueryChange = (evt: React.SyntheticEvent<HTMLInputElement>) => {
-    this.setState({ searchQuery: evt.currentTarget.value });
-  };
-
-  private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
-    const filtered = filterAllLayoutRunners(this.state.allLayoutRunners ?? [], searchQuery);
-    this.setBody(filtered);
-  }, 250);
 
   private async updateAttributes() {
     const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this } });
@@ -134,34 +103,19 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     });
   }
 
-  private buildBody() {
-    const allLayoutRunners = getAllLayoutRunners(
-      getTraceExplorationScene(this),
-      this.state.attributes ?? []
-    );
-    this.setState({ allLayoutRunners });
-    this.setBody(allLayoutRunners);
-  }
-
-  private setBody = (runners: AllLayoutRunners[]) => {
+  private setBody = () => {
     const variable = getGroupByVariable(this);
     this.setState({
-      body:
-        variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllLayout(this, (attribute) => new InspectAttributeAction({ attribute, onClick: () => this.onChange(attribute) }), runners)
-          : buildNormalLayout(this, variable, (frame: DataFrame) => [
-              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-              new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
-            ]),
+      body: buildNormalLayout(this, variable, (frame: DataFrame) => [
+        new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+        new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
+      ])
     });
   };
 
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
-
-    // reset searchQuery
-    this.setState({ searchQuery: '' });
   };
 
   public onSelectStartingPoint() {
@@ -170,7 +124,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   public static Component = ({ model }: SceneComponentProps<SelectStartingPointScene>) => {
     const styles = useStyles2(getStyles);
-    const { attributes, body, metricCards, searchQuery } = model.useState();
+    const { attributes, body, metricCards } = model.useState();
     const groupByVariable = getGroupByVariable(model);
     const { value: groupByValue } = groupByVariable.useState();
 
@@ -196,9 +150,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
             onChange={(value) => model.onChange(value)}
           />
         </div>
-        {isGroupByAll(groupByVariable) && (
-          <Search searchQuery={searchQuery ?? ''} onSearchQueryChange={model.onSearchQueryChange} />
-        )}
         {body && (
           <div className={styles.bodyWrapper}>
             <body.Component model={body} />
@@ -209,42 +160,11 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   };
 }
 
-export function getAllLayoutRunners(traceExploration: TraceExploration, attributes: string[]) {
-  const runners = [];
-  const variable = traceExploration.getMetricVariable();
-  for (const attribute of attributes) {
-    runners.push({
-      attribute: attribute,
-      runner: new SceneQueryRunner({
-        maxDataPoints: 250,
-        datasource: explorationDS,
-        queries: [rateByWithStatus(variable.getValue() as MetricFunction, attribute)],
-      }),
-    });
-  }
-  return runners;
-}
-
-export function filterAllLayoutRunners(runners: AllLayoutRunners[], searchQuery: string) {
-  return (
-    runners.filter((runner: AllLayoutRunners) => {
-      return runner.attribute.toLowerCase().includes(searchQuery);
-    }) ?? []
-  );
-}
-
-export function isGroupByAll(variable: CustomVariable) {
-  return variable.hasAllValue() || variable.getValue() === ALL;
-}
-
 function getVariableSet() {
   return new SceneVariableSet({
     variables: [
       new CustomVariable({
         name: VAR_GROUPBY,
-        defaultToAll: true,
-        includeAll: true,
-        value: ALL,
       }),
     ],
   });
