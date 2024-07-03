@@ -14,7 +14,7 @@ export const VAR_METRIC = 'metric';
 
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
-export const radioAttributesResource = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
+export const radioAttributesResource = ['resource.service.name', 'resource.cluster', 'resource.environment', 'resource.namespace'];
 export const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
 export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:id', 'trace:id', 'traceDuration'];
 

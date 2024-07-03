@@ -20,7 +20,6 @@ import { GroupBySelector } from '../../../GroupBySelector';
 import {
   VAR_GROUPBY,
   VAR_FILTERS,
-  ignoredAttributes,
   explorationDS,
   VAR_FILTERS_EXPR,
   getAttributesAsOptions,
@@ -29,19 +28,17 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { ALL } from '../../../../../constants';
-import { AllLayoutRunners, getAllLayoutRunners } from 'pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { BaselineColor, buildAllComparisonLayout, SelectionColor } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
-import { getTraceExplorationScene, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
-  allLayoutRunners?: any;
 }
 
 export class AttributesComparisonScene extends SceneObjectBase<AttributesComparisonSceneState> {
@@ -69,18 +66,18 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.updateData();
 
     variable.subscribeToState(() => {
-      this.updateBody(variable);
+      this.setBody(variable);
     });
 
     getTraceByServiceScene(this).subscribeToState(() => {
-      this.updateBody(variable);
+      this.setBody(variable);
     });
 
     sceneGraph.getTimeRange(this).subscribeToState(() => {
       this.updateData();
     });
 
-    this.updateBody(variable);
+    this.setBody(variable);
   }
 
   private updateData() {
@@ -122,21 +119,10 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private onReferencedVariableValueChanged() {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(ALL);
-    this.updateBody(variable);
+    this.setBody(variable);
   }
 
-  private getAttributes() {
-    const allAttributes = getTraceByServiceScene(this).state.attributes;
-    return allAttributes?.filter((attr) => !ignoredAttributes.includes(attr));
-  }
-
-  private async updateBody(variable: CustomVariable) {
-    const allLayoutRunners = getAllLayoutRunners(getTraceExplorationScene(this), this.getAttributes() ?? []);
-    this.setState({ allLayoutRunners });
-    this.setBody(allLayoutRunners, variable);
-  }
-
-  private setBody = (runners: AllLayoutRunners[], variable: CustomVariable) => {
+  private setBody = (variable: CustomVariable) => {
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
@@ -169,6 +155,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 radioAttributes={radioAttributes}
                 value={variable.getValueText()}
                 onChange={model.onChange}
+                showAll={true}
               />
             </div>
           )}

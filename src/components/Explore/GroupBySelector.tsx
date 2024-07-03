@@ -12,9 +12,10 @@ type Props = {
   radioAttributes: string[];
   value?: string;
   onChange: (label: string) => void;
+  showAll?: boolean;
 };
 
-export function GroupBySelector({ options, radioAttributes, value, onChange }: Props) {
+export function GroupBySelector({ options, radioAttributes, value, onChange, showAll = false }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
 
@@ -56,13 +57,16 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
     setLabelSelectorRequiredWidth((textWidth + (additionalWidthPerItem * radioOptions.length) + widthOfOtherAttributes));
   }, [radioOptions, theme]);
 
+  const showAllOption = showAll ? [{ label: ALL, value: ALL }] : [];
+  const defaultOnChangeValue = showAll ? ALL : '';
+
   return (
     <Field label="Group by">
       <div ref={controlsContainer} className={styles.container}>
         {useHorizontalLabelSelector ? (
           <>
             <RadioButtonGroup
-              options={[{ value: ALL, label: ALL }, ...radioOptions]}
+              options={[...showAllOption, ...radioOptions]}
               value={value}
               onChange={onChange}
             />
@@ -70,7 +74,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
               value={value && getModifiedSelectOptions(selectOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
               options={getModifiedSelectOptions(selectOptions)}
-              onChange={(selected) => onChange(selected?.value ?? ALL)}
+              onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
               className={styles.select}
               isClearable={true}
             />
@@ -80,7 +84,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange }: P
             value={value}
             placeholder={'Select attribute'}
             options={getModifiedSelectOptions(options)}
-            onChange={(selected) => onChange(selected?.value ?? ALL)}
+            onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
             className={styles.select}
             isClearable={true}
           />
