@@ -4,7 +4,6 @@ import {
   SceneFlexLayout,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
 } from '@grafana/scenes';
 import { explorationDS, MetricFunction } from '../../utils/shared';
 import { barsPanelConfig } from '../../components/Explore/panels/barsPanel';
@@ -15,7 +14,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 import { getTraceExplorationScene } from 'utils/utils';
-import { getStepForTimeRange } from '../../utils/dates';
+import { StepQueryRunner } from '../../components/Explore/queries/StepQueryRunner';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -46,9 +45,10 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
       case 'errors':
         return barsPanelConfig()
           .setData(
-            new SceneQueryRunner({
+            new StepQueryRunner({
+              maxDataPoints: 50,
               datasource: explorationDS,
-              queries: [rateByWithStatus('errors', getStepForTimeRange(this))],
+              queries: [rateByWithStatus('errors')],
             })
           )
           .setDisplayMode('transparent')
@@ -67,10 +67,10 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
       case 'duration':
         return histogramPanelConfig()
           .setData(
-            new SceneQueryRunner({
-              maxDataPoints: 250,
+            new StepQueryRunner({
+              maxDataPoints: 25,
               datasource: explorationDS,
-              queries: [buildQuery(getStepForTimeRange(this, 25))],
+              queries: [buildQuery()],
             })
           )
           .setHoverHeader(true)
@@ -80,10 +80,10 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
         return barsPanelConfig()
           .setDisplayMode('transparent')
           .setData(
-            new SceneQueryRunner({
-              maxDataPoints: 250,
+            new StepQueryRunner({
+              maxDataPoints: 50,
               datasource: explorationDS,
-              queries: [rateByWithStatus('rate', getStepForTimeRange(this))],
+              queries: [rateByWithStatus('rate')],
             })
           )
           .setHoverHeader(true)

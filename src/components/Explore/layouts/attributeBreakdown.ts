@@ -8,7 +8,6 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   SceneObject,
-  SceneQueryRunner,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
@@ -21,7 +20,7 @@ import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
-import { getStepForTimeRange } from '../../../utils/dates';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -30,11 +29,12 @@ export function buildNormalLayout(
 ) {
   const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
-  const query = rateByWithStatus(metric, getStepForTimeRange(scene), variable.getValueText());
+  const query = rateByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
-      $data: new SceneQueryRunner({
+      $data: new StepQueryRunner({
+        maxDataPoints: 50,
         datasource: explorationDS,
         queries: [query],
       }),

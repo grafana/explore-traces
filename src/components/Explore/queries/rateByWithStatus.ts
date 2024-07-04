@@ -1,6 +1,6 @@
 import { MetricFunction, VAR_FILTERS_EXPR } from '../../../utils/shared';
 
-export function rateByWithStatus(metric: MetricFunction, step: string, tagKey?: string) {
+export function rateByWithStatus(metric: MetricFunction, tagKey?: string) {
   let expr = `{${VAR_FILTERS_EXPR} ${tagKey ? `&& ${tagKey} != nil` : ''}} | rate() by(${
     tagKey ? tagKey + ',' : ''
   } status)`;
@@ -18,7 +18,6 @@ export function rateByWithStatus(metric: MetricFunction, step: string, tagKey?: 
     query: expr,
     queryType: 'traceql',
     tableType: 'spans',
-    step,
     limit: 100,
     spss: 10,
     filters: [],

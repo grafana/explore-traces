@@ -8,7 +8,6 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
 } from '@grafana/scenes';
 import { arrayToDataFrame, LoadingState } from '@grafana/data';
 import { ComparisonSelection, explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
@@ -20,7 +19,7 @@ import { css } from '@emotion/css';
 import { ComparisonControl } from './ComparisonControl';
 import { getTraceByServiceScene } from 'utils/utils';
 import { TraceSceneState } from './TracesByServiceScene';
-import { getStepForTimeRange } from '../../../utils/dates';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -132,9 +131,10 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
   private _onActivate() {
     this.setState({
-      $data: new SceneQueryRunner({
+      $data: new StepQueryRunner({
+        maxDataPoints: 25,
         datasource: explorationDS,
-        queries: [buildQuery(getStepForTimeRange(this))],
+        queries: [buildQuery()],
       }),
       panel: this.getVizPanel(),
     });
@@ -228,7 +228,7 @@ function getStyles() {
   };
 }
 
-export function buildQuery(step: string) {
+export function buildQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | histogram_over_time(duration)`,
@@ -236,7 +236,6 @@ export function buildQuery(step: string) {
     tableType: 'spans',
     limit: 1000,
     spss: 10,
-    step,
     filters: [],
   };
 }

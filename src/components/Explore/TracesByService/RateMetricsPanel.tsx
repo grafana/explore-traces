@@ -7,7 +7,6 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
 } from '@grafana/scenes';
 import { FieldType, LoadingState } from '@grafana/data';
 import { explorationDS, MetricFunction } from 'utils/shared';
@@ -17,7 +16,7 @@ import { SkeletonComponent } from '../ByFrameRepeater';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { ComparisonControl } from './ComparisonControl';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
-import { getStepForTimeRange } from '../../../utils/dates';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -79,9 +78,10 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
 
   private _onActivate() {
     this.setState({
-      $data: new SceneQueryRunner({
+      $data: new StepQueryRunner({
+        maxDataPoints: 50,
         datasource: explorationDS,
-        queries: [rateByWithStatus(this.state.type, getStepForTimeRange(this))],
+        queries: [rateByWithStatus(this.state.type)],
       }),
       panel: this.getVizPanel(),
     });
