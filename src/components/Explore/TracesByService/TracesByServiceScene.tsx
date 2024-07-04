@@ -178,7 +178,7 @@ export function buildQuery(type: MetricFunction) {
   };
 }
 
-function buildGraphScene(type: MetricFunction, children?: SceneObject[]) {
+function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
   return new SceneFlexLayout({
     direction: 'column',
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
@@ -186,7 +186,7 @@ function buildGraphScene(type: MetricFunction, children?: SceneObject[]) {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({ type }) : new HistogramPanel({}),
+        body: metric === 'rate' || metric === 'errors' ? new RateMetricsPanel({ metric }) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',

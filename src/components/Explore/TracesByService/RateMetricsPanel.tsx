@@ -20,7 +20,7 @@ import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  type: MetricFunction;
+  metric: MetricFunction;
 }
 
 export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
@@ -56,7 +56,7 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
                 refId: 'A',
               });
               this.setState({
-                panel: this.getVizPanel(),
+                panel: this.getVizPanel(this.state.metric),
               });
             }
           } else if (data.data?.state === LoadingState.Loading) {
@@ -81,20 +81,22 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
       $data: new StepQueryRunner({
         maxDataPoints: 50,
         datasource: explorationDS,
-        queries: [rateByWithStatus(this.state.type)],
+        queries: [rateByWithStatus(this.state.metric)],
       }),
-      panel: this.getVizPanel(),
+      panel: this.getVizPanel(this.state.metric),
     });
   }
 
-  private getVizPanel() {
+  private getVizPanel(type: MetricFunction) {
+    const panel = barsPanelConfig().setHeaderActions(new ComparisonControl({ query: 'status = error' }));
+    if (type === 'errors') {
+      panel.setColor({ fixedColor: 'semi-dark-red', mode: 'fixed' });
+    }
     return new SceneFlexLayout({
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: barsPanelConfig()
-            .setHeaderActions(new ComparisonControl({ query: 'status = error' }))
-            .build(),
+          body: panel.build(),
         }),
       ],
     });
