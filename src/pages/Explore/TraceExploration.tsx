@@ -30,6 +30,7 @@ import {
   MetricFunction,
   StartingPointSelectedEvent,
   VAR_DATASOURCE,
+  VAR_GROUPBY,
   VAR_METRIC,
 } from '../../utils/shared';
 import { getTraceExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
@@ -256,6 +257,9 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       new CustomVariable({
         name: VAR_METRIC,
         hide: VariableHide.hideVariable,
+      }),
+      new CustomVariable({
+        name: VAR_GROUPBY,
       }),
     ],
   });

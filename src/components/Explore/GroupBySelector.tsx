@@ -38,15 +38,19 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
 
   const radioOptions = radioAttributes
     .filter((attr) => !!options.find((op) => op.value === attr))
-    .map((attribute) => ({ label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), text: attribute, value: attribute }));
+    .map((attribute) => ({
+      label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''),
+      text: attribute,
+      value: attribute,
+    }));
 
   const selectOptions = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
 
   const getModifiedSelectOptions = (options: Array<SelectableValue<string>>) => {
-    return options 
+    return options
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
       .map((op) => ({ label: op.label?.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), value: op.value }));
-  }
+  };
 
   useEffect(() => {
     const { fontSize } = theme.typography;
@@ -54,8 +58,18 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
     const textWidth = measureText(text, fontSize).width;
     const additionalWidthPerItem = 40;
     const widthOfOtherAttributes = 180;
-    setLabelSelectorRequiredWidth((textWidth + (additionalWidthPerItem * radioOptions.length) + widthOfOtherAttributes));
+    setLabelSelectorRequiredWidth(textWidth + additionalWidthPerItem * radioOptions.length + widthOfOtherAttributes);
   }, [radioOptions, theme]);
+
+  // Set default value as first value in options
+  useEffect(() => {
+    const defaultValue = radioAttributes[0] ?? options[0]?.value;
+    if (defaultValue) {
+      if (!showAll && (!value || value === ALL)) {
+        onChange(defaultValue);
+      }
+    }
+  });
 
   const showAllOption = showAll ? [{ label: ALL, value: ALL }] : [];
   const defaultOnChangeValue = showAll ? ALL : '';
@@ -65,13 +79,9 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
       <div ref={controlsContainer} className={styles.container}>
         {useHorizontalLabelSelector ? (
           <>
-            <RadioButtonGroup
-              options={[...showAllOption, ...radioOptions]}
-              value={value}
-              onChange={onChange}
-            />
+            <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
             <Select
-              value={value && getModifiedSelectOptions(selectOptions).some(x => x.value === value) ? value : null} // remove value from select when radio button clicked
+              value={value && getModifiedSelectOptions(selectOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
               options={getModifiedSelectOptions(selectOptions)}
               onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}

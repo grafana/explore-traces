@@ -8,7 +8,6 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
 } from '@grafana/scenes';
 import { arrayToDataFrame, LoadingState } from '@grafana/data';
 import { ComparisonSelection, explorationDS, VAR_FILTERS_EXPR } from 'utils/shared';
@@ -19,6 +18,8 @@ import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { ComparisonControl } from './ComparisonControl';
 import { getTraceByServiceScene } from 'utils/utils';
+import { TraceSceneState } from './TracesByServiceScene';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -29,10 +30,6 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   constructor(state: HistogramPanelState) {
     super({
       yBuckets: [],
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery()],
-      }),
       ...state,
     });
 
@@ -44,30 +41,12 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
           if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
-            const xSel = newState.selection?.raw?.x;
-            const ySel = newState.selection?.raw?.y;
-
-            const frame = arrayToDataFrame([
-              {
-                time: xSel?.from || 0,
-                xMin: xSel?.from || 0,
-                xMax: xSel?.to || 0,
-                yMin: ySel?.from,
-                yMax: ySel?.to,
-                isRegion: true,
-                fillOpacity: 0.1,
-                lineWidth: 1,
-                lineStyle: 'solid',
-                color: '#CCCCDC',
-                text: 'Comparison selection',
-              },
-            ]);
-            frame.name = 'xymark';
+            const annotations = this.buildSelectionAnnotation(newState);
 
             data.setState({
               data: {
                 ...data.state.data!,
-                annotations: [frame],
+                annotations: annotations,
               },
             });
           }
@@ -92,6 +71,18 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
               });
             } else {
               const yBuckets = data.state.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
+              if (parent.state.selection && newData.data?.state === LoadingState.Done) {
+                // set selection annotation if it exists
+                const annotations = this.buildSelectionAnnotation(parent.state);
+
+                data.setState({
+                  data: {
+                    ...data.state.data!,
+                    annotations: annotations,
+                  },
+                });
+              }
+              // update panel
               this.setState({
                 yBuckets,
                 panel: this.getVizPanel(),
@@ -114,8 +105,37 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
     });
   }
 
+  private buildSelectionAnnotation(state: TraceSceneState) {
+    const xSel = state.selection?.raw?.x;
+    const ySel = state.selection?.raw?.y;
+
+    const frame = arrayToDataFrame([
+      {
+        time: xSel?.from || 0,
+        xMin: xSel?.from || 0,
+        xMax: xSel?.to || 0,
+        yMin: ySel?.from,
+        yMax: ySel?.to,
+        isRegion: true,
+        fillOpacity: 0.1,
+        lineWidth: 1,
+        lineStyle: 'solid',
+        color: '#CCCCDC',
+        text: 'Comparison selection',
+      },
+    ]);
+    frame.name = 'xymark';
+
+    return [frame];
+  }
+
   private _onActivate() {
     this.setState({
+      $data: new StepQueryRunner({
+        maxDataPoints: 25,
+        datasource: explorationDS,
+        queries: [buildQuery()],
+      }),
       panel: this.getVizPanel(),
     });
   }

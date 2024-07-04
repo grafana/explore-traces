@@ -8,19 +8,19 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   SceneObject,
-  SceneQueryRunner,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getTraceExplorationScene, getLabelValue } from '../../../utils/utils';
+import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -33,7 +33,8 @@ export function buildNormalLayout(
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
-      $data: new SceneQueryRunner({
+      $data: new StepQueryRunner({
+        maxDataPoints: 50,
         datasource: explorationDS,
         queries: [query],
       }),
