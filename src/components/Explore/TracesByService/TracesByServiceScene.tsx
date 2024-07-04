@@ -6,6 +6,7 @@ import {
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -27,7 +28,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
-import { getTraceExplorationScene } from 'utils/utils';
+import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -63,6 +64,21 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       if (newState.value !== prevState.value) {
         this.setState({ selection: undefined });
         this.updateBody();
+      }
+    });
+
+    this.subscribeToState((newState, prevState) => {
+      const timeRange = sceneGraph.getTimeRange(this);
+      const selectionFrom = newState.selection?.timeRange?.from;
+      // clear selection if it's out of time range
+      if (selectionFrom && selectionFrom < timeRange.state.value.from.unix()) {
+        this.setState({ selection: undefined });
+      }
+
+      // Set group by to All when starting a comparison
+      if (newState.selection && newState.selection !== prevState.selection) {
+        const groupByVar = getGroupByVariable(this);
+        groupByVar.changeValueTo('All');
       }
     });
 
