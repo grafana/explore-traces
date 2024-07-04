@@ -14,13 +14,14 @@ import {
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getTraceExplorationScene, getLabelValue } from '../../../utils/utils';
+import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
+import { getStepForTimeRange } from '../../../utils/dates';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -29,7 +30,7 @@ export function buildNormalLayout(
 ) {
   const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
-  const query = rateByWithStatus(metric, variable.getValueText());
+  const query = rateByWithStatus(metric, getStepForTimeRange(scene), variable.getValueText());
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({

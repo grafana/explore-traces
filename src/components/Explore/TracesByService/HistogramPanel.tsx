@@ -20,6 +20,7 @@ import { css } from '@emotion/css';
 import { ComparisonControl } from './ComparisonControl';
 import { getTraceByServiceScene } from 'utils/utils';
 import { TraceSceneState } from './TracesByServiceScene';
+import { getStepForTimeRange } from '../../../utils/dates';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -30,10 +31,6 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   constructor(state: HistogramPanelState) {
     super({
       yBuckets: [],
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery()],
-      }),
       ...state,
     });
 
@@ -135,6 +132,10 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
 
   private _onActivate() {
     this.setState({
+      $data: new SceneQueryRunner({
+        datasource: explorationDS,
+        queries: [buildQuery(getStepForTimeRange(this))],
+      }),
       panel: this.getVizPanel(),
     });
   }
@@ -227,7 +228,7 @@ function getStyles() {
   };
 }
 
-export function buildQuery() {
+export function buildQuery(step: string) {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | histogram_over_time(duration)`,
@@ -235,6 +236,7 @@ export function buildQuery() {
     tableType: 'spans',
     limit: 1000,
     spss: 10,
+    step,
     filters: [],
   };
 }

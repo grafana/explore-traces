@@ -15,6 +15,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 import { getTraceExplorationScene } from 'utils/utils';
+import { getStepForTimeRange } from '../../utils/dates';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -46,9 +47,8 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
         return barsPanelConfig()
           .setData(
             new SceneQueryRunner({
-              maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [rateByWithStatus('errors')],
+              queries: [rateByWithStatus('errors', getStepForTimeRange(this))],
             })
           )
           .setDisplayMode('transparent')
@@ -70,7 +70,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
             new SceneQueryRunner({
               maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [buildQuery()],
+              queries: [buildQuery(getStepForTimeRange(this, 25))],
             })
           )
           .setHoverHeader(true)
@@ -83,7 +83,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
             new SceneQueryRunner({
               maxDataPoints: 250,
               datasource: explorationDS,
-              queries: [rateByWithStatus('rate')],
+              queries: [rateByWithStatus('rate', getStepForTimeRange(this))],
             })
           )
           .setHoverHeader(true)
