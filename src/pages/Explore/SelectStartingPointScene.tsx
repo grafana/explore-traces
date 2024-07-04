@@ -2,14 +2,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 
 import { DataFrame, GrafanaTheme2, MetricFindValue } from '@grafana/data';
-import {
-  CustomVariable,
-  SceneComponentProps,
-  SceneObjectBase,
-  SceneObjectState,
-  SceneVariableSet,
-  VariableDependencyConfig,
-} from '@grafana/scenes';
+import { SceneComponentProps, SceneObjectBase, SceneObjectState, VariableDependencyConfig } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 
 import {
@@ -49,7 +42,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
 
   constructor(state: Partial<TraceSelectSceneState>) {
     super({
-      $variables: state.$variables ?? getVariableSet(),
       showPreviews: true,
       metricCards: [
         new MetricFunctionCard({ metric: 'rate' }),
@@ -109,7 +101,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
         new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
         new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
-      ])
+      ]),
     });
   };
 
@@ -158,16 +150,6 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       </div>
     );
   };
-}
-
-function getVariableSet() {
-  return new SceneVariableSet({
-    variables: [
-      new CustomVariable({
-        name: VAR_GROUPBY,
-      }),
-    ],
-  });
 }
 
 function getStyles(theme: GrafanaTheme2) {

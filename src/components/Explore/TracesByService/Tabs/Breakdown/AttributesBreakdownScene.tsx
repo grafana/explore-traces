@@ -8,13 +8,18 @@ import {
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
-  SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
 import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_GROUPBY, VAR_FILTERS, VAR_METRIC, radioAttributesResource, radioAttributesSpan, getAttributesAsOptions } from '../../../../../utils/shared';
+import {
+  VAR_FILTERS,
+  VAR_METRIC,
+  radioAttributesResource,
+  radioAttributesSpan,
+  getAttributesAsOptions,
+} from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -34,11 +39,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   constructor(state: Partial<AttributesBreakdownSceneState>) {
     super({
-      $variables:
-        state.$variables ??
-        new SceneVariableSet({
-          variables: [new CustomVariable({ name: VAR_GROUPBY })],
-        }),
       ...state,
     });
 
@@ -69,7 +69,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
         new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-      ])
+      ]),
     });
   };
 
@@ -79,15 +79,18 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
-    const [scope, setScope] = useState(RESOURCE)
+    const [scope, setScope] = useState(RESOURCE);
     const { body } = model.useState();
     const variable = getGroupByVariable(model);
     const { attributes } = getTraceByServiceScene(model).useState();
-    const styles = useStyles2(getStyles);  
-    
+    const styles = useStyles2(getStyles);
+
     const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;
     let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
-    filteredAttributes = scope === RESOURCE ? filteredAttributes?.concat(radioAttributesResource) : filteredAttributes?.concat(radioAttributesSpan);
+    filteredAttributes =
+      scope === RESOURCE
+        ? filteredAttributes?.concat(radioAttributesResource)
+        : filteredAttributes?.concat(radioAttributesSpan);
 
     return (
       <div className={styles.container}>
@@ -103,7 +106,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
                   />
                 </Field>
               </div>
-              
+
               <div className={styles.groupBy}>
                 <GroupBySelector
                   options={getAttributesAsOptions(filteredAttributes!)}

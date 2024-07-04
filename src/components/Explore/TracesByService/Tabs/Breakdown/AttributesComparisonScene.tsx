@@ -11,19 +11,12 @@ import {
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
-  SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
 import { Icon, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import {
-  VAR_GROUPBY,
-  VAR_FILTERS,
-  explorationDS,
-  VAR_FILTERS_EXPR,
-  getAttributesAsOptions,
-} from '../../../../../utils/shared';
+import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, getAttributesAsOptions } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -49,11 +42,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
   constructor(state: Partial<AttributesComparisonSceneState>) {
     super({
-      $variables:
-        state.$variables ??
-        new SceneVariableSet({
-          variables: [new CustomVariable({ name: VAR_GROUPBY, defaultToAll: true, includeAll: true })],
-        }),
       ...state,
     });
 
@@ -126,7 +114,13 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
-          ? buildAllComparisonLayout((frame) => new InspectAttributeAction({ attribute: frame.name, onClick: () => this.onChange(frame.name || '') }))
+          ? buildAllComparisonLayout(
+              (frame) =>
+                new InspectAttributeAction({
+                  attribute: frame.name,
+                  onClick: () => this.onChange(frame.name || ''),
+                })
+            )
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
               new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
             ]),

@@ -1,8 +1,16 @@
 import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
-import { AdHocFiltersVariable, CustomVariable, getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
+import {
+  AdHocFiltersVariable,
+  CustomVariable,
+  getUrlSyncManager,
+  sceneGraph,
+  SceneObject,
+  SceneObjectUrlValues,
+  SceneTimeRange,
+} from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
-import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY, radioAttributesResource } from './shared';
+import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
 
@@ -58,9 +66,6 @@ export function getGroupByVariable(scene: SceneObject): CustomVariable {
   const variable = sceneGraph.lookupVariable(VAR_GROUPBY, scene);
   if (!(variable instanceof CustomVariable)) {
     throw new Error('Group by variable not found');
-  }
-  if (!variable.getValue()) {
-    variable.changeValueTo(radioAttributesResource[0]);
   }
   return variable;
 }
