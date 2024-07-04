@@ -65,12 +65,8 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
   useEffect(() => {
     const defaultValue = radioAttributes[0] ?? options[0]?.value;
     if (defaultValue) {
-      if (!value && !showAll) {
+      if (!showAll && (!value || value === ALL)) {
         onChange(defaultValue);
-      } else {
-        if (value === 'All' && !showAll) {
-          onChange(defaultValue);
-        }
       }
     }
   });

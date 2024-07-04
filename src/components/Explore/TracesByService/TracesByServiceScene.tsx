@@ -29,6 +29,7 @@ import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/Tab
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
 import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
+import { ALL } from '../../../constants';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -78,7 +79,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       // Set group by to All when starting a comparison
       if (newState.selection && newState.selection !== prevState.selection) {
         const groupByVar = getGroupByVariable(this);
-        groupByVar.changeValueTo('All');
+        groupByVar.changeValueTo(ALL);
       }
     });
 
