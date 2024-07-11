@@ -96,7 +96,8 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
             options={getModifiedSelectOptions(options)}
             onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
             className={styles.select}
-            isClearable={true}
+            isClearable
+            virtualized
           />
         )}
       </div>

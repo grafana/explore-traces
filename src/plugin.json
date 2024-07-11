@@ -5,7 +5,7 @@
   "id": "grafana-exploretraces-app",
   "info": {
     "keywords": ["app"],
-    "description": "Query less exploration of trace data stored in tempo",
+    "description": "Query less exploration of trace data stored in Tempo",
     "author": {
       "name": "Grafana"
     },

@@ -90,7 +90,9 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
   private getVizPanel(type: MetricFunction) {
     const panel = barsPanelConfig().setHeaderActions(new ComparisonControl({ query: 'status = error' }));
     if (type === 'errors') {
-      panel.setColor({ fixedColor: 'semi-dark-red', mode: 'fixed' });
+      panel.setTitle('Errors rate').setColor({ fixedColor: 'semi-dark-red', mode: 'fixed' });
+    } else {
+      panel.setTitle('Span rate');
     }
     return new SceneFlexLayout({
       direction: 'row',

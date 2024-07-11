@@ -1,6 +1,5 @@
 import {
   CustomVariable,
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
@@ -63,7 +62,7 @@ export function buildNormalLayout(
         children: [
           new SceneFlexItem({
             minHeight: 300,
-            body: PanelBuilders.timeseries().build(),
+            body: (metric === 'duration' ? linesPanelConfig().setUnit('s') : linesPanelConfig()).build(),
           }),
         ],
       }),
@@ -96,7 +95,7 @@ export function getLayoutChild(
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = (metric === 'duration' ? linesPanelConfig() : barsPanelConfig())
+    const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
       .setData(
         new SceneDataNode({

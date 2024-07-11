@@ -78,6 +78,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
       // Set group by to All when starting a comparison
       if (newState.selection && newState.selection !== prevState.selection) {
+        this.setActionView('breakdown');
         const groupByVar = getGroupByVariable(this);
         groupByVar.changeValueTo(ALL);
       }
@@ -149,7 +150,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     if (body.state.children.length > 1) {
       if (actionViewDef) {
         // reduce max height for main panel to reduce height flicker
-        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
+        body.state.children[0].setState({ maxHeight: MAIN_PANEL_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
         this.setState({ actionView: actionViewDef.value });
       }
@@ -162,8 +163,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   };
 }
 
-const MAIN_PANEL_MIN_HEIGHT = 205;
-const MAIN_PANEL_MAX_HEIGHT = '30%';
+const MAIN_PANEL_HEIGHT = 205;
 
 export function buildQuery(type: MetricFunction) {
   const typeQuery = type === 'errors' ? ' && status = error' : '';
@@ -184,8 +184,8 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
     children: [
       new SceneFlexItem({
-        minHeight: MAIN_PANEL_MIN_HEIGHT,
-        maxHeight: MAIN_PANEL_MAX_HEIGHT,
+        minHeight: MAIN_PANEL_HEIGHT,
+        maxHeight: MAIN_PANEL_HEIGHT,
         body: metric === 'rate' || metric === 'errors' ? new RateMetricsPanel({ metric }) : new HistogramPanel({}),
       }),
       new SceneFlexItem({

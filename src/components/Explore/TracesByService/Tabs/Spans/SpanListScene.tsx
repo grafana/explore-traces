@@ -44,10 +44,10 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
-                    new SceneFlexItem({ 
-                      body: new EmptyStateScene({ 
-                        message: "No data for selected query" 
-                      }) 
+                    new SceneFlexItem({
+                      body: new EmptyStateScene({
+                        message: 'No data for selected query',
+                      }),
                     }),
                   ],
                 }),
@@ -59,7 +59,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                   children: [
                     new SceneFlexItem({
                       body: PanelBuilders.table()
-                        .setTitle('Spans table')
+                        .setHoverHeader(true)
                         .setOverrides((builder) => {
                           return builder
                             .matchFieldsWithName('traceID')
@@ -68,7 +68,8 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                                 title: 'Trace: ${__value.raw}',
                                 url: '',
                                 onClick: (data) => {
-                                  const traceID: string | undefined = data.origin?.field?.values?.[data.origin?.rowIndex];
+                                  const traceID: string | undefined =
+                                    data.origin?.field?.values?.[data.origin?.rowIndex];
                                   traceID && locationService.partial({ traceId: traceID });
                                 },
                               },
@@ -80,16 +81,18 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                                 url: '',
                                 onClick: (data) => {
                                   const traceID: string | undefined =
-                                    data?.origin?.field?.state?.scopedVars?.__dataContext?.value?.frame?.first?.[data.origin?.rowIndex];
+                                    data?.origin?.field?.state?.scopedVars?.__dataContext?.value?.frame?.first?.[
+                                      data.origin?.rowIndex
+                                    ];
                                   traceID && locationService.partial({ traceId: traceID });
                                 },
                               },
                             ]);
                         })
-                        .build()
+                        .build(),
                     }),
                   ],
-                })
+                }),
               });
             }
           } else if (data.data?.state === LoadingState.Loading) {
@@ -97,12 +100,12 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
               panel: new SceneFlexLayout({
                 direction: 'row',
                 children: [
-                  new LoadingStateScene({ 
+                  new LoadingStateScene({
                     component: SkeletonComponent,
                   }),
                 ],
-              })
-            });         
+              }),
+            });
           }
         })
       );
@@ -131,12 +134,14 @@ const SkeletonComponent = () => {
       {[...Array(3)].map((_, i) => (
         <div className={styles.row} key={i}>
           {[...Array(6)].map((_, j) => (
-            <span className={styles.rowItem} key={j}><Skeleton count={1}/></span>
+            <span className={styles.rowItem} key={j}>
+              <Skeleton count={1} />
+            </span>
           ))}
         </div>
       ))}
     </div>
-  )
+  );
 };
 
 function getStyles(theme: GrafanaTheme2) {
