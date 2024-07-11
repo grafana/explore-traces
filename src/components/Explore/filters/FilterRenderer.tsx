@@ -50,14 +50,19 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     // Ensure we always have the same order of keys
     const resourceAttributes = filteredKeys.filter((k) => k.value?.includes(RESOURCE_ATTR));
     const spanAttributes = filteredKeys.filter((k) => k.value?.includes(SPAN_ATTR));
-    const intrinsicAttributes = filteredKeys.filter((k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR));
-    return intrinsicAttributes?.concat(resourceAttributes).concat(spanAttributes).map((key) => {
-      return {
-        label: key.value,
-        value: key.value,
-      };
-    });
-  }
+    const intrinsicAttributes = filteredKeys.filter(
+      (k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR)
+    );
+    return intrinsicAttributes
+      ?.concat(resourceAttributes)
+      .concat(spanAttributes)
+      .map((key) => {
+        return {
+          label: key.value,
+          value: key.value,
+        };
+      });
+  };
 
   const sortValues = (values: Array<SelectableValue<string>>) => {
     return values.sort((a, b) => {
@@ -66,7 +71,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       }
       return 0;
     });
-  }
+  };
 
   const keyAutoFocus = isWip && filter.key === '';
   const keySelect = (

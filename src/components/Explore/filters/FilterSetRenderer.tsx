@@ -27,13 +27,21 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
   const otherFilters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(primarySignalOption?.filter));
 
   const clearFilters = () => {
+    model.setState({ _wip: undefined });
     for (const filter of filters) {
       // Don't remove the primary signal filter
-      if (!primarySignalOptions.find(option => option.filter.key === filter.key && option.filter.value === filter.value && option.filter.operator === filter.operator)) {
+      if (
+        !primarySignalOptions.find(
+          (option) =>
+            option.filter.key === filter.key &&
+            option.filter.value === filter.value &&
+            option.filter.operator === filter.operator
+        )
+      ) {
         model._removeFilter(filter);
       }
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
@@ -52,18 +60,18 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
         </React.Fragment>
       ))}
 
-      <AddFilter model={model} />
+      <AddFilter model={model} otherFiltersLength={otherFilters.length} />
 
       {filters.length > 0 && (
         <Button
           variant="secondary"
           aria-label="Clear filters"
-          size='sm'
+          size="sm"
           className={styles.clearFilters}
           icon="times"
           onClick={() => clearFilters()}
           tooltip="Clear filters"
-          tooltipPlacement='left'
+          tooltipPlacement="left"
         />
       )}
     </div>

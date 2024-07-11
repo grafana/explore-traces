@@ -20,6 +20,7 @@ import { ComparisonControl } from './ComparisonControl';
 import { getTraceByServiceScene } from 'utils/utils';
 import { TraceSceneState } from './TracesByServiceScene';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
+import { SelectionColor } from '../layouts/allComparison';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -117,10 +118,10 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
         yMin: ySel?.from,
         yMax: ySel?.to,
         isRegion: true,
-        fillOpacity: 0.1,
+        fillOpacity: 0.15,
         lineWidth: 1,
         lineStyle: 'solid',
-        color: '#CCCCDC',
+        color: SelectionColor,
         text: 'Comparison selection',
       },
     ]);

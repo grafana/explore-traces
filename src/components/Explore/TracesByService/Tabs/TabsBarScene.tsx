@@ -15,11 +15,11 @@ interface ActionViewDefinition {
   getScene: () => SceneObject;
 }
 
-export type ActionViewType = 'spans' | 'breakdown' | 'structure';
+export type ActionViewType = 'traceList' | 'breakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
-  { displayName: 'Spans', value: 'spans', getScene: buildSpansScene },
+  { displayName: 'Trace List', value: 'traceList', getScene: buildSpansScene },
 ];
 
 export interface TabsBarSceneState extends SceneObjectState {}
