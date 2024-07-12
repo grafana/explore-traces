@@ -18,7 +18,7 @@ export function AddFilter({ model, otherFiltersLength }: Props) {
   if (!_wip) {
     return (
       <div className={styles.addFilterBar} onClick={() => model._addWip()}>
-        {otherFiltersLength === 0 ? 'Add a filter...' : undefined}
+        {otherFiltersLength === 0 ? 'Filter by attribute...' : undefined}
       </div>
     );
   }

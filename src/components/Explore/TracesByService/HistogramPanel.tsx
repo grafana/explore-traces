@@ -133,7 +133,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
   private _onActivate() {
     this.setState({
       $data: new StepQueryRunner({
-        maxDataPoints: 25,
+        maxDataPoints: 24,
         datasource: explorationDS,
         queries: [buildQuery()],
       }),

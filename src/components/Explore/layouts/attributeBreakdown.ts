@@ -33,7 +33,7 @@ export function buildNormalLayout(
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
       $data: new StepQueryRunner({
-        maxDataPoints: 50,
+        maxDataPoints: 64,
         datasource: explorationDS,
         queries: [query],
       }),

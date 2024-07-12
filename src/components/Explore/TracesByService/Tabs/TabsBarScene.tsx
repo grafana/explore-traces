@@ -19,7 +19,7 @@ export type ActionViewType = 'traceList' | 'breakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
   { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
-  { displayName: 'Trace List', value: 'traceList', getScene: buildSpansScene },
+  { displayName: 'Trace list', value: 'traceList', getScene: buildSpansScene },
 ];
 
 export interface TabsBarSceneState extends SceneObjectState {}
