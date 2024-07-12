@@ -4,7 +4,7 @@ import { Button, Stack, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { getFiltersVariable } from '../../../utils/utils';
-import { addToFilters } from '../actions/addToFilters';
+import { addToFilters } from '../actions/AddToFiltersAction';
 
 export interface HighestDifferencePanelState extends SceneObjectState {
   frame: DataFrame;

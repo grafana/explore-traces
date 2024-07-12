@@ -4,7 +4,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
 import React from 'react';
 import { getTraceExplorationScene, getTraceByServiceScene } from 'utils/utils';
-import { ShareExplorationButton } from '../ShareExplorationButton';
+import { ShareExplorationAction } from '../../actions/ShareExplorationAction';
 import { buildSpansScene } from './Spans/SpansScene';
 import { buildStructureScene } from './Structure/StructureScene';
 import { buildBreakdownScene } from './Breakdown/BreakdownScene';
@@ -35,7 +35,7 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
       <Box paddingY={1}>
         <div className={styles.actions}>
           <Stack gap={2}>
-            <ShareExplorationButton exploration={exploration} />
+            <ShareExplorationAction exploration={exploration} />
           </Stack>
         </div>
 
