@@ -14,18 +14,20 @@ import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
+  RESOURCE,
+  RESOURCE_ATTR,
+  SPAN,
+  SPAN_ATTR,
   VAR_FILTERS,
   VAR_METRIC,
   radioAttributesResource,
   radioAttributesSpan,
-  getAttributesAsOptions,
 } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
-import { RESOURCE, RESOURCE_ATTR, SPAN, SPAN_ATTR } from '../../../../../constants';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;

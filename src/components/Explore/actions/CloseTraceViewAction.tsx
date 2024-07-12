@@ -6,12 +6,12 @@ import { Button, useStyles2 } from '@grafana/ui';
 import { DetailsSceneUpdated } from 'utils/shared';
 import { css } from '@emotion/css';
 
-export class CloseTraceViewPanelAction extends SceneObjectBase {
+export class CloseTraceViewAction extends SceneObjectBase {
   public onClick = () => {
     this.publishEvent(new DetailsSceneUpdated({ showDetails: false }), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<CloseTraceViewPanelAction>) => {
+  public static Component = ({ model }: SceneComponentProps<CloseTraceViewAction>) => {
     const styles = useStyles2(getStyles);
     return (
       <div className={styles.button}>

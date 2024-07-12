@@ -23,13 +23,13 @@ import {
   VAR_DATASOURCE_EXPR,
   MetricFunction,
   ComparisonSelection,
+  ALL,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
 import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
-import { ALL } from '../../../constants';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;

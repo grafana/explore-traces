@@ -12,11 +12,10 @@ import {
   VAR_METRIC,
   StartingPointSelectedEvent,
   radioAttributesResource,
-  getAttributesAsOptions,
+  RESOURCE_ATTR,
 } from '../../utils/shared';
-import { getLabelValue, getGroupByVariable, getTraceExplorationScene } from '../../utils/utils';
+import { getLabelValue, getGroupByVariable, getTraceExplorationScene, getAttributesAsOptions } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { RESOURCE_ATTR } from '../../constants';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
 import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';

@@ -4,8 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
-import { ALL, RESOURCE_ATTR, SPAN_ATTR } from '../../constants';
-import { ignoredAttributes } from 'utils/shared';
+import { ALL, ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;

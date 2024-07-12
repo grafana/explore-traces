@@ -16,18 +16,17 @@ import {
 import { Icon, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, getAttributesAsOptions } from '../../../../../utils/shared';
+import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
-import { ALL } from '../../../../../constants';
 import { map, Observable } from 'rxjs';
 import { BaselineColor, buildAllComparisonLayout, SelectionColor } from '../../../layouts/allComparison';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
-import { getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {

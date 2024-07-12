@@ -47,6 +47,10 @@ export const getFilterSignature = (filter: AdHocVariableFilter) => {
   return `${filter.key}${filter.operator}${filter.value}`;
 };
 
+export function getAttributesAsOptions(attributes: string[]) {
+  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
+}
+
 export function getLabelValue(frame: DataFrame, labelName?: string) {
   const labels = frame.fields.find((f) => f.type === 'number')?.labels;
 

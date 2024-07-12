@@ -5,8 +5,7 @@ import { AdHocVariableFilter, GrafanaTheme2, SelectableValue, toOption } from '@
 import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
-import { ignoredAttributes } from 'utils/shared';
-import { RESOURCE_ATTR, SPAN_ATTR } from '../../../constants';
+import { ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 
 interface Props {
   filter: AdHocVariableFilter;
