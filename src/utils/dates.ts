@@ -1,4 +1,6 @@
-import { round as _round, dropWhile as _dropWhile } from 'lodash';
+import { dropWhile as _dropWhile, round as _round } from 'lodash';
+import { sceneGraph, SceneObject } from '@grafana/scenes';
+import { duration } from 'moment/moment';
 
 export const ONE_MILLISECOND = 1000;
 export const ONE_SECOND = 1000 * ONE_MILLISECOND;
@@ -44,4 +46,14 @@ export function formatDuration(duration: number): string {
   const secondaryValue = Math.round((duration / secondaryUnit.microseconds) % primaryUnit.ofPrevious);
   const secondaryUnitString = `${secondaryValue}${secondaryUnit.unit}`;
   return secondaryValue === 0 ? primaryUnitString : `${primaryUnitString} ${secondaryUnitString}`;
+}
+
+export function getStepForTimeRange(scene: SceneObject, dataPoints?: number) {
+  const sceneTimeRange = sceneGraph.getTimeRange(scene);
+  const from = sceneTimeRange.state.value.from.unix();
+  const to = sceneTimeRange.state.value.to.unix();
+
+  const dur = duration(to - from, 's');
+  const finalDur = Math.floor(dur.asSeconds() / (dataPoints ?? 50));
+  return `${finalDur}s`;
 }

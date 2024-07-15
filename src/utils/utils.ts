@@ -1,5 +1,13 @@
 import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
-import { AdHocFiltersVariable, CustomVariable, getUrlSyncManager, sceneGraph, SceneObject, SceneObjectUrlValues, SceneTimeRange } from '@grafana/scenes';
+import {
+  AdHocFiltersVariable,
+  CustomVariable,
+  getUrlSyncManager,
+  sceneGraph,
+  SceneObject,
+  SceneObjectUrlValues,
+  SceneTimeRange,
+} from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
 import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
@@ -38,6 +46,10 @@ export function getDataSource(exploration: TraceExploration) {
 export const getFilterSignature = (filter: AdHocVariableFilter) => {
   return `${filter.key}${filter.operator}${filter.value}`;
 };
+
+export function getAttributesAsOptions(attributes: string[]) {
+  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
+}
 
 export function getLabelValue(frame: DataFrame, labelName?: string) {
   const labels = frame.fields.find((f) => f.type === 'number')?.labels;

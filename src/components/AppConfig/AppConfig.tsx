@@ -3,7 +3,6 @@ import { Button, Field, Input, useStyles2, FieldSet, SecretInput } from '@grafan
 import { PluginConfigPageProps, AppPluginMeta, PluginMeta, GrafanaTheme2 } from '@grafana/data';
 import { FetchResponse, getBackendSrv, locationService } from '@grafana/runtime';
 import { css } from '@emotion/css';
-import { testIds } from '../testIds';
 import { lastValueFrom, Observable } from 'rxjs';
 
 export type JsonData = {
@@ -181,6 +180,16 @@ const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<
     console.error('Error while updating the plugin', e);
   }
 };
+
+const testIds = {
+  appConfig: {
+    container: 'data-testid ac-container',
+    apiKey: 'data-testid ac-api-key',
+    apiUrl: 'data-testid ac-api-url',
+    submit: 'data-testid ac-submit-form',
+  },
+};
+
 
 export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) => {
   const response = getBackendSrv().fetch({

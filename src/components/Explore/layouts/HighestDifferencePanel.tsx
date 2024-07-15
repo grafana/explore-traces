@@ -3,9 +3,8 @@ import { DataFrame, GrafanaTheme2 } from '@grafana/data';
 import { Button, Stack, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import React from 'react';
-import { SelectionColor } from './allComparison';
 import { getFiltersVariable } from '../../../utils/utils';
-import { addToFilters } from '../actions/addToFilters';
+import { addToFilters } from '../actions/AddToFiltersAction';
 
 export interface HighestDifferencePanelState extends SceneObjectState {
   frame: DataFrame;
@@ -77,9 +76,7 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
               />
             </Stack>
 
-            <div className={css([styles.differenceValue, maxDifference >= 0 ? styles.selectionIsLarger : css({})])}>
-              {(Math.abs(maxDifference) * 100).toFixed(2)}%
-            </div>
+            <div className={styles.differenceValue}>{(Math.abs(maxDifference) * 100).toFixed(2)}%</div>
             <div className={styles.value}>{value}</div>
           </div>
         )}
@@ -117,9 +114,6 @@ function getStyles(theme: GrafanaTheme2) {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-    }),
-    selectionIsLarger: css({
-      color: SelectionColor,
     }),
     title: css({
       fontWeight: 500,

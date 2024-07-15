@@ -1,6 +1,5 @@
 import {
   CustomVariable,
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
@@ -8,19 +7,19 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   SceneObject,
-  SceneQueryRunner,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getTraceExplorationScene, getLabelValue } from '../../../utils/utils';
+import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -33,7 +32,8 @@ export function buildNormalLayout(
 
   return new LayoutSwitcher({
     $data: new SceneDataTransformer({
-      $data: new SceneQueryRunner({
+      $data: new StepQueryRunner({
+        maxDataPoints: 50,
         datasource: explorationDS,
         queries: [query],
       }),
@@ -62,7 +62,7 @@ export function buildNormalLayout(
         children: [
           new SceneFlexItem({
             minHeight: 300,
-            body: PanelBuilders.timeseries().build(),
+            body: (metric === 'duration' ? linesPanelConfig().setUnit('s') : linesPanelConfig()).build(),
           }),
         ],
       }),
@@ -95,7 +95,7 @@ export function getLayoutChild(
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = (metric === 'duration' ? linesPanelConfig() : barsPanelConfig())
+    const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
       .setData(
         new SceneDataNode({

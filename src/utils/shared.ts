@@ -1,7 +1,12 @@
 import { BusEventBase, BusEventWithPayload } from '@grafana/data';
+import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
+export enum ROUTES {
+  Explore = 'explore',
+}
 
+export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
@@ -11,10 +16,15 @@ export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_GROUPBY = 'groupBy';
 export const VAR_METRIC = 'metric';
-
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
-export const radioAttributesResource = ['resource.cluster', 'resource.environment', 'resource.namespace', 'resource.service.name'];
+export const ALL = 'All';
+export const RESOURCE = 'Resource';
+export const SPAN = 'Span';
+export const RESOURCE_ATTR = 'resource.';
+export const SPAN_ATTR = 'span.';
+
+export const radioAttributesResource = ['resource.service.name', 'resource.cluster', 'resource.environment', 'resource.namespace'];
 export const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
 export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:id', 'trace:id', 'traceDuration'];
 
@@ -36,8 +46,4 @@ export interface DetailsSceneUpdatedPayload {
 }
 export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
-}
-
-export function getAttributesAsOptions(attributes: string[]) {
-  return attributes.map((attribute) => ({ label: attribute, value: attribute }));
 }

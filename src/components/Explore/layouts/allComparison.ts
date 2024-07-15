@@ -6,8 +6,8 @@ import { AxisPlacement } from '@grafana/ui';
 import { TooltipDisplayMode } from '@grafana/schema';
 import { HighestDifferencePanel } from './HighestDifferencePanel';
 
-export const BaselineColor = '#CCCCDC';
-export const SelectionColor = '#FF9830';
+export const BaselineColor = '#5794F299';
+export const SelectionColor = '#FF9930';
 
 export function buildAllComparisonLayout(actionsFn: (df: DataFrame) => VizPanelState['headerActions']) {
   return new ByFrameRepeater({

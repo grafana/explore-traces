@@ -18,7 +18,6 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 import { debounce } from 'lodash';
-import { groupSeriesBy } from '../../utils/panels';
 import { Search } from 'pages/Explore/Search';
 import { getGroupByVariable } from 'utils/utils';
 
@@ -130,12 +129,35 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     }
   }, 250);
 
+  private groupSeriesBy(data: PanelData, groupBy: string) {
+    const groupedData = data.series.reduce((acc, series) => {
+      const key = series.fields.find((f) => f.type === FieldType.number)?.labels?.[groupBy];
+      if (!key) {
+        return acc;
+      }
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(series);
+      return acc;
+    }, {} as Record<string, DataFrame[]>);
+  
+    const newSeries = [];
+    for (const key in groupedData) {
+      const frames = groupedData[key].sort((a, b) => a.name?.localeCompare(b.name!) || 0);
+      const mainFrame = frames[0];
+      frames.slice(1, frames.length).forEach((frame) => mainFrame.fields.push(frame.fields[1]));
+      newSeries.push(mainFrame);
+    }
+    return newSeries;
+  }
+  
   private performRepeat(data: PanelData) {
     const newChildren: SceneFlexItem[] = [];
     let frames = data.series;
 
     if (this.state.groupBy) {
-      frames = groupSeriesBy(data, getGroupByVariable(this).getValueText());
+      frames = this.groupSeriesBy(data, getGroupByVariable(this).getValueText());
     }
 
     for (let frameIndex = 0; frameIndex < frames.length; frameIndex++) {

@@ -1,8 +1,8 @@
 # Explore Traces documentation
 
-This directory contains the source code for the Explore Profiles documentation.
+This directory contains the source code for the Explore Traces documentation.
 
-Some key things to know about the Explore Profiles documentation source:
+Some key things to know about the Explore Traces documentation source:
 
 - The docs are written in markdown, specifically the CommonMark flavor of markdown.
 - The Grafana docs team uses [Hugo](https://gohugo.io/) to generate the documentation.
@@ -16,7 +16,7 @@ The Explore Traces documentation is written using the CommonMark flavor of markd
 
 If you have a GitHub account and you're just making a small fix, for example fixing a typo or updating an example, you can edit the topic in GitHub.
 
-1. Find the topic in the explore-profiles repo.
+1. Find the topic in the explore-traces repo.
 2. Click the pencil icon.
 3. Enter your changes.
 4. Click **Commit changes**. GitHub creates a pull request for you.

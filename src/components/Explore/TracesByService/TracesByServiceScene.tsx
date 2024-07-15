@@ -6,6 +6,7 @@ import {
   SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -22,12 +23,13 @@ import {
   VAR_DATASOURCE_EXPR,
   MetricFunction,
   ComparisonSelection,
+  ALL,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
-import { getTraceExplorationScene } from 'utils/utils';
+import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -63,6 +65,22 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       if (newState.value !== prevState.value) {
         this.setState({ selection: undefined });
         this.updateBody();
+      }
+    });
+
+    this.subscribeToState((newState, prevState) => {
+      const timeRange = sceneGraph.getTimeRange(this);
+      const selectionFrom = newState.selection?.timeRange?.from;
+      // clear selection if it's out of time range
+      if (selectionFrom && selectionFrom < timeRange.state.value.from.unix()) {
+        this.setState({ selection: undefined });
+      }
+
+      // Set group by to All when starting a comparison
+      if (newState.selection && newState.selection !== prevState.selection) {
+        this.setActionView('breakdown');
+        const groupByVar = getGroupByVariable(this);
+        groupByVar.changeValueTo(ALL);
       }
     });
 
@@ -132,7 +150,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     if (body.state.children.length > 1) {
       if (actionViewDef) {
         // reduce max height for main panel to reduce height flicker
-        body.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
+        body.state.children[0].setState({ maxHeight: MAIN_PANEL_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
         this.setState({ actionView: actionViewDef.value });
       }
@@ -145,8 +163,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   };
 }
 
-const MAIN_PANEL_MIN_HEIGHT = 205;
-const MAIN_PANEL_MAX_HEIGHT = '30%';
+const MAIN_PANEL_HEIGHT = 205;
 
 export function buildQuery(type: MetricFunction) {
   const typeQuery = type === 'errors' ? ' && status = error' : '';
@@ -161,15 +178,15 @@ export function buildQuery(type: MetricFunction) {
   };
 }
 
-function buildGraphScene(type: MetricFunction, children?: SceneObject[]) {
+function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
   return new SceneFlexLayout({
     direction: 'column',
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
     children: [
       new SceneFlexItem({
-        minHeight: MAIN_PANEL_MIN_HEIGHT,
-        maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: type === 'rate' || type === 'errors' ? new RateMetricsPanel({ type }) : new HistogramPanel({}),
+        minHeight: MAIN_PANEL_HEIGHT,
+        maxHeight: MAIN_PANEL_HEIGHT,
+        body: metric === 'rate' || metric === 'errors' ? new RateMetricsPanel({ metric }) : new HistogramPanel({}),
       }),
       new SceneFlexItem({
         ySizing: 'content',

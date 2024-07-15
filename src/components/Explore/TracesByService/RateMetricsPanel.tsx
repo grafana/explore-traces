@@ -7,28 +7,25 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
-  SceneQueryRunner,
 } from '@grafana/scenes';
 import { FieldType, LoadingState } from '@grafana/data';
-import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from 'utils/shared';
+import { explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { ComparisonControl } from './ComparisonControl';
+import { rateByWithStatus } from '../queries/rateByWithStatus';
+import { StepQueryRunner } from '../queries/StepQueryRunner';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  type: MetricFunction;
+  metric: MetricFunction;
 }
 
 export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
   constructor(state: RateMetricsPanelState) {
     super({
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery(state.type)],
-      }),
       ...state,
     });
 
@@ -59,7 +56,7 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
                 refId: 'A',
               });
               this.setState({
-                panel: this.getVizPanel(),
+                panel: this.getVizPanel(this.state.metric),
               });
             }
           } else if (data.data?.state === LoadingState.Loading) {
@@ -81,18 +78,27 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
 
   private _onActivate() {
     this.setState({
-      panel: this.getVizPanel(),
+      $data: new StepQueryRunner({
+        maxDataPoints: 50,
+        datasource: explorationDS,
+        queries: [rateByWithStatus(this.state.metric)],
+      }),
+      panel: this.getVizPanel(this.state.metric),
     });
   }
 
-  private getVizPanel() {
+  private getVizPanel(type: MetricFunction) {
+    const panel = barsPanelConfig().setHeaderActions(new ComparisonControl({ query: 'status = error' }));
+    if (type === 'errors') {
+      panel.setTitle('Errors rate').setColor({ fixedColor: 'semi-dark-red', mode: 'fixed' });
+    } else {
+      panel.setTitle('Span rate');
+    }
     return new SceneFlexLayout({
       direction: 'row',
       children: [
         new SceneFlexItem({
-          body: barsPanelConfig()
-            .setHeaderActions(new ComparisonControl({ query: 'status = error' }))
-            .build(),
+          body: panel.build(),
         }),
       ],
     });
@@ -106,18 +112,5 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
     }
 
     return <panel.Component model={panel} />;
-  };
-}
-
-function buildQuery(type: MetricFunction) {
-  const typeQuery = type === 'rate' ? '' : ' && status = error';
-  return {
-    refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}${typeQuery}} | rate() by (status)`,
-    queryType: 'traceql',
-    tableType: 'spans',
-    limit: 100,
-    spss: 10,
-    filters: [],
   };
 }

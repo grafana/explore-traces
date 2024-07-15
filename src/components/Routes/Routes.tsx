@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { TraceExplorationPage } from '../../pages/Explore';
+import { PLUGIN_BASE_URL, ROUTES } from 'utils/shared';
 
 export const Routes = () => {
   return (
