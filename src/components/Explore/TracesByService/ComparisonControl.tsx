@@ -28,7 +28,7 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
 
   public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {
     const { query, placeholder } = model.useState();
-    const { selection } = getTraceByServiceScene(model).useState();
+    const { selection, metric } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
 
     if (!query && !selection) {
@@ -40,8 +40,19 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
       );
     }
 
+    const explanation =
+      metric === 'duration'
+        ? 'Comparing selected area against non-selected area'
+        : 'Comparing errors (selection) against non-errors (baseline)';
+
     return (
       <div className={styles.wrapper}>
+        {selection && (
+          <div className={styles.placeholder}>
+            <Icon name={'info-circle'} />
+            <div>{explanation}</div>
+          </div>
+        )}
         <Button
           variant={selection ? 'destructive' : 'primary'}
           size="sm"
@@ -62,6 +73,7 @@ function getStyles(theme: GrafanaTheme2) {
       marginTop: theme.spacing(1),
       display: 'flex',
       gap: '16px',
+      alignItems: 'center',
     }),
     placeholder: css({
       color: theme.colors.text.secondary,

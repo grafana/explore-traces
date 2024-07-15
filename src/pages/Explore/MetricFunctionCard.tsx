@@ -46,7 +46,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
         return barsPanelConfig()
           .setData(
             new StepQueryRunner({
-              maxDataPoints: 50,
+              maxDataPoints: 64,
               datasource: explorationDS,
               queries: [rateByWithStatus('errors')],
             })
@@ -68,7 +68,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
         return histogramPanelConfig()
           .setData(
             new StepQueryRunner({
-              maxDataPoints: 25,
+              maxDataPoints: 24,
               datasource: explorationDS,
               queries: [buildQuery()],
             })
@@ -81,7 +81,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
           .setDisplayMode('transparent')
           .setData(
             new StepQueryRunner({
-              maxDataPoints: 50,
+              maxDataPoints: 64,
               datasource: explorationDS,
               queries: [rateByWithStatus('rate')],
             })

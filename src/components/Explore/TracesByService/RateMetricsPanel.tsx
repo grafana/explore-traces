@@ -79,7 +79,7 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
   private _onActivate() {
     this.setState({
       $data: new StepQueryRunner({
-        maxDataPoints: 50,
+        maxDataPoints: 64,
         datasource: explorationDS,
         queries: [rateByWithStatus(this.state.metric)],
       }),

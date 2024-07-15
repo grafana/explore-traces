@@ -9,8 +9,9 @@ import {
   SceneFlexLayout,
   SceneQueryRunner,
   sceneGraph,
+  SceneDataTransformer,
 } from '@grafana/scenes';
-import { LoadingState, GrafanaTheme2 } from '@grafana/data';
+import { LoadingState, GrafanaTheme2, DataFrame } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { MakeOptional, MetricFunction, explorationDS } from 'utils/shared';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
@@ -19,6 +20,7 @@ import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
 import { buildQuery } from '../../TracesByServiceScene';
+import { map, Observable } from 'rxjs';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -28,9 +30,35 @@ export interface SpanListSceneState extends SceneObjectState {
 export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
   constructor(state: MakeOptional<SpanListSceneState, 'metric'>) {
     super({
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery(state.metric as MetricFunction)],
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: explorationDS,
+          queries: [buildQuery(state.metric as MetricFunction)],
+        }),
+        transformations: [
+          () => (source: Observable<DataFrame[]>) => {
+            return source.pipe(
+              map((data: DataFrame[]) => {
+                return data.map((df) => ({
+                  ...df,
+                  fields: df.fields.filter((f) => !f.name.startsWith('nestedSet')),
+                }));
+              })
+            );
+          },
+          {
+            id: 'sortBy',
+            options: {
+              fields: {},
+              sort: [
+                {
+                  field: 'Duration',
+                  desc: true,
+                },
+              ],
+            },
+          },
+        ],
       }),
     });
 
