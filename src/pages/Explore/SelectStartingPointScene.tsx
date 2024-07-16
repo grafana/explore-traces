@@ -14,7 +14,13 @@ import {
   radioAttributesResource,
   RESOURCE_ATTR,
 } from '../../utils/shared';
-import { getLabelValue, getGroupByVariable, getTraceExplorationScene, getAttributesAsOptions } from '../../utils/utils';
+import {
+  getLabelValue,
+  getGroupByVariable,
+  getTraceExplorationScene,
+  getAttributesAsOptions,
+  getFiltersVariable,
+} from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
@@ -22,6 +28,7 @@ import { AddToFiltersAction } from '../../components/Explore/actions/AddToFilter
 import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body?: LayoutSwitcher;
@@ -98,8 +105,14 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     const variable = getGroupByVariable(this);
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
-        new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-        new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
+        new AddToFiltersAction({
+          frame,
+          pageForReporting: USER_EVENTS_PAGES.starting_page,
+          labelKey: variable.getValueText(),
+        }),
+        new AnalyzeTracesAction({
+          attribute: getLabelValue(frame, variable.getValueText()),
+        }),
       ]),
     });
   };
@@ -110,6 +123,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   };
 
   public onSelectStartingPoint() {
+    const filtersVariable = getFiltersVariable(this);
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.analyze_current, {
+      filtersLength: filtersVariable.state.filters.length,
+    });
     this.publishEvent(new StartingPointSelectedEvent(), true);
   }
 

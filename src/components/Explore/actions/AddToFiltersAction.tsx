@@ -4,9 +4,16 @@ import { DataFrame } from '@grafana/data';
 import { SceneObjectState, SceneObjectBase, SceneComponentProps, AdHocFiltersVariable } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 import { getFiltersVariable, getLabelValue } from '../../../utils/utils';
+import {
+  reportAppInteraction,
+  USER_EVENTS_ACTIONS,
+  USER_EVENTS_PAGES,
+  UserEventPagesType,
+} from '../../../utils/analytics';
 
 export interface AddToFiltersActionState extends SceneObjectState {
   frame: DataFrame;
+  pageForReporting: UserEventPagesType;
   labelKey?: string;
 }
 
@@ -26,8 +33,18 @@ export class AddToFiltersAction extends SceneObjectBase<AddToFiltersActionState>
     }
 
     const labelName = this.state.labelKey ?? Object.keys(labels)[0];
+    const value = getLabelValue(this.state.frame, this.state.labelKey);
 
-    addToFilters(variable, labelName, getLabelValue(this.state.frame, this.state.labelKey));
+    addToFilters(variable, labelName, value);
+
+    reportAppInteraction(
+      USER_EVENTS_PAGES[this.state.pageForReporting],
+      USER_EVENTS_ACTIONS[this.state.pageForReporting].add_to_filters_clicked,
+      {
+        labelName,
+        value,
+      }
+    );
   };
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersAction>) => {

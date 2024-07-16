@@ -1,14 +1,11 @@
 import React from 'react';
 
-import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
-} from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
 import { StartingPointSelectedEvent } from '../../../utils/shared';
 import { getFiltersVariable, getGroupByVariable } from 'utils/utils';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface AnalyzeTracesActionState extends SceneObjectState {
   attribute: string;
@@ -28,6 +25,13 @@ export class AnalyzeTracesAction extends SceneObjectBase<AnalyzeTracesActionStat
     const filtersWithoutNew = filtersVariable.state.filters.filter(
       (f) => f.key !== groupByVariable.getValue().toString()
     );
+
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.analyze_traces_clicked, {
+      currentFiltersLength: filtersWithoutNew.length,
+      key: groupByVariable.getValue().toString(),
+      operator: '=',
+      value: this.state.attribute,
+    });
 
     filtersVariable.setState({
       filters: [
