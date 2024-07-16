@@ -21,6 +21,7 @@ import { getTraceByServiceScene } from 'utils/utils';
 import { TraceSceneState } from './TracesByServiceScene';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { SelectionColor } from '../layouts/allComparison';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface HistogramPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -173,6 +174,15 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
           newSelection.duration = { from: yFrom, to: yTo };
 
           parent.setState({ selection: newSelection });
+
+          reportAppInteraction(
+            USER_EVENTS_PAGES.analyse_traces,
+            USER_EVENTS_ACTIONS.analyse_traces.start_investigation,
+            {
+              selection: newSelection,
+              metric: 'duration',
+            }
+          );
         };
       },
     });

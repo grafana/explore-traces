@@ -28,6 +28,7 @@ import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -67,10 +68,18 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     this.setBody(variable);
   }
 
+  private onAddToFiltersClick(payload: any) {
+    reportAppInteraction(
+      USER_EVENTS_PAGES.analyse_traces,
+      USER_EVENTS_ACTIONS.analyse_traces.breakdown_add_to_filters_clicked,
+      payload
+    );
+  }
+
   private setBody = (variable: CustomVariable) => {
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
-        new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+        new AddToFiltersAction({ frame, labelKey: variable.getValueText(), onClick: this.onAddToFiltersClick }),
       ]),
     });
   };

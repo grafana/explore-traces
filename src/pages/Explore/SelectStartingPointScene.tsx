@@ -101,13 +101,21 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     });
   }
 
+  private onAddToFiltersClick(payload: any) {
+    reportAppInteraction(
+      USER_EVENTS_PAGES.starting_page,
+      USER_EVENTS_ACTIONS.starting_page.add_to_filters_clicked,
+      payload
+    );
+  }
+
   private setBody = () => {
     const variable = getGroupByVariable(this);
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
         new AddToFiltersAction({
           frame,
-          pageForReporting: USER_EVENTS_PAGES.starting_page,
+          onClick: this.onAddToFiltersClick,
           labelKey: variable.getValueText(),
         }),
         new AnalyzeTracesAction({

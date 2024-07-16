@@ -27,7 +27,10 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
   const otherFilters = filters.filter((f) => getFilterSignature(f) !== getFilterSignature(primarySignalOption?.filter));
 
   const clearFilters = () => {
-    model.setState({ _wip: undefined });
+    if (model.state._wip) {
+      model.setState({ _wip: undefined });
+      return;
+    }
     for (const filter of filters) {
       // Don't remove the primary signal filter
       if (

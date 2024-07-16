@@ -54,6 +54,6 @@ export function getStepForTimeRange(scene: SceneObject, dataPoints?: number) {
   const to = sceneTimeRange.state.value.to.unix();
 
   const dur = duration(to - from, 's');
-  const finalDur = Math.floor(dur.asSeconds() / (dataPoints ?? 50));
+  const finalDur = Math.floor(dur.asSeconds() / (dataPoints ?? 50)) || 1;
   return `${finalDur}s`;
 }

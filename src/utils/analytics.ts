@@ -36,14 +36,16 @@ export const USER_EVENTS_ACTIONS = {
   },
   [USER_EVENTS_PAGES.analyse_traces]: {
     action_view_changed: 'action_view_changed',
-    add_to_filters_clicked: 'add_to_filters_clicked',
-    select_field_in_breakdown_clicked: 'select_field_in_breakdown_clicked',
+    breakdown_add_to_filters_clicked: 'breakdown_add_to_filters_clicked',
+    comparison_add_to_filters_clicked: 'comparison_add_to_filters_clicked',
+    select_attribute_in_comparison_clicked: 'select_attribute_in_comparison_clicked',
     layout_type_changed: 'layout_type_changed',
+    start_investigation: 'start_investigation',
+    stop_investigation: 'stop_investigation',
   },
   [USER_EVENTS_PAGES.common]: {
     metric_changed: 'metric_changed',
     new_filter_added_manually: 'new_filter_added_manually',
-    add_to_filters_clicked: 'add_to_filters_clicked',
     app_initialized: 'app_initialized',
   },
 } as const;
