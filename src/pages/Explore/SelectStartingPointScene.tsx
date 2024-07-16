@@ -128,6 +128,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
+
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.group_by_changed, {
+      groupBy: value,
+    });
   };
 
   public onSelectStartingPoint() {

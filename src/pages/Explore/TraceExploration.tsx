@@ -20,7 +20,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Stack, useStyles2 } from '@grafana/ui';
+import { Badge, Stack, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import { SelectStartingPointScene } from './SelectStartingPointScene';
@@ -213,6 +213,9 @@ export class TraceExplorationScene extends SceneObjectBase {
             </Stack>
           )}
           <div className={styles.controls}>
+            <div className={styles.previewWrapper}>
+              <Badge text={'Preview'} color={'blue'} icon={'rocket'} />
+            </div>
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
@@ -300,6 +303,11 @@ function getStyles(theme: GrafanaTheme2) {
       position: 'sticky',
       top: `-${theme.spacing(2)}`,
       zIndex: 2,
+    }),
+    previewWrapper: css({
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 8px',
     }),
   };
 }

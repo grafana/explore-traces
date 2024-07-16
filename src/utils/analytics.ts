@@ -33,9 +33,11 @@ export const USER_EVENTS_ACTIONS = {
     add_to_filters_clicked: 'add_to_filters_clicked',
     analyze_traces_clicked: 'analyze_traces_clicked',
     analyze_current: 'analyze_current',
+    group_by_changed: 'group_by_changed',
   },
   [USER_EVENTS_PAGES.analyse_traces]: {
     action_view_changed: 'action_view_changed',
+    breakdown_group_by_changed: 'breakdown_group_by_changed',
     breakdown_add_to_filters_clicked: 'breakdown_add_to_filters_clicked',
     comparison_add_to_filters_clicked: 'comparison_add_to_filters_clicked',
     select_attribute_in_comparison_clicked: 'select_attribute_in_comparison_clicked',
