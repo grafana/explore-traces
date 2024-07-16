@@ -5,6 +5,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getTraceByServiceScene } from 'utils/utils';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface ComparisonControlState extends SceneObjectState {
   query?: string;
@@ -19,11 +20,16 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
   public startInvestigation = () => {
     const byServiceScene = getTraceByServiceScene(this);
     byServiceScene.setState({ selection: { query: this.state.query } });
+    reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.start_investigation, {
+      query: this.state.query,
+      metric: byServiceScene.state.metric,
+    });
   };
 
   public stopInvestigation = () => {
     const byServiceScene = getTraceByServiceScene(this);
     byServiceScene.setState({ selection: undefined });
+    reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.stop_investigation);
   };
 
   public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {

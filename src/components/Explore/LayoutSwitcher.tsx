@@ -3,6 +3,7 @@ import React from 'react';
 import { SelectableValue } from '@grafana/data';
 import { SceneComponentProps, SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { Field, RadioButtonGroup } from '@grafana/ui';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 
 export interface LayoutSwitcherState extends SceneObjectState {
   active: LayoutType;
@@ -25,6 +26,9 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
 
   public onLayoutChange = (active: LayoutType) => {
     this.setState({ active });
+    reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.layout_type_changed, {
+      layout: active,
+    });
   };
 
   public static Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {

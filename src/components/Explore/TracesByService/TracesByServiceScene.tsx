@@ -29,7 +29,8 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
-import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
+import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -82,6 +83,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         const groupByVar = getGroupByVariable(this);
         groupByVar.changeValueTo(ALL);
       }
+    });
+
+    getDatasourceVariable(this).subscribeToState(() => {
+      this.updateAttributes();
     });
 
     this.updateAttributes();
@@ -152,6 +157,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         // reduce max height for main panel to reduce height flicker
         body.state.children[0].setState({ maxHeight: MAIN_PANEL_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
+        reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.action_view_changed, {
+          oldAction: this.state.actionView,
+          newAction: actionView,
+        });
         this.setState({ actionView: actionViewDef.value });
       }
     }

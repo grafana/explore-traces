@@ -5,6 +5,7 @@ import { FilterByVariable } from './FilterByVariable';
 import { FilterRenderer } from './FilterRenderer';
 import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 interface Props {
   model: FilterByVariable;
@@ -15,9 +16,14 @@ export function AddFilter({ model, otherFiltersLength }: Props) {
   const { _wip } = model.useState();
   const styles = useStyles2(getStyles);
 
+  const onClick = () => {
+    reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.new_filter_added_manually);
+    model._addWip();
+  };
+
   if (!_wip) {
     return (
-      <div className={styles.addFilterBar} onClick={() => model._addWip()}>
+      <div className={styles.addFilterBar} onClick={onClick}>
         {otherFiltersLength === 0 ? 'Filter by attribute...' : undefined}
       </div>
     );

@@ -7,6 +7,7 @@ import { getFiltersVariable, getLabelValue } from '../../../utils/utils';
 
 export interface AddToFiltersActionState extends SceneObjectState {
   frame: DataFrame;
+  onClick: (payload: any) => void;
   labelKey?: string;
 }
 
@@ -26,8 +27,11 @@ export class AddToFiltersAction extends SceneObjectBase<AddToFiltersActionState>
     }
 
     const labelName = this.state.labelKey ?? Object.keys(labels)[0];
+    const value = getLabelValue(this.state.frame, this.state.labelKey);
 
-    addToFilters(variable, labelName, getLabelValue(this.state.frame, this.state.labelKey));
+    addToFilters(variable, labelName, value);
+
+    this.state.onClick({ labelName });
   };
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersAction>) => {

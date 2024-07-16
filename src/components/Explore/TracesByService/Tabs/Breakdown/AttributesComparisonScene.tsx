@@ -28,6 +28,7 @@ import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
 import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -109,6 +110,14 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     this.setBody(variable);
   }
 
+  private onAddToFiltersClick(payload: any) {
+    reportAppInteraction(
+      USER_EVENTS_PAGES.analyse_traces,
+      USER_EVENTS_ACTIONS.analyse_traces.comparison_add_to_filters_clicked,
+      payload
+    );
+  }
+
   private setBody = (variable: CustomVariable) => {
     this.setState({
       body:
@@ -121,7 +130,11 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 })
             )
           : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
+              new AddToFiltersAction({
+                frame,
+                labelKey: variable.getValueText(),
+                onClick: this.onAddToFiltersClick,
+              }),
             ]),
     });
   };
@@ -129,6 +142,12 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
+
+    reportAppInteraction(
+      USER_EVENTS_PAGES.analyse_traces,
+      USER_EVENTS_ACTIONS.analyse_traces.select_attribute_in_comparison_clicked,
+      { value }
+    );
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {

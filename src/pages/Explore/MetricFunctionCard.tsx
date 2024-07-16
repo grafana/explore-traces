@@ -15,6 +15,7 @@ import { useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 import { getTraceExplorationScene } from 'utils/utils';
 import { StepQueryRunner } from '../../components/Explore/queries/StepQueryRunner';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 
 export interface MetricFunctionCardState extends SceneObjectState {
   metric: MetricFunction;
@@ -102,6 +103,16 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
     }
   }
 
+  private onCardClicked(newMetric: string) {
+    const traceExploration = getTraceExplorationScene(this);
+    const oldMetric = traceExploration.getMetricVariable().getValueText();
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.metric_card_clicked, {
+      newMetric,
+      oldMetric,
+    });
+    traceExploration.onChangeMetricFunction(newMetric);
+  }
+
   public static Component = ({ model }: SceneComponentProps<MetricFunctionCard>) => {
     const { body, metric } = model.useState();
     const traceExploration = getTraceExplorationScene(model);
@@ -110,7 +121,7 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
 
     const itemStyles = metric === selectedMetric ? [styles.item, styles.selected] : [styles.item];
     return (
-      <div key={metric} className={cx(itemStyles)} onClick={() => traceExploration.onChangeMetricFunction(metric)}>
+      <div key={metric} className={cx(itemStyles)} onClick={() => model.onCardClicked(metric)}>
         <h6>{model.getLabel()}</h6>
         <body.Component model={body} />
       </div>

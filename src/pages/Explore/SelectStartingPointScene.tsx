@@ -13,8 +13,16 @@ import {
   StartingPointSelectedEvent,
   radioAttributesResource,
   RESOURCE_ATTR,
+  VAR_DATASOURCE,
 } from '../../utils/shared';
-import { getLabelValue, getGroupByVariable, getTraceExplorationScene, getAttributesAsOptions } from '../../utils/utils';
+import {
+  getLabelValue,
+  getGroupByVariable,
+  getTraceExplorationScene,
+  getAttributesAsOptions,
+  getFiltersVariable,
+  getDatasourceVariable,
+} from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
@@ -22,6 +30,7 @@ import { AddToFiltersAction } from '../../components/Explore/actions/AddToFilter
 import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 
 export interface TraceSelectSceneState extends SceneObjectState {
   body?: LayoutSwitcher;
@@ -36,7 +45,7 @@ export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC],
+    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC, VAR_DATASOURCE],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -77,6 +86,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
         this.setBody();
       }
     });
+
+    getDatasourceVariable(this).subscribeToState(() => {
+      this.updateAttributes();
+    });
   }
 
   private async updateAttributes() {
@@ -94,12 +107,26 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     });
   }
 
+  private onAddToFiltersClick(payload: any) {
+    reportAppInteraction(
+      USER_EVENTS_PAGES.starting_page,
+      USER_EVENTS_ACTIONS.starting_page.add_to_filters_clicked,
+      payload
+    );
+  }
+
   private setBody = () => {
     const variable = getGroupByVariable(this);
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
-        new AddToFiltersAction({ frame, labelKey: variable.getValueText() }),
-        new AnalyzeTracesAction({ attribute: getLabelValue(frame, variable.getValueText()) }),
+        new AddToFiltersAction({
+          frame,
+          onClick: this.onAddToFiltersClick,
+          labelKey: variable.getValueText(),
+        }),
+        new AnalyzeTracesAction({
+          attribute: getLabelValue(frame, variable.getValueText()),
+        }),
       ]),
     });
   };
@@ -107,9 +134,17 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
     variable.changeValueTo(value);
+
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.group_by_changed, {
+      groupBy: value,
+    });
   };
 
   public onSelectStartingPoint() {
+    const filtersVariable = getFiltersVariable(this);
+    reportAppInteraction(USER_EVENTS_PAGES.starting_page, USER_EVENTS_ACTIONS.starting_page.analyze_current, {
+      filtersLength: filtersVariable.state.filters.length,
+    });
     this.publishEvent(new StartingPointSelectedEvent(), true);
   }
 
