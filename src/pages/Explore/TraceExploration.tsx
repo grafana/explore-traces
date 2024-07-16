@@ -263,6 +263,7 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       }),
       new CustomVariable({
         name: VAR_GROUPBY,
+        defaultToAll: false,
       }),
     ],
   });
