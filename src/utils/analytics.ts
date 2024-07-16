@@ -42,6 +42,7 @@ export const USER_EVENTS_ACTIONS = {
     layout_type_changed: 'layout_type_changed',
     start_investigation: 'start_investigation',
     stop_investigation: 'stop_investigation',
+    open_trace: 'open_trace',
   },
   [USER_EVENTS_PAGES.common]: {
     metric_changed: 'metric_changed',

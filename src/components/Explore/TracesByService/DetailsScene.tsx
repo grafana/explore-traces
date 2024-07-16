@@ -12,6 +12,7 @@ import {
 import { DetailsSceneUpdated } from '../../../utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { TraceViewPanelScene } from '../panels/TraceViewPanelScene';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface DetailsSceneState extends SceneObjectState {
   traceId?: string;
@@ -32,6 +33,9 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
     this.subscribeToState((newState, prevState) => {
       if (newState.traceId !== prevState.traceId) {
         this.updateBody();
+        reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.open_trace, {
+          traceId: newState.traceId,
+        });
       }
       this.publishEvent(new DetailsSceneUpdated({ showDetails: true }), true);
     });
