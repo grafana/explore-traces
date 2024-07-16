@@ -29,7 +29,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
-import { getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
+import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface TraceSceneState extends SceneObjectState {
@@ -83,6 +83,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         const groupByVar = getGroupByVariable(this);
         groupByVar.changeValueTo(ALL);
       }
+    });
+
+    getDatasourceVariable(this).subscribeToState(() => {
+      this.updateAttributes();
     });
 
     this.updateAttributes();

@@ -13,6 +13,7 @@ import {
   StartingPointSelectedEvent,
   radioAttributesResource,
   RESOURCE_ATTR,
+  VAR_DATASOURCE,
 } from '../../utils/shared';
 import {
   getLabelValue,
@@ -20,6 +21,7 @@ import {
   getTraceExplorationScene,
   getAttributesAsOptions,
   getFiltersVariable,
+  getDatasourceVariable,
 } from '../../utils/utils';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
@@ -43,7 +45,7 @@ export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC],
+    variableNames: [VAR_GROUPBY, VAR_FILTERS, VAR_METRIC, VAR_DATASOURCE],
   });
 
   constructor(state: Partial<TraceSelectSceneState>) {
@@ -83,6 +85,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
       if (newState.value !== prevState.value) {
         this.setBody();
       }
+    });
+
+    getDatasourceVariable(this).subscribeToState(() => {
+      this.updateAttributes();
     });
   }
 

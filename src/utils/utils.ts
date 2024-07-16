@@ -2,6 +2,7 @@ import { AdHocVariableFilter, DataFrame, urlUtil } from '@grafana/data';
 import {
   AdHocFiltersVariable,
   CustomVariable,
+  DataSourceVariable,
   getUrlSyncManager,
   sceneGraph,
   SceneObject,
@@ -10,7 +11,7 @@ import {
 } from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
-import { EXPLORATIONS_ROUTE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
+import { EXPLORATIONS_ROUTE, VAR_DATASOURCE, VAR_DATASOURCE_EXPR, VAR_FILTERS, VAR_GROUPBY } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
 
@@ -78,6 +79,14 @@ export function getFiltersVariable(scene: SceneObject): AdHocFiltersVariable {
   const variable = sceneGraph.lookupVariable(VAR_FILTERS, scene);
   if (!(variable instanceof AdHocFiltersVariable)) {
     throw new Error('Filters variable not found');
+  }
+  return variable;
+}
+
+export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
+  const variable = sceneGraph.lookupVariable(VAR_DATASOURCE, scene);
+  if (!(variable instanceof DataSourceVariable)) {
+    throw new Error('Datasource variable not found');
   }
   return variable;
 }
