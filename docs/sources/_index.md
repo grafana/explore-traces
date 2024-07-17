@@ -7,6 +7,7 @@ cascade:
   PRODUCT_NAME: Explore Traces
 description: Learn about traces and how you can use them to understand and troubleshoot
   your application and services.
+canonical: https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces/
 keywords:
   - Explore Traces
   - Traces
