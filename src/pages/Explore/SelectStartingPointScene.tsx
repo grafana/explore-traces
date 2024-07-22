@@ -26,7 +26,6 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { buildNormalLayout } from '../../components/Explore/layouts/attributeBreakdown';
 import { LayoutSwitcher } from '../../components/Explore/LayoutSwitcher';
-import { AddToFiltersAction } from '../../components/Explore/actions/AddToFiltersAction';
 import { AnalyzeTracesAction } from '../../components/Explore/actions/AnalyzeTracesAction';
 import { MetricFunctionCard } from './MetricFunctionCard';
 import { GroupBySelector } from 'components/Explore/GroupBySelector';
@@ -107,23 +106,10 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
     });
   }
 
-  private onAddToFiltersClick(payload: any) {
-    reportAppInteraction(
-      USER_EVENTS_PAGES.starting_page,
-      USER_EVENTS_ACTIONS.starting_page.add_to_filters_clicked,
-      payload
-    );
-  }
-
   private setBody = () => {
     const variable = getGroupByVariable(this);
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
-        new AddToFiltersAction({
-          frame,
-          onClick: this.onAddToFiltersClick,
-          labelKey: variable.getValueText(),
-        }),
         new AnalyzeTracesAction({
           attribute: getLabelValue(frame, variable.getValueText()),
         }),
@@ -163,7 +149,7 @@ export class SelectStartingPointScene extends SceneObjectBase<TraceSelectSceneSt
           ))}
         </div>
         <div className={styles.stack}>
-          <div>2. Add filters to find relevant data or</div>
+          <div>2. Select a starting point to analyze traces or</div>
           <button onClick={() => model.onSelectStartingPoint()} className={styles.inlineButton}>
             analyze the current selection
           </button>
@@ -235,9 +221,9 @@ function getStyles(theme: GrafanaTheme2) {
     inlineButton: css({
       border: 'none',
       background: 'none',
-      color: theme.colors.primary.main,
       cursor: 'pointer',
       padding: 0,
+      textDecoration: 'underline',
     }),
     stack: css({
       display: 'flex',
