@@ -5,7 +5,6 @@ import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
   CustomVariable,
   DataSourceVariable,
-  getUrlSyncManager,
   SceneComponentProps,
   SceneFlexItem,
   sceneGraph,
@@ -107,10 +106,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
       }
     });
-
-    return () => {
-      getUrlSyncManager().cleanUp(this);
-    };
   }
 
   public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
