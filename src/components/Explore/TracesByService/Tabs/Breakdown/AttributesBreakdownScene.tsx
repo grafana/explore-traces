@@ -86,15 +86,17 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
-    variable.changeValueTo(value);
+    if (variable.getValueText() !== value) {
+      variable.changeValueTo(value);
 
-    reportAppInteraction(
-      USER_EVENTS_PAGES.analyse_traces,
-      USER_EVENTS_ACTIONS.analyse_traces.breakdown_group_by_changed,
-      {
-        groupBy: value,
-      }
-    );
+      reportAppInteraction(
+        USER_EVENTS_PAGES.analyse_traces,
+        USER_EVENTS_ACTIONS.analyse_traces.breakdown_group_by_changed,
+        {
+          groupBy: value,
+        }
+      );
+    }
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {

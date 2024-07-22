@@ -4,7 +4,7 @@ import { SceneObjectBase, SceneComponentProps, SceneObjectState } from '@grafana
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { getTraceByServiceScene } from 'utils/utils';
+import { getTraceByServiceScene, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 
 export interface ComparisonControlState extends SceneObjectState {
@@ -34,7 +34,8 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
 
   public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {
     const { query, placeholder } = model.useState();
-    const { selection, metric } = getTraceByServiceScene(model).useState();
+    const { selection } = getTraceByServiceScene(model).useState();
+    const { value: metric } = getTraceExplorationScene(model).getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 
     if (!query && !selection) {
