@@ -31,7 +31,9 @@ Explore Traces helps you easily get started and make sense of your tracing data 
 Explore Traces lets you automatically visualize and explore your traces without having to write queries.
 Before this app, you would need to use TraceQL, the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
 
-![The Explore Traces app](explore-traces-homescreen.png)
+{{< youtube id="Yqx8yCMCvgQ" >}}
+
+<!-- ![The Explore Traces app](explore-traces-homescreen.png) -->
 
 Using the app, you can:
 
