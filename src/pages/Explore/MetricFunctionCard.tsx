@@ -9,9 +9,9 @@ import { explorationDS, MetricFunction } from '../../utils/shared';
 import { barsPanelConfig } from '../../components/Explore/panels/barsPanel';
 import { rateByWithStatus } from '../../components/Explore/queries/rateByWithStatus';
 import React from 'react';
-import { css, cx } from '@emotion/css';
+import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
-import { useStyles2 } from '@grafana/ui';
+import { Card, useStyles2 } from '@grafana/ui';
 import { buildQuery, histogramPanelConfig } from 'components/Explore/TracesByService/HistogramPanel';
 import { getTraceExplorationScene } from 'utils/utils';
 import { StepQueryRunner } from '../../components/Explore/queries/StepQueryRunner';
@@ -119,11 +119,12 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
     const { value: selectedMetric } = traceExploration.getMetricVariable().useState();
     const styles = useStyles2(getStyles);
 
-    const itemStyles = metric === selectedMetric ? [styles.item, styles.selected] : [styles.item];
     return (
-      <div key={metric} className={cx(itemStyles)} onClick={() => model.onCardClicked(metric)}>
-        <h6>{model.getLabel()}</h6>
-        <body.Component model={body} />
+      <div key={metric} className={styles.itemContainer} onClick={() => model.onCardClicked(metric)}>
+        <Card isSelected={metric === selectedMetric} className={styles.item}>
+          <h6>{model.getLabel()}</h6>
+          <body.Component model={body} />
+        </Card>
       </div>
     );
   };
@@ -131,10 +132,13 @@ export class MetricFunctionCard extends SceneObjectBase<MetricFunctionCardState>
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    itemContainer: css({
+      display: 'flex',
+      flex: 1,
+    }),
     item: css({
       display: 'flex',
       flexDirection: 'column',
-      padding: theme.spacing(1),
       backgroundColor: theme.colors.secondary.main,
       borderRadius: '8px',
       border: `2px solid ${theme.colors.secondary.border}`,
@@ -144,12 +148,12 @@ function getStyles(theme: GrafanaTheme2) {
       '&:hover': {
         border: `2px solid ${theme.colors.secondary.borderTransparent}`,
       },
-    }),
-    selected: css({
-      border: `2px solid ${theme.colors.primary.border}`,
-      '&:hover': {
-        border: `2px solid ${theme.colors.primary.border}`,
+      'h6': {
+        marginTop: '-18px',
       },
+      'h2': { // radio button
+        justifyContent: 'flex-end',
+      }
     }),
   };
 }
