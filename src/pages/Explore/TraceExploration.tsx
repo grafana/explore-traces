@@ -57,6 +57,11 @@ export interface TraceExplorationState extends SceneObjectState {
   initialFilters?: AdHocVariableFilter[];
 }
 
+const version = process.env.VERSION;
+const buildTime = process.env.BUILD_TIME;
+const commitSha = process.env.COMMIT_SHA;
+const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
+
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal'] });
 
@@ -214,7 +219,7 @@ export class TraceExplorationScene extends SceneObjectBase {
           )}
           <div className={styles.controls}>
             <div className={styles.previewWrapper}>
-              <Badge text={'Preview'} color={'blue'} icon={'rocket'} />
+              <Badge text={'Preview'} color={'blue'} icon={'rocket'} tooltip={compositeVersion} />
             </div>
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />

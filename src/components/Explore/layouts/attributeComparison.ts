@@ -88,6 +88,7 @@ export function buildAttributeComparison(
     body: new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
       autoRows: '200px',
+      isLazy: true,
       children: [],
     }),
     getLayoutChild: getLayoutChild(getLabel, actionsFn),
