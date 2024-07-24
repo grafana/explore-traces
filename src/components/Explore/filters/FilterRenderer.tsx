@@ -44,13 +44,11 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   }, [filter, key, model, state]);
 
   const formatKeys = (keys: Array<SelectableValue<string>>) => {
-    const filteredKeys = keys.filter((k) => ignoredAttributes.indexOf(k.value!) === -1);
-
     // Ensure we always have the same order of keys
-    const resourceAttributes = filteredKeys.filter((k) => k.value?.includes(RESOURCE_ATTR));
-    const spanAttributes = filteredKeys.filter((k) => k.value?.includes(SPAN_ATTR));
-    const intrinsicAttributes = filteredKeys.filter(
-      (k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR)
+    const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
+    const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
+    const intrinsicAttributes = keys.filter(
+      (k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR) && ignoredAttributes.indexOf(k.value!) === -1
     );
     return intrinsicAttributes
       ?.concat(resourceAttributes)
