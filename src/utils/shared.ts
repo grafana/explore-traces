@@ -26,7 +26,7 @@ export const SPAN_ATTR = 'span.';
 
 export const radioAttributesResource = ['resource.service.name', 'resource.cluster', 'resource.environment', 'resource.namespace'];
 export const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
-export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:id', 'trace:id', 'traceDuration'];
+export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:duration', 'span:id', 'trace:duration', 'trace:id', 'traceDuration'];
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
