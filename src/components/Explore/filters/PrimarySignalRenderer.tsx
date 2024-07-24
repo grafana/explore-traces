@@ -48,8 +48,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
     boxSizing: 'border-box',
     boxShadow: 'none',
 
-    '& > div': {
-      paddingLeft: '8px',
+    'svg': {
+      marginRight: '-4px',
     },
   }),
 });
