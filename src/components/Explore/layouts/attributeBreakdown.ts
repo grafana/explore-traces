@@ -70,6 +70,7 @@ export function buildNormalLayout(
         body: new SceneCSSGridLayout({
           templateColumns: GRID_TEMPLATE_COLUMNS,
           autoRows: '200px',
+          isLazy: true,
           children: [],
         }),
         groupBy: true,
@@ -79,6 +80,7 @@ export function buildNormalLayout(
         body: new SceneCSSGridLayout({
           templateColumns: '1fr',
           autoRows: '200px',
+          isLazy: true,
           children: [],
         }),
         groupBy: true,
