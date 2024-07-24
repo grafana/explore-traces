@@ -103,15 +103,14 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     const [scope, setScope] = useState(RESOURCE);
     const { body } = model.useState();
     const variable = getGroupByVariable(model);
-    const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
 
+    const { attributes } = getTraceByServiceScene(model).useState();
     const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;
     let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
-    filteredAttributes =
-      scope === RESOURCE
-        ? filteredAttributes?.concat(radioAttributesResource)
-        : filteredAttributes?.concat(radioAttributesSpan);
+    if (scope === SPAN) {
+      filteredAttributes = filteredAttributes?.concat(radioAttributesSpan);
+    }
 
     return (
       <div className={styles.container}>

@@ -16,7 +16,7 @@ import {
 import { Icon, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL } from '../../../../../utils/shared';
+import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL, radioAttributesSpan } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -155,7 +155,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     const variable = getGroupByVariable(model);
     const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
-    const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 
     return (
       <div className={styles.container}>
@@ -164,7 +163,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
             <div className={styles.controlsLeft}>
               <GroupBySelector
                 options={getAttributesAsOptions(attributes)}
-                radioAttributes={radioAttributes}
+                radioAttributes={radioAttributesSpan}
                 value={variable.getValueText()}
                 onChange={model.onChange}
                 showAll={true}
