@@ -32,10 +32,6 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
       width="auto"
       {...props}
       className={css(styles.control, props.className)}
-      components={{
-        IndicatorsContainer: () => null,
-        IndicatorSeparator: () => null,
-      }}
     />
   );
 };
@@ -54,7 +50,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
 
     '& > div': {
       paddingLeft: '8px',
-      paddingRight: '8px',
     },
   }),
 });
