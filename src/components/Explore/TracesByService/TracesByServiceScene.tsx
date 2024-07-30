@@ -31,6 +31,7 @@ import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
 import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
+import { MiniREDPanel } from './MiniREDPanel';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -154,8 +155,6 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
     if (body.state.children.length > 1) {
       if (actionViewDef) {
-        // reduce max height for main panel to reduce height flicker
-        body.state.children[0].setState({ maxHeight: MAIN_PANEL_HEIGHT });
         body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
         reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.action_view_changed, {
           oldAction: this.state.actionView,
@@ -172,7 +171,8 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   };
 }
 
-const MAIN_PANEL_HEIGHT = 205;
+const MAIN_PANEL_HEIGHT = 220;
+export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
 export function buildQuery(type: MetricFunction) {
   const typeQuery = type === 'errors' ? ' && status = error' : '';
@@ -188,14 +188,58 @@ export function buildQuery(type: MetricFunction) {
 }
 
 function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
+  const secondaryPanel =
+    metric === 'rate'
+      ? new MiniREDPanel({ metric: 'errors' })
+      : new MiniREDPanel({
+          metric: 'rate',
+        });
+
+  const tertiaryPanel =
+    metric === 'duration'
+      ? new MiniREDPanel({
+          metric: 'errors',
+        })
+      : new MiniREDPanel({ metric: 'duration' });
+
   return new SceneFlexLayout({
     direction: 'column',
     $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
     children: [
-      new SceneFlexItem({
-        minHeight: MAIN_PANEL_HEIGHT,
-        maxHeight: MAIN_PANEL_HEIGHT,
-        body: metric === 'rate' || metric === 'errors' ? new RateMetricsPanel({ metric }) : new HistogramPanel({}),
+      new SceneFlexLayout({
+        direction: 'row',
+        ySizing: 'content',
+        children: [
+          new SceneFlexItem({
+            minHeight: MAIN_PANEL_HEIGHT,
+            maxHeight: MAIN_PANEL_HEIGHT,
+            width: '60%',
+            body: metric === 'duration' ? new HistogramPanel({}) : new RateMetricsPanel({ metric }),
+          }),
+          new SceneFlexLayout({
+            direction: 'column',
+            minHeight: MAIN_PANEL_HEIGHT,
+            maxHeight: MAIN_PANEL_HEIGHT,
+            children: [
+              new SceneFlexItem({
+                minHeight: MINI_PANEL_HEIGHT,
+                maxHeight: MINI_PANEL_HEIGHT,
+                height: MINI_PANEL_HEIGHT,
+
+                body: secondaryPanel,
+              }),
+              new SceneFlexItem({
+                minHeight: MINI_PANEL_HEIGHT,
+                maxHeight: MINI_PANEL_HEIGHT,
+                height: MINI_PANEL_HEIGHT,
+
+                ySizing: 'fill',
+
+                body: tertiaryPanel,
+              }),
+            ],
+          }),
+        ],
       }),
       new SceneFlexItem({
         ySizing: 'content',

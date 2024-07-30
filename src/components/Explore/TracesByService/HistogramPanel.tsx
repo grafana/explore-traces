@@ -136,7 +136,7 @@ export class HistogramPanel extends SceneObjectBase<HistogramPanelState> {
       $data: new StepQueryRunner({
         maxDataPoints: 24,
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildHistogramQuery()],
       }),
       panel: this.getVizPanel(),
     });
@@ -230,7 +230,7 @@ function yBucketToDuration(yValue: number, buckets?: number[]) {
 function getStyles() {
   return {
     container: css({
-      height: '100%',
+      width: '100%',
       display: 'flex',
       '& .u-select': {
         border: '1px solid #ffffff75',
@@ -239,7 +239,7 @@ function getStyles() {
   };
 }
 
-export function buildQuery() {
+export function buildHistogramQuery() {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}} | histogram_over_time(duration)`,
@@ -256,8 +256,10 @@ export const histogramPanelConfig = () => {
     .setOption('legend', { show: false })
     .setOption('yAxis', {
       unit: 's',
+      axisLabel: 'Duration',
     })
     .setOption('color', {
-      scheme: 'RdBu',
-    });
+      scheme: 'YlGnBu',
+    })
+    .setOption('rowsFrame', { value: 'Spans' });
 };

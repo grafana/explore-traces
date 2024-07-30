@@ -2,6 +2,7 @@ import { BusEventBase, BusEventWithPayload } from '@grafana/data';
 import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
+
 export enum ROUTES {
   Explore = 'explore',
 }
@@ -9,6 +10,8 @@ export enum ROUTES {
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
+
+export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
@@ -24,9 +27,33 @@ export const SPAN = 'Span';
 export const RESOURCE_ATTR = 'resource.';
 export const SPAN_ATTR = 'span.';
 
-export const radioAttributesResource = ['resource.service.name', 'resource.cluster', 'resource.environment', 'resource.namespace'];
-export const radioAttributesSpan = ['name', 'kind', 'rootName', 'rootServiceName', 'status', 'statusMessage', 'span.http.status_code'];
-export const ignoredAttributes = ['duration', 'event:name', 'nestedSetLeft', 'nestedSetParent', 'nestedSetRight', 'span:duration', 'span:id', 'trace:duration', 'trace:id', 'traceDuration'];
+export const radioAttributesResource = [
+  'resource.service.name',
+  'resource.cluster',
+  'resource.environment',
+  'resource.namespace',
+];
+export const radioAttributesSpan = [
+  'name',
+  'kind',
+  'rootName',
+  'rootServiceName',
+  'status',
+  'statusMessage',
+  'span.http.status_code',
+];
+export const ignoredAttributes = [
+  'duration',
+  'event:name',
+  'nestedSetLeft',
+  'nestedSetParent',
+  'nestedSetRight',
+  'span:duration',
+  'span:id',
+  'trace:duration',
+  'trace:id',
+  'traceDuration',
+];
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -44,6 +71,7 @@ export class StartingPointSelectedEvent extends BusEventBase {
 export interface DetailsSceneUpdatedPayload {
   showDetails?: boolean;
 }
+
 export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
 }

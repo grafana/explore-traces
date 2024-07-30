@@ -9,10 +9,10 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, FieldType, LoadingState, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { getPanelConfig } from './allComparison';
+import { GRID_TEMPLATE_COLUMNS } from '../../../utils/shared';
 
 export function buildAttributeComparison(
   scene: SceneObject,

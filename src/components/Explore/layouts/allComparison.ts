@@ -1,10 +1,10 @@
 import { PanelBuilders, SceneCSSGridItem, SceneCSSGridLayout, SceneDataNode, VizPanelState } from '@grafana/scenes';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { DataFrame, PanelData } from '@grafana/data';
 import { AxisPlacement } from '@grafana/ui';
 import { TooltipDisplayMode } from '@grafana/schema';
 import { HighestDifferencePanel } from './HighestDifferencePanel';
+import { GRID_TEMPLATE_COLUMNS } from '../../../utils/shared';
 
 export const BaselineColor = '#5794F299';
 export const SelectionColor = '#FF9930';
