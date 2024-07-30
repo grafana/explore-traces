@@ -10,10 +10,9 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS, MetricFunction } from '../../../utils/shared';
+import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';

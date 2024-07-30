@@ -23,12 +23,10 @@ import {
 import { Badge, Stack, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
-import { SelectStartingPointScene } from './SelectStartingPointScene';
 import {
   DATASOURCE_LS_KEY,
   DetailsSceneUpdated,
   MetricFunction,
-  StartingPointSelectedEvent,
   VAR_DATASOURCE,
   VAR_GROUPBY,
   VAR_METRIC,
@@ -39,15 +37,12 @@ import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
 import { VariableHide } from '@grafana/schema';
 
-type TraceExplorationMode = 'start' | 'traces';
-
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
 
   body: SplitLayout;
 
-  mode?: TraceExplorationMode;
   detailsScene?: DetailsScene;
   showDetails?: boolean;
   primarySignal?: string;
@@ -81,11 +76,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
   public _onActivate() {
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopScene(this.state.mode, this.getMetricVariable().getValue() as MetricFunction) });
+      this.setState({ topScene: getTopScene(this.getMetricVariable().getValue() as MetricFunction) });
     }
 
     // Some scene elements publish this
-    this.subscribeToEvent(StartingPointSelectedEvent, this._handleStartingPointSelected.bind(this));
     this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
 
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
@@ -103,10 +97,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
           this.state.body.setState({ secondary: undefined });
           this.setState({ detailsScene: new DetailsScene({}) });
         }
-      }
-      if (newState.mode !== oldState.mode) {
-        this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
-        this.setState({ topScene: getTopScene(newState.mode, this.getMetricVariable().getValue() as MetricFunction) });
       }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
@@ -135,26 +125,16 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     filtersVar.setState({ filters });
   }
 
-  private _handleStartingPointSelected(evt: StartingPointSelectedEvent) {
-    this.setState({ mode: 'traces' });
-  }
-
   private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
     this.setState({ showDetails: evt.payload.showDetails ?? false });
   }
 
   getUrlState() {
-    return { mode: this.state.mode, primarySignal: this.state.primarySignal };
+    return { primarySignal: this.state.primarySignal };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
     const stateUpdate: Partial<TraceExplorationState> = {};
-
-    if (values.mode !== this.state.mode) {
-      const mode: TraceExplorationMode = (values.mode as TraceExplorationMode) ?? 'start';
-      stateUpdate.mode = mode;
-      stateUpdate.topScene = getTopScene(mode, this.getMetricVariable().getValue() as MetricFunction);
-    }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
       stateUpdate.primarySignal = values.primarySignal as string;
@@ -243,11 +223,8 @@ function buildSplitLayout() {
   });
 }
 
-function getTopScene(mode?: TraceExplorationMode, metric?: MetricFunction) {
-  if (mode === 'traces') {
-    return new TracesByServiceScene({ metric });
-  }
-  return new SelectStartingPointScene({});
+function getTopScene(metric?: MetricFunction) {
+  return new TracesByServiceScene({ metric });
 }
 
 function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {

@@ -40,6 +40,7 @@ const fadeIn = keyframes({
 function getStyles() {
   return {
     container: css({
+      label: 'loading-state-scene',
       // animation prevents flickering when loading
       animationName: fadeIn,
       animationDelay: '100ms',

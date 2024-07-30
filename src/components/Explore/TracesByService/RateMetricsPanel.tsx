@@ -8,7 +8,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { FieldType, LoadingState } from '@grafana/data';
+import { LoadingState } from '@grafana/data';
 import { explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
@@ -50,11 +50,6 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
                 }),
               });
             } else {
-              data.data.annotations?.push({
-                length: 1,
-                fields: [{ name: 'bloop', type: FieldType.string, values: ['bloop'], config: {} }],
-                refId: 'A',
-              });
               this.setState({
                 panel: this.getVizPanel(this.state.metric),
               });
@@ -90,7 +85,10 @@ export class RateMetricsPanel extends SceneObjectBase<RateMetricsPanelState> {
   private getVizPanel(type: MetricFunction) {
     const panel = barsPanelConfig().setHeaderActions(new ComparisonControl({ query: 'status = error' }));
     if (type === 'errors') {
-      panel.setTitle('Errors rate').setColor({ fixedColor: 'semi-dark-red', mode: 'fixed' });
+      panel.setTitle('Errors rate').setCustomFieldConfig('axisLabel', 'Errors').setColor({
+        fixedColor: 'semi-dark-red',
+        mode: 'fixed',
+      });
     } else {
       panel.setTitle('Span rate');
     }

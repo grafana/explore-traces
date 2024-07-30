@@ -16,25 +16,16 @@ export const reportAppInteraction = (
 };
 
 export const USER_EVENTS_PAGES = {
-  starting_page: 'starting_page',
   analyse_traces: 'analyse_traces',
   common: 'common',
 } as const;
 
 export type UserEventPagesType = keyof typeof USER_EVENTS_PAGES;
 type UserEventActionType =
-  | keyof (typeof USER_EVENTS_ACTIONS)['starting_page']
   | keyof (typeof USER_EVENTS_ACTIONS)['analyse_traces']
   | keyof (typeof USER_EVENTS_ACTIONS)['common'];
 
 export const USER_EVENTS_ACTIONS = {
-  [USER_EVENTS_PAGES.starting_page]: {
-    metric_card_clicked: 'metric_card_clicked',
-    add_to_filters_clicked: 'add_to_filters_clicked',
-    analyze_traces_clicked: 'analyze_traces_clicked',
-    analyze_current: 'analyze_current',
-    group_by_changed: 'group_by_changed',
-  },
   [USER_EVENTS_PAGES.analyse_traces]: {
     action_view_changed: 'action_view_changed',
     breakdown_group_by_changed: 'breakdown_group_by_changed',
