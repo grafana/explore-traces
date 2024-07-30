@@ -30,7 +30,6 @@ type UserEventActionType =
 export const USER_EVENTS_ACTIONS = {
   [USER_EVENTS_PAGES.starting_page]: {
     metric_card_clicked: 'metric_card_clicked',
-    add_to_filters_clicked: 'add_to_filters_clicked',
     analyze_traces_clicked: 'analyze_traces_clicked',
     analyze_current: 'analyze_current',
     group_by_changed: 'group_by_changed',
