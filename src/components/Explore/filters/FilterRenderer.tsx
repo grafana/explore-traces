@@ -6,6 +6,8 @@ import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { getTraceExplorationScene } from 'utils/utils';
+import { VariableValue } from '@grafana/scenes';
 
 interface Props {
   filter: AdHocVariableFilter;
@@ -25,6 +27,8 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
 
   const key = filter.key !== '' ? state?.keys?.find((key) => key.value === filter.key) ?? toOption(filter.key) : null;
   const value = filter.value !== '' ? toOption(filter.value) : null;
+  const exploration = getTraceExplorationScene(model);
+  const { value: metric } = exploration.getMetricVariable().useState();
 
   const operators = useMemo(() => {
     const operators = model._getOperators();
@@ -34,21 +38,42 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   useEffect(() => {
     async function updateKeys() {
       setState({ ...state, isKeysLoading: true });
-      const keys = formatKeys(await model._getKeys(filter.key));
+      const keys = formatKeys(await model._getKeys(filter.key), model.state.filters, metric);
       setState({ ...state, isKeysLoading: false, keys });
     }
 
     if (key && state.keys === undefined && !state.isKeysLoading) {
       updateKeys();
     }
-  }, [filter, key, model, state]);
-
-  const formatKeys = (keys: Array<SelectableValue<string>>) => {
+  }, [filter, key, metric, model, state]);  
+  
+  const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
     // Ensure we always have the same order of keys
     const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
     const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
     const intrinsicAttributes = keys.filter(
-      (k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR) && ignoredAttributes.indexOf(k.value!) === -1
+      (k) => { 
+        let checks = !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR) && ignoredAttributes.indexOf(k.value!) === -1;
+        // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes 
+        // as you would overwrite it in the query if it's selected in the drop down
+        if (filters.find((f) => f.key === 'kind')) {
+          checks = checks && k.value !== 'kind' && k.value !== 'span:kind'
+        }
+
+        // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes 
+        // as you would overwrite it in the query if it's selected in the drop down
+        if (filters.find((f) => f.key === 'nestedSetParent')) {
+          checks = checks && k.value !== 'rootName' && k.value !== 'rootServiceName' && k.value !== 'trace:rootName' && k.value !== 'trace:rootService'
+        }
+
+        // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
+        // as you would overwrite it in the query if it's selected in the drop down
+        if (metric === 'rate' || metric === 'errors') {
+          checks = checks && k.value !== 'status' && k.value !== 'span:status'
+        }
+
+        return checks
+      }
     );
     return intrinsicAttributes
       ?.concat(resourceAttributes)
@@ -82,7 +107,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       openMenuOnFocus={keyAutoFocus}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
-        const keys = formatKeys(await model._getKeys(filter.key));
+        const keys = formatKeys(await model._getKeys(filter.key), model.state.filters, metric);
         setState({ ...state, isKeysLoading: false, keys });
       }}
     />
