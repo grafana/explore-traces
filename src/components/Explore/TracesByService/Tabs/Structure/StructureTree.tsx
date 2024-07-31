@@ -4,6 +4,7 @@ import { useStyles2 } from '@grafana/ui';
 import { GrafanaTheme2 } from '@grafana/data';
 import { css } from '@emotion/css';
 import { formatDuration } from '../../../../../utils/dates';
+import { locationService } from '@grafana/runtime';
 
 export interface Props {
   tree: TreeNode;
@@ -21,7 +22,7 @@ export const StructureTree = ({ tree }: Props) => {
         <col style={{ width: '30%' }} />
         <col style={{ width: '10%' }} />
         <thead>
-          <tr className={styles.thead}>
+          <tr>
             <th className={styles.th}>Name</th>
             <th className={styles.th}>Avg. duration</th>
             <th className={styles.th}>Errors</th>
@@ -52,6 +53,10 @@ interface TreeLineProps {
 
 const TreeLine = ({ node, depth, maxDuration }: TreeLineProps) => {
   const styles = useStyles2(getStyles);
+  let nameStyles = [styles.line, css({ paddingLeft: depth * 12 })];
+  if (depth === 0) {
+    nameStyles.push(styles.link);
+  }
 
   // parse and sum up all span durations
   // nodeAvgDuration is in nanos, but formatDuration expects micros so divide by 1000
@@ -65,7 +70,16 @@ const TreeLine = ({ node, depth, maxDuration }: TreeLineProps) => {
   return (
     <tr>
       <td className={styles.td}>
-        <div className={css(styles.line, css({ paddingLeft: depth * 12 }))}>{`${node.name}`}</div>
+        <div 
+          className={css(nameStyles)}
+          onClick={() => {
+            if (depth === 0 && node.traceID) {
+              locationService.partial({ traceId: node.traceID });
+            }
+          }}
+        >
+          {`${node.name}`}
+        </div>
       </td>
       <td className={styles.td}>{formatDuration(nodeAvgDuration)}</td>
       <td className={styles.td}>
@@ -97,7 +111,11 @@ function getStyles(theme: GrafanaTheme2) {
       padding: theme.spacing.x0_5,
       backgroundColor: theme.colors.background.primary,
     }),
-    thead: css({}),
+    link: css({
+      cursor: 'pointer',
+      color: theme.colors.text.link,
+      textDecoration: 'underline',
+    }),
   };
 }
 
