@@ -8,6 +8,7 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
     left: Number.MIN_SAFE_INTEGER,
     right: Number.MAX_SAFE_INTEGER,
     spans: [],
+    traceID: '',
   });
 
   for (const trace of traces) {
@@ -43,6 +44,7 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
 
       // if not, create a new child node and make it the cur node
       const newNode = createNode(span);
+      newNode.traceID = trace.traceID;
       curNode.addChild(newNode);
       curNode = newNode;
     }

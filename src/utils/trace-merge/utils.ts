@@ -21,5 +21,5 @@ export function nestedSetRight(span: Span): number {
     }
   }
 
-  throw new Error('nestedSetLeft not found!');
+  throw new Error('nestedSetRight not found!');
 }

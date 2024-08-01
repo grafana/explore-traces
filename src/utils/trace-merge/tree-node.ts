@@ -8,14 +8,16 @@ export class TreeNode {
   right: number;
   children: TreeNode[];
   parent: TreeNode | null;
+  traceID: string;
 
-  constructor({ name, spans, left, right }: { name: string; spans: Span[]; left: number; right: number }) {
+  constructor({ name, spans, left, right, traceID }: { name: string; spans: Span[]; left: number; right: number; traceID: string; }) {
     this.name = name;
     this.spans = spans;
     this.left = left;
     this.right = right;
     this.children = [];
     this.parent = null;
+    this.traceID = traceID;
   }
 
   addSpan(span: Span) {
@@ -53,6 +55,7 @@ export function createNode(s: Span): TreeNode {
     right: nestedSetRight(s),
     name: nodeName(s),
     spans: [s],
+    traceID: s.traceId ?? '',
   });
 }
 
