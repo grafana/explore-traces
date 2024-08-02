@@ -5,6 +5,8 @@ import { nestedSetLeft } from './utils';
 export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
   const tree = new TreeNode({
     name: 'root',
+    serviceName: '',
+    operationName: '',
     left: Number.MIN_SAFE_INTEGER,
     right: Number.MAX_SAFE_INTEGER,
     spans: [],

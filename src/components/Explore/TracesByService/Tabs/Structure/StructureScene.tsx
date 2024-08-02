@@ -2,7 +2,10 @@ import React from 'react';
 
 import {
   CustomVariable,
+  PanelBuilders,
   SceneComponentProps,
+  SceneFlexLayout,
+  SceneDataNode,
   SceneFlexItem,
   sceneGraph,
   SceneObjectBase,
@@ -14,15 +17,15 @@ import {
 import { explorationDS, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
-import { GrafanaTheme2, LoadingState } from '@grafana/data';
+import { createDataFrame, FieldType, GrafanaTheme2, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
 import { RadioButtonGroup, Stack, useTheme2 } from '@grafana/ui';
-import { StructureTree } from './StructureTree';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 
 export interface ServicesTabSceneState extends SceneObjectState {
+  panel?: SceneFlexLayout;
   loading?: boolean;
   tree?: TreeNode;
 }
@@ -57,10 +60,129 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
           const merged = mergeTraces(response);
-          this.setState({ tree: merged });
+          console.log(merged);
+          this.setState({ 
+            tree: merged,
+            panel: new SceneFlexLayout({
+              height: '100%',
+              wrap: 'wrap',
+              children: this.getPanels(merged),
+            }),
+          });
         }
       }
     });
+  }
+
+  private getPanels(tree: TreeNode) {
+    return tree.children.map((child) => {
+      return new SceneFlexItem({
+        height: 150,
+        width: '100%',
+        body: this.getPanel(child)
+      });
+    })
+  }
+
+  private getPanel(tree: TreeNode) {
+    const timeRange = sceneGraph.getTimeRange(this);
+    const from = timeRange.state.value.from;
+    const to = timeRange.state.value.to;
+
+    return PanelBuilders.traces()
+      .setTitle('Trace')
+      .setData(
+        new SceneDataNode({
+          data: {
+            state: LoadingState.Done,
+            timeRange: {
+              from,
+              to,
+              raw: { from, to }
+            },
+            series: [{
+              ...this.buildData(tree)
+            }],
+          },
+        })
+      )
+      .build();
+  }
+
+  private buildData(tree: TreeNode) {
+    const trace = this.getTrace(tree, tree.traceID, '000000000000000');
+    const traceName = trace[0].serviceName + ':' + trace[0].operationName;
+
+    const df = createDataFrame({
+      name: `Trace ${traceName}`,
+      refId: `trace_${traceName}`,
+      meta: {
+        custom: {
+          skipHeader: true,
+        },
+      },
+      fields: [
+        {
+          name: 'references',
+          type: FieldType.other,
+          values: trace.map(x => x.references)
+        },
+        {
+          name: 'traceID',
+          type: FieldType.string,
+          values: trace.map(x => x.traceID)
+        },
+        {
+          name: 'spanID',
+          type: FieldType.string,
+          values: trace.map(x => x.spanID)
+        },
+        {
+          name: 'serviceName',
+          type: FieldType.string,
+          values: trace.map(x => x.serviceName)
+        },
+        {
+          name: 'operationName',
+          type: FieldType.string,
+          values: trace.map(x => x.operationName)
+        },
+        {
+          name: 'duration',
+          type: FieldType.number,
+          values: trace.map(x => x.duration)
+        },
+        {
+          name: 'startTime',
+          type: FieldType.number,
+          values: trace.map(x => x.startTime)
+        },
+      ],
+    });
+
+    console.log(df);
+    return df;
+  }
+
+  private getTrace(node: TreeNode, traceID: string, spanID: string) {
+    const values = [{
+      references: [{
+        refType: 'CHILD_OF',
+        traceID: traceID,
+        spanID: spanID,
+      }],
+      traceID: node.traceID,
+      spanID: node.spans[0].spanID,
+      serviceName: node.serviceName,
+      operationName: node.operationName,
+      duration: (node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length) / 1000000,
+      startTime: (node.spans.reduce((acc, c) => acc + parseInt(c.startTimeUnixNano, 10), 0) / node.spans.length) / 1000000,
+    }];
+
+    for (const child of node.children) {
+      values.push(...this.getTrace(child, node.traceID, node.spans[0].spanID));
+    }
+    return values;
   }
 
   private getStructureFilterVariable() {
@@ -82,7 +204,8 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
-    const { tree, loading } = model.useState();
+    const { tree, loading, panel } = model.useState();
+
     const styles = getStyles(useTheme2());
     const variable = model.getStructureFilterVariable();
     const { query } = variable.useState();
@@ -109,9 +232,10 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
           </Stack>
         ) : tree && tree.children.length ? (
           <Stack gap={2} direction={'column'}>
-            {tree.children.map((child) => (
+            {/* {tree.children.map((child) => (
               <StructureTree tree={child} key={child.name} />
-            ))}
+            ))} */}
+            {panel && <panel.Component model={panel} />}
           </Stack>
         ) : (
           <EmptyState message={'No data available'} />
@@ -123,6 +247,12 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
+    container: css({
+      display: 'flex',
+      flexDirection: 'row',
+      flexGrow: 1,
+      height: '100%',
+    }),
     label: css({
       fontSize: theme.typography.fontSize,
       fontWeight: theme.typography.fontWeightMedium,
