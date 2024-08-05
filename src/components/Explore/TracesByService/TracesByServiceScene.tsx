@@ -15,7 +15,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 
-import { RateMetricsPanel } from './RateMetricsPanel';
+import { REDPanel } from './REDPanel';
 import {
   MakeOptional,
   explorationDS,
@@ -27,7 +27,6 @@ import {
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
-import { HistogramPanel } from './HistogramPanel';
 import { isEqual } from 'lodash';
 import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
@@ -213,8 +212,8 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
           new SceneFlexItem({
             minHeight: MAIN_PANEL_HEIGHT,
             maxHeight: MAIN_PANEL_HEIGHT,
-            width: '60%',
-            body: metric === 'duration' ? new HistogramPanel({}) : new RateMetricsPanel({ metric }),
+            width: '65%',
+            body: new REDPanel({ metric }),
           }),
           new SceneFlexLayout({
             direction: 'column',
