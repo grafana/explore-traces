@@ -92,7 +92,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                 }
 
                 if (yBuckets?.length) {
-                  const tenPercentOfBuckets = Math.floor(yBuckets.length / 10);
+                  const tenPercentOfBuckets = Math.floor(yBuckets.length / 5);
                   const minBucket = yBuckets.length - tenPercentOfBuckets;
 
                   const selection: ComparisonSelection = {};
