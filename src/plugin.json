@@ -3,9 +3,10 @@
   "type": "app",
   "name": "Explore Traces",
   "id": "grafana-exploretraces-app",
+  "autoEnabled": true,
   "info": {
-    "keywords": ["app"],
-    "description": "Query less exploration of trace data stored in Tempo",
+    "keywords": ["app", "tempo", "traces", "explore"],
+    "description": "Query-less exploration of trace data stored in Tempo",
     "author": {
       "name": "Grafana"
     },
@@ -22,13 +23,13 @@
       "type": "page",
       "name": "Explore",
       "path": "/a/%PLUGIN_ID%/",
-      "role": "Viewer",
+      "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=10.0.3",
+    "grafanaDependency": ">=11.2.0",
     "plugins": []
   }
 }
