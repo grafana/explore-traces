@@ -147,9 +147,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
 
       '& .show-on-hover': {
-        // zIndex: 2,
-        // right: 'auto',
-        // left: 0,
         display: 'none',
       },
     }),
