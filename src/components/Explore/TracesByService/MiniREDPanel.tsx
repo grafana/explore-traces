@@ -20,7 +20,8 @@ import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getTraceExplorationScene } from '../../../utils/utils';
 import { MINI_PANEL_HEIGHT } from './TracesByServiceScene';
-import { buildHistogramQuery, histogramPanelConfig } from './HistogramPanel';
+import { buildHistogramQuery } from '../queries/histogram';
+import { histogramPanelConfig } from '../panels/histogram';
 
 export interface MiniREDPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -146,9 +147,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
 
       '& .show-on-hover': {
-        zIndex: 2,
-        right: 'auto',
-        left: 0,
+        display: 'none',
       },
     }),
     clickable: css({
@@ -162,6 +161,7 @@ function getStyles(theme: GrafanaTheme2) {
 
       ':hover section': {
         background: theme.colors.background.secondary,
+        outline: `1px solid #6e9fff`,
       },
     }),
   };
