@@ -60,8 +60,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
           const merged = mergeTraces(response);
-          console.log(merged);
-          this.setState({ 
+          this.setState({
             tree: merged,
             panel: new SceneFlexLayout({
               height: '100%',
@@ -79,9 +78,10 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
       return new SceneFlexItem({
         height: 150,
         width: '100%',
-        body: this.getPanel(child)
+        minHeight: '300px',
+        body: this.getPanel(child),
       });
-    })
+    });
   }
 
   private getPanel(tree: TreeNode) {
@@ -98,11 +98,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
             timeRange: {
               from,
               to,
-              raw: { from, to }
+              raw: { from, to },
             },
-            series: [{
-              ...this.buildData(tree)
-            }],
+            series: [
+              {
+                ...this.buildData(tree),
+              },
+            ],
           },
         })
       )
@@ -125,59 +127,73 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         {
           name: 'references',
           type: FieldType.other,
-          values: trace.map(x => x.references)
+          values: trace.map((x) => x.references),
         },
         {
           name: 'traceID',
           type: FieldType.string,
-          values: trace.map(x => x.traceID)
+          values: trace.map((x) => x.traceID),
         },
         {
           name: 'spanID',
           type: FieldType.string,
-          values: trace.map(x => x.spanID)
+          values: trace.map((x) => x.spanID),
         },
         {
           name: 'serviceName',
           type: FieldType.string,
-          values: trace.map(x => x.serviceName)
+          values: trace.map((x) => x.serviceName),
         },
         {
           name: 'operationName',
           type: FieldType.string,
-          values: trace.map(x => x.operationName)
+          values: trace.map((x) => x.operationName),
         },
         {
           name: 'duration',
           type: FieldType.number,
-          values: trace.map(x => x.duration)
+          values: trace.map((x) => x.duration),
         },
         {
           name: 'startTime',
           type: FieldType.number,
-          values: trace.map(x => x.startTime)
+          values: trace.map((x) => x.startTime),
+        },
+        {
+          name: 'statusCode',
+          type: FieldType.number,
+          values: trace.map((x) => x.statusCode),
         },
       ],
     });
 
-    console.log(df);
     return df;
   }
 
   private getTrace(node: TreeNode, traceID: string, spanID: string) {
-    const values = [{
-      references: [{
-        refType: 'CHILD_OF',
-        traceID: traceID,
-        spanID: spanID,
-      }],
-      traceID: node.traceID,
-      spanID: node.spans[0].spanID,
-      serviceName: node.serviceName,
-      operationName: node.operationName,
-      duration: (node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length) / 1000000,
-      startTime: (node.spans.reduce((acc, c) => acc + parseInt(c.startTimeUnixNano, 10), 0) / node.spans.length) / 1000000,
-    }];
+    const erroredSpans = node.spans.reduce(
+      (acc, c) => (c.attributes?.find((a) => a.key === 'status')?.value.stringValue === 'error' ? acc + 1 : acc),
+      0
+    );
+    const values = [
+      {
+        references: [
+          {
+            refType: 'CHILD_OF',
+            traceID: traceID,
+            spanID: spanID,
+          },
+        ],
+        traceID: node.traceID,
+        spanID: node.spans[0].spanID,
+        serviceName: node.serviceName,
+        operationName: node.operationName,
+        statusCode: erroredSpans > 0 ? 2 /*error*/ : 0 /*unset*/,
+        duration: node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length / 1000000,
+        startTime:
+          node.spans.reduce((acc, c) => acc + parseInt(c.startTimeUnixNano, 10), 0) / node.spans.length / 1000000,
+      },
+    ];
 
     for (const child of node.children) {
       values.push(...this.getTrace(child, node.traceID, node.spans[0].spanID));
@@ -231,12 +247,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
             />
           </Stack>
         ) : tree && tree.children.length ? (
-          <Stack gap={2} direction={'column'}>
-            {/* {tree.children.map((child) => (
-              <StructureTree tree={child} key={child.name} />
-            ))} */}
-            {panel && <panel.Component model={panel} />}
-          </Stack>
+          <div className={styles.traceViewList}>{panel && <panel.Component model={panel} />}</div>
         ) : (
           <EmptyState message={'No data available'} />
         )}
@@ -258,6 +269,14 @@ const getStyles = (theme: GrafanaTheme2) => {
       fontWeight: theme.typography.fontWeightMedium,
       lineHeight: 1.25,
       color: theme.colors.text.primary,
+    }),
+    traceViewList: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing.x1,
+      'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
+        display: 'none',
+      },
     }),
   };
 };
