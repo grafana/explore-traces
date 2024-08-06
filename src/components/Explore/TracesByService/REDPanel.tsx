@@ -139,7 +139,6 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
 
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
-          console.log('newState.selection', newState.selection, prevState.selection);
           if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
             const annotations = this.buildSelectionAnnotation(newState);
 

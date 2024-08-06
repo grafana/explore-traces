@@ -11,6 +11,7 @@ import {
   sceneGraph,
   SceneObject,
   SceneObjectBase,
+  SceneObjectRef,
   SceneObjectState,
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
@@ -43,9 +44,13 @@ export interface TraceExplorationState extends SceneObjectState {
 
   body: SplitLayout;
 
-  detailsScene?: DetailsScene;
+  detailsScene?: SceneObjectRef<DetailsScene>;
   showDetails?: boolean;
   primarySignal?: string;
+
+  // details scene
+  traceId?: string;
+  spanId?: string;
 
   // just for the starting data source
   initialDS?: string;
@@ -58,7 +63,7 @@ const commitSha = process.env.COMMIT_SHA;
 const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['mode', 'primarySignal'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId'] });
 
   public constructor(state: Partial<TraceExplorationState>) {
     super({
@@ -66,7 +71,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
       body: buildSplitLayout(),
-      detailsScene: new DetailsScene({}),
+      detailsScene: new DetailsScene({}).getRef(),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
       ...state,
     });
@@ -91,11 +96,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToState((newState, oldState) => {
       if (newState.showDetails !== oldState.showDetails) {
         if (newState.showDetails) {
-          this.state.body.setState({ secondary: new DetailsScene(this.state.detailsScene?.state || {}) });
-          this.setState({ detailsScene: undefined });
+          this.state.body.setState({ secondary: this.state.detailsScene?.resolve() });
         } else {
           this.state.body.setState({ secondary: undefined });
-          this.setState({ detailsScene: new DetailsScene({}) });
         }
       }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
@@ -130,11 +133,22 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { primarySignal: this.state.primarySignal };
+    return { primarySignal: this.state.primarySignal, traceId: this.state.traceId, spanId: this.state.spanId };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
     const stateUpdate: Partial<TraceExplorationState> = {};
+
+    if (values.traceId || values.spanId) {
+      stateUpdate.showDetails = true;
+      stateUpdate.traceId = values.traceId ? (values.traceId as string) : undefined;
+      stateUpdate.spanId = values.spanId ? (values.spanId as string) : undefined;
+
+      if (!this.state.body.state.secondary) {
+        const detailsScene = this.state.detailsScene?.resolve();
+        this.state.body.setState({ secondary: detailsScene });
+      }
+    }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
       stateUpdate.primarySignal = values.primarySignal as string;

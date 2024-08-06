@@ -3,6 +3,8 @@ import { nestedSetLeft, nestedSetRight } from './utils';
 
 export class TreeNode {
   name: string;
+  serviceName: string;
+  operationName: string;
   spans: Span[];
   left: number;
   right: number;
@@ -10,8 +12,10 @@ export class TreeNode {
   parent: TreeNode | null;
   traceID: string;
 
-  constructor({ name, spans, left, right, traceID }: { name: string; spans: Span[]; left: number; right: number; traceID: string; }) {
+  constructor({ name, serviceName, operationName, spans, left, right, traceID }: { name: string; serviceName: string, operationName: string, spans: Span[]; left: number; right: number; traceID: string; }) {
     this.name = name;
+    this.serviceName = serviceName;
+    this.operationName = operationName;
     this.spans = spans;
     this.left = left;
     this.right = right;
@@ -54,6 +58,8 @@ export function createNode(s: Span): TreeNode {
     left: nestedSetLeft(s),
     right: nestedSetRight(s),
     name: nodeName(s),
+    serviceName: s.attributes?.find((a) => a.key === 'service.name')?.value.stringValue ?? '',
+    operationName: s.name ?? '',
     spans: [s],
     traceID: s.traceId ?? '',
   });
