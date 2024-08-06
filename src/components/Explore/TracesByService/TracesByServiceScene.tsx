@@ -98,7 +98,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === this.state.actionView);
 
     this.setState({
-      body: buildGraphScene(metric as MetricFunction, actionViewDef ? [actionViewDef?.getScene()] : undefined),
+      body: buildGraphScene(metric as MetricFunction, actionViewDef ? [actionViewDef?.getScene(metric as MetricFunction)] : undefined),
     });
 
     if (this.state.actionView === undefined) {
@@ -151,10 +151,12 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   public setActionView(actionView?: ActionViewType) {
     const { body } = this.state;
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
+    const traceExploration = getTraceExplorationScene(this);
+    const metric = traceExploration.getMetricVariable().getValue();
 
     if (body.state.children.length > 1) {
       if (actionViewDef) {
-        body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene()] });
+        body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene(metric as MetricFunction)] });
         reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.action_view_changed, {
           oldAction: this.state.actionView,
           newAction: actionView,

@@ -8,11 +8,12 @@ import { ShareExplorationAction } from '../../actions/ShareExplorationAction';
 import { buildSpansScene } from './Spans/SpansScene';
 import { buildStructureScene } from './Structure/StructureScene';
 import { buildBreakdownScene } from './Breakdown/BreakdownScene';
+import { MetricFunction } from 'utils/shared';
 
 interface ActionViewDefinition {
   displayName: string;
   value: ActionViewType;
-  getScene: () => SceneObject;
+  getScene: (metric: MetricFunction) => SceneObject;
 }
 
 export type ActionViewType = 'traceList' | 'breakdown' | 'structure';

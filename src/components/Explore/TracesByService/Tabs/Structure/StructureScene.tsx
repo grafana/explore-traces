@@ -11,7 +11,7 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
+import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { GrafanaTheme2, LoadingState } from '@grafana/data';
@@ -25,6 +25,7 @@ import { css } from '@emotion/css';
 export interface ServicesTabSceneState extends SceneObjectState {
   loading?: boolean;
   tree?: TreeNode;
+  metric?: MetricFunction;
 }
 
 const VAR_STRUCTURE_FILTER = 'structureFilter';
@@ -39,7 +40,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildQuery(state.metric as MetricFunction)],
       }),
       $variables: state.$variables ?? getVariablesSet(),
       loading: true,
@@ -150,10 +151,15 @@ function getVariablesSet() {
   });
 }
 
-function buildQuery() {
+function buildQuery(type: MetricFunction) {
+  let typeQuery = 'status = error';
+  if (type === 'duration') {
+    typeQuery = 'duration > trace:duration * .3';
+  }
+
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} &>> { ${VAR_STRUCTURE_FILTER_EXPR} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR}} &>> { ${typeQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,
@@ -162,8 +168,8 @@ function buildQuery() {
   };
 }
 
-export function buildStructureScene() {
+export function buildStructureScene(metric: MetricFunction) {
   return new SceneFlexItem({
-    body: new StructureTabScene({}),
+    body: new StructureTabScene({metric}),
   });
 }
