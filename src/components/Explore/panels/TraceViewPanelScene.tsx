@@ -21,6 +21,7 @@ import { CloseTraceViewAction } from '../actions/CloseTraceViewAction';
 export interface TracePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
   traceId: string;
+  spanId?: string;
 }
 
 export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
@@ -44,10 +45,7 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
                 direction: 'row',
                 children: [
                   new SceneFlexItem({
-                    body: PanelBuilders.traces()
-                      .setTitle('Trace')
-                      .setHeaderActions(new CloseTraceViewAction({}))
-                      .build(),
+                    body: this.getVizPanel().build(),
                   }),
                 ],
               }),
@@ -67,6 +65,14 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
         })
       );
     });
+  }
+
+  private getVizPanel() {
+    const panel = PanelBuilders.traces().setTitle('Trace').setHeaderActions(new CloseTraceViewAction({}));
+    if (this.state.spanId) {
+      panel.setOption('focusedSpanId' as any, this.state.spanId as any);
+    }
+    return panel;
   }
 
   public static Component = ({ model }: SceneComponentProps<TraceViewPanelScene>) => {

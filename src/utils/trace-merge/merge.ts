@@ -27,6 +27,9 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
     // left/right is only valid w/i a trace, so reset it each loop
     resetLeftRight(tree);
     for (const span of ss.spans) {
+      // force traceID to be the same for all spans in a trace
+      span.traceId = trace.traceID;
+
       // walk up the tree until we find a node that is a parent of this span
       while (curNode.parent !== null) {
         if (curNode.isChild(span)) {
@@ -51,8 +54,6 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
       curNode = newNode;
     }
   }
-
-  // console.log(dumpTree(tree, 0));
 
   return tree;
 }

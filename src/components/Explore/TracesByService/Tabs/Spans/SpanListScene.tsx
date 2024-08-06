@@ -89,33 +89,26 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                       body: PanelBuilders.table()
                         .setHoverHeader(true)
                         .setOverrides((builder) => {
-                          return builder
-                            .matchFieldsWithName('traceID')
-                            .overrideLinks([
-                              {
-                                title: 'Trace: ${__value.raw}',
-                                url: '',
-                                onClick: (data) => {
-                                  const traceID: string | undefined =
-                                    data.origin?.field?.values?.[data.origin?.rowIndex];
-                                  traceID && locationService.partial({ traceId: traceID });
-                                },
+                          return builder.matchFieldsWithName('spanID').overrideLinks([
+                            {
+                              title: 'Span: ${__value.raw}',
+                              url: '',
+                              onClick: (clickEvent) => {
+                                const data = sceneGraph.getData(this);
+                                const firstSeries = data.state.data?.series[0];
+                                const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
+                                const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
+                                const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
+                                const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
+
+                                traceId &&
+                                  locationService.partial({
+                                    traceId,
+                                    spanId,
+                                  });
                               },
-                            ])
-                            .matchFieldsWithName('spanID')
-                            .overrideLinks([
-                              {
-                                title: 'Span: ${__value.raw}',
-                                url: '',
-                                onClick: (data) => {
-                                  const traceID: string | undefined =
-                                    data?.origin?.field?.state?.scopedVars?.__dataContext?.value?.frame?.first?.[
-                                      data.origin?.rowIndex
-                                    ];
-                                  traceID && locationService.partial({ traceId: traceID });
-                                },
-                              },
-                            ]);
+                            },
+                          ]);
                         })
                         .build(),
                     }),

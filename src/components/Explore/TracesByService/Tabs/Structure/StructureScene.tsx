@@ -1,11 +1,13 @@
 import React from 'react';
 
 import {
-    PanelBuilders,
+  PanelBuilders,
   SceneComponentProps,
-  SceneFlexLayout,
   SceneDataNode,
+  SceneDataTransformer,
   SceneFlexItem,
+  SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
@@ -13,11 +15,13 @@ import {
 import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
-import { createDataFrame, FieldType, GrafanaTheme2, LoadingState } from '@grafana/data';
+import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
-import { RadioButtonGroup, Stack, useTheme2 } from '@grafana/ui';
+import { Stack, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
+import { css } from '@emotion/css';
+import { locationService } from '@grafana/runtime';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -29,9 +33,19 @@ export interface ServicesTabSceneState extends SceneObjectState {
 export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   constructor(state: Partial<ServicesTabSceneState>) {
     super({
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery(state.metric as MetricFunction)],
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: explorationDS,
+          queries: [buildQuery(state.metric as MetricFunction)],
+        }),
+        transformations: [
+          {
+            id: 'filterByRefId',
+            options: {
+              exclude: 'streaming-progress',
+            },
+          },
+        ],
       }),
       loading: true,
       ...state,
@@ -43,7 +57,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   public _onActivate() {
     this.state.$data?.subscribeToState((state) => {
       this.setState({ loading: state.data?.state === LoadingState.Loading });
-      if (state.data?.state === LoadingState.Done) {
+      if (state.data?.state === LoadingState.Done && state.data?.series.length) {
         const frame = state.data?.series[0].fields[0].values[0];
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
@@ -79,6 +93,17 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
     return PanelBuilders.traces()
       .setTitle('Trace')
+      .setOption('createFocusSpanLink' as any, (traceId: string, spanId: string): LinkModel<Field> => {
+        return {
+          title: 'Open trace',
+          href: '#',
+          onClick: () => {
+            locationService.partial({ traceId, spanId });
+          },
+          origin: {} as Field,
+          target: '_self',
+        };
+      })
       .setData(
         new SceneDataNode({
           data: {
@@ -103,7 +128,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const trace = this.getTrace(tree, tree.traceID, '000000000000000');
     const traceName = trace[0].serviceName + ':' + trace[0].operationName;
 
-    const df = createDataFrame({
+    return createDataFrame({
       name: `Trace ${traceName}`,
       refId: `trace_${traceName}`,
       meta: {
@@ -154,8 +179,6 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         },
       ],
     });
-
-    return df;
   }
 
   private getTrace(node: TreeNode, traceID: string, spanID: string) {
@@ -171,6 +194,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
             traceID: traceID,
             spanID: spanID,
           },
+          // Add last 5 spans of the list as external references
+          // refType = 'EXTERNAL' doesn't mean anything, it's just to be different from CHILD_OF and FOLLOW_FROM
+          ...node.spans.slice(-5).map((x) => ({
+            refType: 'EXTERNAL',
+            traceID: x.traceId,
+            spanID: x.spanID,
+          })),
         ],
         traceID: node.traceID,
         spanID: node.spans[0].spanID,
@@ -234,20 +264,20 @@ function buildQuery(type: MetricFunction) {
 }
 
 const getStyles = (theme: GrafanaTheme2) => {
-    return {
-        traceViewList: css({
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.x1,
-            'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
-                display: 'none',
-            },
-        }),
-    };
+  return {
+    traceViewList: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing.x1,
+      'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
+        display: 'none',
+      },
+    }),
+  };
 };
 
 export function buildStructureScene(metric: MetricFunction) {
   return new SceneFlexItem({
-    body: new StructureTabScene({metric}),
+    body: new StructureTabScene({ metric }),
   });
 }
