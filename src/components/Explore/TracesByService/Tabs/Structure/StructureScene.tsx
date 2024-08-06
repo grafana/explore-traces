@@ -80,7 +80,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
       return new SceneFlexItem({
         height: 150,
         width: '100%',
-        minHeight: '300px',
+        minHeight: '400px',
         body: this.getPanel(child),
       });
     });
