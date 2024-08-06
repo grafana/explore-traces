@@ -1,20 +1,16 @@
 import React from 'react';
 
 import {
-  CustomVariable,
-  PanelBuilders,
+    PanelBuilders,
   SceneComponentProps,
   SceneFlexLayout,
   SceneDataNode,
   SceneFlexItem,
-  sceneGraph,
   SceneObjectBase,
   SceneObjectState,
   SceneQueryRunner,
-  SceneVariableSet,
-  VariableDependencyConfig,
 } from '@grafana/scenes';
-import { explorationDS, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
+import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, FieldType, GrafanaTheme2, LoadingState } from '@grafana/data';
@@ -22,29 +18,21 @@ import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
 import { RadioButtonGroup, Stack, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
-import { css } from '@emotion/css';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
   loading?: boolean;
   tree?: TreeNode;
+  metric?: MetricFunction;
 }
 
-const VAR_STRUCTURE_FILTER = 'structureFilter';
-const VAR_STRUCTURE_FILTER_EXPR = '${structureFilter}';
-
 export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_STRUCTURE_FILTER],
-  });
-
   constructor(state: Partial<ServicesTabSceneState>) {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [buildQuery()],
+        queries: [buildQuery(state.metric as MetricFunction)],
       }),
-      $variables: state.$variables ?? getVariablesSet(),
       loading: true,
       ...state,
     });
@@ -201,42 +189,14 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     return values;
   }
 
-  private getStructureFilterVariable() {
-    const variable = sceneGraph.lookupVariable(VAR_STRUCTURE_FILTER, this);
-    if (!(variable instanceof CustomVariable)) {
-      throw new Error('Structure filters variable not found');
-    }
-
-    return variable;
-  }
-
-  private onChangeStructureFilter = (value?: string) => {
-    if (!value) {
-      return;
-    }
-    const variable = this.getStructureFilterVariable();
-    variable.changeValueTo(value);
-    variable.setState({ query: value });
-  };
-
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
     const { tree, loading, panel } = model.useState();
 
     const styles = getStyles(useTheme2());
-    const variable = model.getStructureFilterVariable();
-    const { query } = variable.useState();
     const theme = useTheme2();
 
     return (
       <Stack direction={'column'} gap={2}>
-        <Stack gap={1} alignItems={'center'}>
-          <div className={styles.label}>Structure by</div>
-          <RadioButtonGroup
-            onChange={(value) => model.onChangeStructureFilter(value)}
-            options={structureFilterOptions}
-            value={query}
-          />
-        </Stack>
         {loading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
@@ -256,53 +216,15 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   };
 }
 
-const getStyles = (theme: GrafanaTheme2) => {
-  return {
-    container: css({
-      display: 'flex',
-      flexDirection: 'row',
-      flexGrow: 1,
-      height: '100%',
-    }),
-    label: css({
-      fontSize: theme.typography.fontSize,
-      fontWeight: theme.typography.fontWeightMedium,
-      lineHeight: 1.25,
-      color: theme.colors.text.primary,
-    }),
-    traceViewList: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing.x1,
-      'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
-        display: 'none',
-      },
-    }),
-  };
-};
+function buildQuery(type: MetricFunction) {
+  let typeQuery = 'status = error';
+  if (type === 'duration') {
+    typeQuery = 'duration > trace:duration * .3';
+  }
 
-const structureFilterOptions = [
-  { label: 'Errors', value: 'status = error' },
-  { label: 'Services', value: 'kind = server' },
-  { label: 'Databases', value: 'span.db.statement != ""' },
-];
-
-function getVariablesSet() {
-  return new SceneVariableSet({
-    variables: [
-      new CustomVariable({
-        name: VAR_STRUCTURE_FILTER,
-        label: 'Structure by',
-        query: structureFilterOptions[0].value,
-      }),
-    ],
-  });
-}
-
-function buildQuery() {
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} &>> { ${VAR_STRUCTURE_FILTER_EXPR} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR}} &>> { ${typeQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,
@@ -311,8 +233,21 @@ function buildQuery() {
   };
 }
 
-export function buildStructureScene() {
+const getStyles = (theme: GrafanaTheme2) => {
+    return {
+        traceViewList: css({
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.x1,
+            'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
+                display: 'none',
+            },
+        }),
+    };
+};
+
+export function buildStructureScene(metric: MetricFunction) {
   return new SceneFlexItem({
-    body: new StructureTabScene({}),
+    body: new StructureTabScene({metric}),
   });
 }

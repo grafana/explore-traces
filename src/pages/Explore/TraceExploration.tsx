@@ -171,6 +171,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     variable.changeValueTo(metric);
   };
 
+  public getMetricFunction() {
+    return this.getMetricVariable().getValue() as MetricFunction;
+  }
+
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
     const { body } = model.useState();
     const styles = useStyles2(getStyles);

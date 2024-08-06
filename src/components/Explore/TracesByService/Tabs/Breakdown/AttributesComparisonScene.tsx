@@ -16,7 +16,14 @@ import {
 import { Icon, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL, radioAttributesSpan } from '../../../../../utils/shared';
+import {
+  VAR_FILTERS,
+  explorationDS,
+  VAR_FILTERS_EXPR,
+  ALL,
+  radioAttributesSpan,
+  MetricFunction,
+} from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -26,9 +33,15 @@ import { BaselineColor, buildAllComparisonLayout, SelectionColor } from '../../.
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import {
+  getAttributesAsOptions,
+  getGroupByVariable,
+  getTraceByServiceScene,
+  getTraceExplorationScene,
+} from 'utils/utils';
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
+import { computeHighestDifference } from '../../../../../utils/comparison';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -88,13 +101,9 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 return Object.entries(groupedFrames)
                   .map(([attribute, frames]) => frameGroupToDataframe(attribute, frames))
                   .sort((a, b) => {
-                    const aCompare = a.fields[1].values
-                      .map((val, i) => (val || 0) - (a.fields[2].values[i] || 0))
-                      .reduce((acc, val) => acc + val, 0);
-                    const bCompare = b.fields[1].values
-                      .map((val, i) => (val || 0) - (b.fields[2].values[i] || 0))
-                      .reduce((acc, val) => acc + val, 0);
-                    return aCompare - bCompare;
+                    const aCompare = computeHighestDifference(a);
+                    const bCompare = computeHighestDifference(b);
+                    return bCompare.maxDifference - aCompare.maxDifference;
                   });
               })
             );
@@ -119,6 +128,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private setBody = (variable: CustomVariable) => {
+    const traceExploration = getTraceExplorationScene(this);
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
@@ -127,15 +137,21 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 new InspectAttributeAction({
                   attribute: frame.name,
                   onClick: () => this.onChange(frame.name || ''),
-                })
+                }),
+              traceExploration.getMetricFunction()
             )
-          : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersAction({
-                frame,
-                labelKey: variable.getValueText(),
-                onClick: this.onAddToFiltersClick,
-              }),
-            ]),
+          : buildAttributeComparison(
+              this,
+              variable,
+              (frame: DataFrame) => [
+                new AddToFiltersAction({
+                  frame,
+                  labelKey: variable.getValueText(),
+                  onClick: this.onAddToFiltersClick,
+                }),
+              ],
+              traceExploration.getMetricFunction()
+            ),
     });
   };
 
@@ -153,8 +169,9 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {
     const { body } = model.useState();
     const variable = getGroupByVariable(model);
+    const traceExploration = getTraceExplorationScene(model);
     const { attributes } = getTraceByServiceScene(model).useState();
-    const styles = useStyles2(getStyles);
+    const styles = useStyles2(getStyles, traceExploration.getMetricFunction());
 
     return (
       <div className={styles.container}>
@@ -289,7 +306,7 @@ function getValueForMetaType(frames: DataFrame[], metaType: string) {
   }, 1);
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2, metric: MetricFunction) {
   return {
     container: css({
       flexGrow: 1,
@@ -325,14 +342,14 @@ function getStyles(theme: GrafanaTheme2) {
       width: '16px',
       height: '4px',
       borderRadius: '4px',
-      backgroundColor: BaselineColor,
+      backgroundColor: metric === 'duration' ? BaselineColor : theme.visualization.getColorByName('semi-dark-green'),
     }),
     selectionTag: css({
       display: 'inline-block',
       width: '16px',
       height: '4px',
       borderRadius: '4px',
-      backgroundColor: SelectionColor,
+      backgroundColor: metric === 'duration' ? SelectionColor : theme.visualization.getColorByName('semi-dark-red'),
     }),
     infoFlex: css({
       display: 'flex',
