@@ -281,7 +281,6 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      gap: '4px',
       border: `1px solid ${theme.colors.border.weak}`,
       borderRadius: '2px',
       background: theme.colors.background.primary,

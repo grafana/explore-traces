@@ -269,7 +269,12 @@ const getStyles = (theme: GrafanaTheme2) => {
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing.x1,
+      // Hide the minimap and header components
       'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
+        display: 'none',
+      },
+      // Hide the Span and Resource accordions from span details
+      'div[data-testid="span-detail-component"] > :nth-child(4) > :nth-child(1)': {
         display: 'none',
       },
     }),
