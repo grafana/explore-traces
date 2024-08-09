@@ -18,6 +18,8 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
       throw new Error('there should be only 1 spanset!');
     }
 
+    const traceStartTime = parseInt(trace.startTimeUnixNano || '0', 10);
+
     const ss = trace.spanSets[0];
     // sort by nestedSetLeft
     ss.spans.sort((s1, s2) => nestedSetLeft(s1) - nestedSetLeft(s2));
@@ -29,6 +31,7 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
     for (const span of ss.spans) {
       // force traceID to be the same for all spans in a trace
       span.traceId = trace.traceID;
+      span.startTimeUnixNano = `${parseInt(span.startTimeUnixNano, 10) - traceStartTime}`;
 
       // walk up the tree until we find a node that is a parent of this span
       while (curNode.parent !== null) {
