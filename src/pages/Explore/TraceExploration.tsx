@@ -221,7 +221,7 @@ export class TraceExplorationScene extends SceneObjectBase {
               <a
                 href="https://forms.gle/52nPMeDvZ4iZD9iV8"
                 className={styles.feedback}
-                title="Share your thoughts about the explore traces app in Grafana."
+                title="Share your thoughts about the Explore Traces App in Grafana."
                 target="_blank"
                 rel="noreferrer noopener"
               >
