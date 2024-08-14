@@ -131,11 +131,6 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     return createDataFrame({
       name: `Trace ${traceName}`,
       refId: `trace_${traceName}`,
-      meta: {
-        custom: {
-          skipHeader: true,
-        },
-      },
       fields: [
         {
           name: 'references',

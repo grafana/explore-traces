@@ -21,7 +21,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Badge, Stack, useStyles2 } from '@grafana/ui';
+import { Badge, Icon, Stack, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import {
@@ -216,6 +216,19 @@ export class TraceExplorationScene extends SceneObjectBase {
             </Stack>
           )}
           <div className={styles.controls}>
+            <div className={styles.feedbackContainer}>
+              <Icon name="comment-alt-message" />
+              <a
+                href="https://forms.gle/52nPMeDvZ4iZD9iV8"
+                className={styles.feedback}
+                title="Share your thoughts about the Explore Traces App in Grafana."
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Give feedback
+              </a>
+            </div>
+
             <div className={styles.previewWrapper}>
               <Badge text={'Preview'} color={'blue'} icon={'rocket'} tooltip={compositeVersion} />
             </div>
@@ -309,6 +322,19 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       alignItems: 'center',
       padding: '0 8px',
+    }),
+    feedbackContainer: css({
+      color: theme.colors.text.link,
+      display: 'flex',
+      alignItems: 'center',
+    }),
+    feedback: css({
+      margin: '6px',
+      color: theme.colors.text.link,
+      fontSize: theme.typography.bodySmall.fontSize,
+      '&:hover': {
+        textDecoration: 'underline',
+      },
     }),
   };
 }
