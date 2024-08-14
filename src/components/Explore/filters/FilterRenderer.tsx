@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { AdHocVariableFilter, GrafanaTheme2, SelectableValue, toOption } from '@grafana/data';
-import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
+import { Button, InputActionMeta, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
@@ -25,6 +25,11 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     isValuesLoading?: boolean;
   }>({});
 
+  // Limit maximum options in select dropdowns for performance reasons
+  const maxOptions = 10000;
+  const [keyQuery, setKeyQuery] = useState<string>('');
+  const [valueQuery, setValueQuery] = useState<string>('');
+
   const key = filter.key !== '' ? state?.keys?.find((key) => key.value === filter.key) ?? toOption(filter.key) : null;
   const value = filter.value !== '' ? toOption(filter.value) : null;
   const exploration = getTraceExplorationScene(model);
@@ -46,6 +51,46 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       updateKeys();
     }
   }, [filter, key, metric, model, state]);  
+
+  const keyOptions = useMemo(() => {
+    if (!state.keys) {
+      return;
+    }
+
+    if (keyQuery.length === 0) {
+      return state.keys.slice(0, maxOptions);
+    }
+
+    const queryLowerCase = keyQuery.toLowerCase();
+    return state.keys
+      .filter((tag) => {
+        if (tag.value && tag.value.length > 0) {
+          return tag.value.toLowerCase().includes(queryLowerCase);
+        }
+        return false;
+      })
+      .slice(0, maxOptions);
+  }, [keyQuery, state.keys]);
+
+  const valueOptions = useMemo(() => {
+    if (!state.values) {
+      return;
+    }
+
+    if (valueQuery.length === 0) {
+      return state.values.slice(0, maxOptions);
+    }
+
+    const queryLowerCase = valueQuery.toLowerCase();
+    return state.values
+      .filter((tag) => {
+        if (tag.value && tag.value.length > 0) {
+          return tag.value.toLowerCase().includes(queryLowerCase);
+        }
+        return false;
+      })
+      .slice(0, maxOptions);
+  }, [valueQuery, state.values]);
   
   const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
     // Ensure we always have the same order of keys
@@ -101,7 +146,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     <BaseSelect
       value={key}
       placeholder={'Select attribute'}
-      options={state.keys}
+      options={keyOptions}
       onChange={(v) => model._updateFilter(filter, 'key', v.value)}
       isLoading={state.isKeysLoading}
       autoFocus={keyAutoFocus}
@@ -111,6 +156,12 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         const keys = formatKeys(await model._getKeys(filter.key), model.state.filters, metric);
         setState({ ...state, isKeysLoading: false, keys });
       }}
+      onInputChange={(value: string, { action }: InputActionMeta) => {
+        if (action === 'input-change') {
+          setKeyQuery(value);
+        }
+      }}
+      onCloseMenu={() => setKeyQuery('')}
     />
   );
 
@@ -119,7 +170,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     <BaseSelect
       value={value}
       placeholder={'value'}
-      options={state.values}
+      options={valueOptions}
       onChange={(v) => model._updateFilter(filter, 'value', v.value)}
       isLoading={state.isValuesLoading}
       autoFocus={valueAutoFocus}
@@ -129,6 +180,12 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         const values = sortValues(await model._getValuesFor(filter));
         setState({ ...state, isValuesLoading: false, values });
       }}
+      onInputChange={(value: string, { action }: InputActionMeta) => {
+        if (action === 'input-change') {
+          setValueQuery(value);
+        }
+      }}
+      onCloseMenu={() => setValueQuery('')}
     />
   );
 
