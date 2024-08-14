@@ -162,6 +162,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         }
       }}
       onCloseMenu={() => setKeyQuery('')}
+      virtualized={true}
     />
   );
 
@@ -186,6 +187,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         }
       }}
       onCloseMenu={() => setValueQuery('')}
+      virtualized={true}
     />
   );
 
