@@ -20,12 +20,6 @@ export const primarySignalOptions: Array<SelectableValue<string>> = [
     description: 'Analyze interactions initiated by consumer services',
   },
   {
-    label: 'HTTP endpoints',
-    value: 'http_endpoints',
-    filter: { key: 'span.http.path', operator: '!=', value: '""' },
-    description: 'Analyze activities at specific HTTP service points',
-  },
-  {
     label: 'Database calls',
     value: 'database_calls',
     filter: { key: 'span.db.name', operator: '!=', value: '""' },
