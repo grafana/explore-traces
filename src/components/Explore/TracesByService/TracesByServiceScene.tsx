@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DashboardCursorSync, MetricFindValue } from '@grafana/data';
+import { DashboardCursorSync, GrafanaTheme2, MetricFindValue } from '@grafana/data';
 import {
   behaviors,
   SceneComponentProps,
@@ -31,6 +31,8 @@ import { isEqual } from 'lodash';
 import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { MiniREDPanel } from './MiniREDPanel';
+import { Icon, LinkButton, Stack, Tooltip, useStyles2 } from '@grafana/ui';
+import { css } from '@emotion/css';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -98,7 +100,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === this.state.actionView);
 
     this.setState({
-      body: buildGraphScene(metric as MetricFunction, actionViewDef ? [actionViewDef?.getScene(metric as MetricFunction)] : undefined),
+      body: buildGraphScene(
+        metric as MetricFunction,
+        actionViewDef ? [actionViewDef?.getScene(metric as MetricFunction)] : undefined
+      ),
     });
 
     if (this.state.actionView === undefined) {
@@ -156,7 +161,9 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
     if (body.state.children.length > 1) {
       if (actionViewDef) {
-        body.setState({ children: [...body.state.children.slice(0, 2), actionViewDef.getScene(metric as MetricFunction)] });
+        body.setState({
+          children: [...body.state.children.slice(0, 2), actionViewDef.getScene(metric as MetricFunction)],
+        });
         reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.action_view_changed, {
           oldAction: this.state.actionView,
           newAction: actionView,
@@ -168,11 +175,82 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   static Component = ({ model }: SceneComponentProps<TracesByServiceScene>) => {
     const { body } = model.useState();
-    return <body.Component model={body} />;
+    const styles = useStyles2(getStyles);
+
+    return (
+      <div>
+        <div className={styles.title}>
+          <span>Select metric type</span>
+          <Tooltip content={<MetricTypeTooltip />} placement={'bottom-start'} interactive>
+            <Icon name={'info-circle'} />
+          </Tooltip>
+        </div>
+        <body.Component model={body} />
+      </div>
+    );
   };
 }
 
-const MAIN_PANEL_HEIGHT = 220;
+const MetricTypeTooltip = () => {
+  const styles = useStyles2(getStyles);
+
+  return (
+    <Stack direction={'column'} gap={2}>
+      <div className={styles.tooltip.title}>RED metrics for traces</div>
+      <div className={styles.tooltip.text}>
+        <div>Metrics are generated based on tracing data.</div>
+        <div>
+          <span className={styles.tooltip.emphasize}>Rate</span> - Explanation
+        </div>
+        <div>
+          <span className={styles.tooltip.emphasize}>Errors</span> - Explanation
+        </div>
+        <div>
+          <span className={styles.tooltip.emphasize}>Duration</span> - Explanation
+        </div>
+      </div>
+
+      <div>
+        <LinkButton
+          icon="external-link-alt"
+          fill="solid"
+          target={'_blank'}
+          href={'https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces/'}
+          tooltip="Learn more"
+        >
+          Learn more
+        </LinkButton>
+      </div>
+    </Stack>
+  );
+};
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    title: css({
+      display: 'flex',
+      gap: theme.spacing.x0_5,
+      fontSize: theme.typography.bodySmall.fontSize,
+      paddingBottom: theme.spacing.x0_5,
+      alignItems: 'center',
+    }),
+    tooltip: {
+      title: css({
+        fontSize: '14px',
+        fontWeight: 500,
+        lineHeight: '22px',
+      }),
+      text: css({
+        color: theme.colors.text.secondary,
+      }),
+      emphasize: css({
+        color: theme.colors.text.primary,
+      }),
+    },
+  };
+}
+
+const MAIN_PANEL_HEIGHT = 240;
 export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
 export function buildQuery(type: MetricFunction) {
@@ -214,7 +292,7 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
           new SceneFlexItem({
             minHeight: MAIN_PANEL_HEIGHT,
             maxHeight: MAIN_PANEL_HEIGHT,
-            width: '65%',
+            width: '60%',
             body: new REDPanel({ metric }),
           }),
           new SceneFlexLayout({

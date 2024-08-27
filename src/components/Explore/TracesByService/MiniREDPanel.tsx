@@ -16,7 +16,7 @@ import { SkeletonComponent } from '../ByFrameRepeater';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
-import { useStyles2 } from '@grafana/ui';
+import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getTraceExplorationScene } from '../../../utils/utils';
 import { MINI_PANEL_HEIGHT } from './TracesByServiceScene';
@@ -101,7 +101,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
   }
 
   private getRateOrErrorPanel(metric: MetricFunction) {
-    const panel = barsPanelConfig().setHoverHeader(true);
+    const panel = barsPanelConfig().setHoverHeader(true).setDisplayMode('transparent');
     if (metric === 'errors') {
       panel.setTitle('Errors rate').setCustomFieldConfig('axisLabel', 'Errors').setColor({
         fixedColor: 'semi-dark-red',
@@ -115,7 +115,11 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
   }
 
   private getDurationVizPanel() {
-    return histogramPanelConfig().setTitle('Histogram by duration').setHoverHeader(true).build();
+    return histogramPanelConfig()
+      .setTitle('Histogram by duration')
+      .setHoverHeader(true)
+      .setDisplayMode('transparent')
+      .build();
   }
 
   public static Component = ({ model }: SceneComponentProps<MiniREDPanel>) => {
@@ -133,6 +137,13 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
 
     return (
       <div className={css([styles.container, styles.clickable])} onClick={selectMetric}>
+        <RadioButtonList
+          className={styles.radioButton}
+          name={`metric-${model.state.metric}`}
+          options={[{ title: '', value: 'selected' }]}
+          onChange={() => selectMetric()}
+          value={'not-selected'}
+        />
         <panel.Component model={panel} />
       </div>
     );
@@ -145,6 +156,14 @@ function getStyles(theme: GrafanaTheme2) {
       flex: 1,
       width: '100%',
       display: 'flex',
+      border: `1px solid ${theme.colors.border.weak}`,
+      borderRadius: '2px',
+      background: theme.colors.background.primary,
+      paddingTop: '8px',
+
+      'section, section:hover': {
+        borderColor: 'transparent',
+      },
 
       '& .show-on-hover': {
         display: 'none',
@@ -159,10 +178,21 @@ function getStyles(theme: GrafanaTheme2) {
         overflow: 'hidden',
       },
 
-      ':hover section': {
+      ':hover': {
         background: theme.colors.background.secondary,
-        outline: `1px solid #6e9fff`,
+        input: {
+          backgroundColor: '#ffffff',
+          border: '5px solid #3D71D9',
+          cursor: 'pointer',
+        },
       },
+    }),
+    radioButton: css({
+      display: 'block',
+      position: 'absolute',
+      top: '4px',
+      left: '8px',
+      zIndex: 2,
     }),
   };
 }
