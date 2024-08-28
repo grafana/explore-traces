@@ -181,7 +181,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       <div>
         <div className={styles.title}>
           <Tooltip content={<MetricTypeTooltip />} placement={'bottom-start'} interactive>
-            <span>
+            <span className={styles.hand}>
               Select metric type <Icon name={'info-circle'} />
             </span>
           </Tooltip>
@@ -234,6 +234,9 @@ function getStyles(theme: GrafanaTheme2) {
       fontSize: theme.typography.bodySmall.fontSize,
       paddingBottom: theme.spacing.x0_5,
       alignItems: 'center',
+    }),
+    hand: css({
+      cursor: 'pointer',
     }),
     tooltip: {
       title: css({
