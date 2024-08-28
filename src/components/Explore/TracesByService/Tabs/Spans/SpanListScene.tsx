@@ -58,6 +58,19 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
               ],
             },
           },
+          {
+            id: "organize",
+            options: {
+              indexByName: {
+                "Trace Service": 0,
+                "Trace Name": 1,
+                "Span ID": 2,
+                "Duration": 3,
+                "Start time": 4,
+                "status": 5
+              },
+            }
+          }
         ],
       }),
     });
@@ -89,8 +102,8 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                       body: PanelBuilders.table()
                         .setHoverHeader(true)
                         .setOverrides((builder) => {
-                          return builder.matchFieldsWithName('spanID').overrideLinks([
-                            {
+                          return builder
+                            .matchFieldsWithName('spanID').overrideLinks([{
                               title: 'Span: ${__value.raw}',
                               url: '',
                               onClick: (clickEvent) => {
@@ -107,8 +120,9 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                                     spanId,
                                   });
                               },
-                            },
-                          ]);
+                            }])
+                            .matchFieldsWithName('traceService').overrideCustomFieldConfig('width', 350)
+                            .matchFieldsWithName('traceName').overrideCustomFieldConfig('width', 350)
                         })
                         .build(),
                     }),
