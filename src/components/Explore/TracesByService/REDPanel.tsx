@@ -19,7 +19,7 @@ import { ComparisonControl } from './ComparisonControl';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import { getTraceByServiceScene } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
@@ -255,12 +255,15 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
       <div className={styles.container}>
         <div className={styles.headerContainer}>
           <div className={styles.titleContainer}>
-            <div>{getTitle()}</div>
-            {subtitle && (
-              <div className={styles.subtitle}>
-                <span>{getSubtitle()}</span> <Icon name={'info-circle'} />
-              </div>
-            )}
+            <div className={styles.titleRadioWrapper}>
+              <RadioButtonList
+                name={`metric-${model.state.metric}`}
+                options={[{ title: '', value: 'selected' }]}
+                value={'selected'}
+              />
+              <span>{getTitle()}</span>
+            </div>
+            {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
           </div>
 
           <div className={styles.actions}>
@@ -309,6 +312,9 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       flexDirection: 'column',
       gap: '4px',
+    }),
+    titleRadioWrapper: css({
+      display: 'flex',
     }),
     actions: css({
       display: 'flex',
