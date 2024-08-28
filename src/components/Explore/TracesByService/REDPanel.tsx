@@ -19,7 +19,7 @@ import { ComparisonControl } from './ComparisonControl';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
-import { Icon, RadioButtonList, useStyles2 } from '@grafana/ui';
+import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import { getTraceByServiceScene } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
@@ -263,11 +263,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
               />
               <span>{getTitle()}</span>
             </div>
-            {subtitle && (
-              <div className={styles.subtitle}>
-                <span>{getSubtitle()}</span> <Icon name={'info-circle'} />
-              </div>
-            )}
+            {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
           </div>
 
           <div className={styles.actions}>

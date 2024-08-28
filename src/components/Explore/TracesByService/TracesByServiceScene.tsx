@@ -180,9 +180,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     return (
       <div>
         <div className={styles.title}>
-          <span>Select metric type</span>
           <Tooltip content={<MetricTypeTooltip />} placement={'bottom-start'} interactive>
-            <Icon name={'info-circle'} />
+            <span>
+              Select metric type <Icon name={'info-circle'} />
+            </span>
           </Tooltip>
         </div>
         <body.Component model={body} />
@@ -214,11 +215,11 @@ const MetricTypeTooltip = () => {
         <LinkButton
           icon="external-link-alt"
           fill="solid"
+          size={'sm'}
           target={'_blank'}
           href={'https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces/'}
-          tooltip="Learn more"
         >
-          Learn more
+          Read docs
         </LinkButton>
       </div>
     </Stack>
