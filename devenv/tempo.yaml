@@ -18,6 +18,9 @@ compactor:
     block_retention: 1h 
 
 metrics_generator:
+  processor:
+    local_blocks:
+      filter_server_spans: false
   storage:
     path: /tmp/tempo/generator/wal
   traces_storage:
