@@ -94,6 +94,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: `1px solid ${theme.colors.secondary.border}`,
       background: theme.colors.background.primary,
       padding: '8px',
+      marginBottom: theme.spacing(2),
       fontSize: '12px',
     }),
     differenceValue: css({

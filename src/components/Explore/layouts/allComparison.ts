@@ -16,7 +16,7 @@ export function buildAllComparisonLayout(
   return new ByFrameRepeater({
     body: new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: '300px',
+      autoRows: '320px',
       children: [],
     }),
     getLayoutChild: getLayoutChild(getFrameName, actionsFn, metric),
