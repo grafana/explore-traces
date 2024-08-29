@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject } from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject, sceneGraph } from '@grafana/scenes';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
 import React from 'react';
@@ -11,16 +11,20 @@ import { buildBreakdownScene } from './Breakdown/BreakdownScene';
 import { MetricFunction } from 'utils/shared';
 
 interface ActionViewDefinition {
-  displayName: string;
+  displayName: (metric: MetricFunction) => string;
   value: ActionViewType;
   getScene: (metric: MetricFunction) => SceneObject;
 }
 
 export type ActionViewType = 'traceList' | 'breakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
-  { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
-  { displayName: 'Trace list', value: 'traceList', getScene: buildSpansScene },
+  { displayName: breakdownDisplayName, value: 'breakdown', getScene: buildBreakdownScene },
+  { displayName: structureDisplayName, value: 'structure', getScene: buildStructureScene },
+  {
+    displayName: tracesDisplayName,
+    value: 'traceList',
+    getScene: buildSpansScene,
+  },
 ];
 
 export interface TabsBarSceneState extends SceneObjectState {}
@@ -31,9 +35,12 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
     const styles = useStyles2(getStyles);
     const exploration = getTraceExplorationScene(model);
     const { actionView } = metricScene.useState();
+    const { value: metric } = exploration.getMetricVariable().useState();
+    const dataState = sceneGraph.getData(model).useState();
+    const tracesCount = dataState.data?.series?.[0]?.length;
 
     return (
-      <Box paddingY={1}>
+      <Box>
         <div className={styles.actions}>
           <Stack gap={2}>
             <ShareExplorationAction exploration={exploration} />
@@ -45,9 +52,10 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
             return (
               <Tab
                 key={index}
-                label={tab.displayName}
+                label={tab.displayName(metric as MetricFunction)}
                 active={actionView === tab.value}
                 onChangeTab={() => metricScene.setActionView(tab.value)}
+                counter={tab.value === 'traceList' ? tracesCount : undefined}
               />
             );
           })}
@@ -57,12 +65,32 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
   };
 }
 
+function breakdownDisplayName(_: MetricFunction) {
+  return 'Breakdown';
+}
+
+function structureDisplayName(metric: MetricFunction) {
+  switch (metric) {
+    case 'rate':
+      return 'Service Structure';
+    case 'errors':
+      return 'Root Cause Errors';
+    case 'duration':
+      return 'Root Cause Latency';
+  }
+}
+
+function tracesDisplayName(metric: MetricFunction) {
+  return `${metric === 'errors' ? 'Errored' : metric === 'duration' ? 'Slow' : ''} Traces`.trim();
+}
+
 function getStyles(theme: GrafanaTheme2) {
   return {
     actions: css({
       [theme.breakpoints.up(theme.breakpoints.values.md)]: {
         position: 'absolute',
         right: 0,
+        top: 5,
         zIndex: 2,
       },
     }),
