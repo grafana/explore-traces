@@ -29,12 +29,7 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
 import { isEqual } from 'lodash';
-import {
-  getDatasourceVariable,
-  getGroupByVariable,
-  getLatencyThresholdVariable,
-  getTraceExplorationScene,
-} from 'utils/utils';
+import { getDatasourceVariable, getGroupByVariable, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { MiniREDPanel } from './MiniREDPanel';
 import { Icon, LinkButton, Stack, Tooltip, useStyles2 } from '@grafana/ui';
@@ -72,8 +67,13 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const metricVariable = exploration.getMetricVariable();
     metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.setState({ selection: undefined }); // clear selection when metric changes
-        getLatencyThresholdVariable(this).changeValueTo(''); // reset latency threshold
+        this.setState({
+          selection: undefined,
+          $data: new SceneQueryRunner({
+            datasource: explorationDS,
+            queries: [buildQuery(newState.value as MetricFunction)],
+          }),
+        }); // clear selection when metric changes and rerun query
         this.updateBody();
       }
     });
@@ -185,7 +185,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const styles = useStyles2(getStyles);
 
     return (
-      <div>
+      <>
         <div className={styles.title}>
           <Tooltip content={<MetricTypeTooltip />} placement={'right-start'} interactive>
             <span className={styles.hand}>
@@ -194,7 +194,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
           </Tooltip>
         </div>
         <body.Component model={body} />
-      </div>
+      </>
     );
   };
 }
@@ -269,13 +269,21 @@ const MAIN_PANEL_HEIGHT = 240;
 export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
 export function buildQuery(type: MetricFunction) {
-  const typeQuery = type === 'errors' ? ' && status = error' : '';
+  let typeQuery = '';
+  switch (type) {
+    case 'errors':
+      typeQuery = ' && status = error';
+      break;
+    case 'duration':
+      typeQuery = `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}`;
+      break;
+  }
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}${typeQuery} ${VAR_LATENCY_THRESHOLD_EXPR}} | select(status)`,
+    query: `{${VAR_FILTERS_EXPR}${typeQuery}} | select(status)`,
     queryType: 'traceql',
     tableType: 'spans',
-    limit: 100,
+    limit: 200,
     spss: 10,
     filters: [],
   };

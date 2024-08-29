@@ -20,7 +20,7 @@ export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_GROUPBY = 'groupBy';
 export const VAR_METRIC = 'metric';
 export const VAR_LATENCY_THRESHOLD = 'latencyThreshold';
-export const VAR_LATENCY_THRESHOLD_EXPR = '&& duration > ${latencyThreshold}';
+export const VAR_LATENCY_THRESHOLD_EXPR = '${latencyThreshold}';
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
 export const ALL = 'All';

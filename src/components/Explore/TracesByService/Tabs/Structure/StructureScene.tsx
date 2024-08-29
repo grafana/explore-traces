@@ -262,7 +262,9 @@ function buildQuery(metric: MetricFunction) {
 
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR} ${VAR_LATENCY_THRESHOLD_EXPR}} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR} ${
+      metric === 'duration' ? `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}` : ''
+    }} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,

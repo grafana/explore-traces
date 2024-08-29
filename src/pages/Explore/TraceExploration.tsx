@@ -130,7 +130,15 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
-    this.setState({ showDetails: evt.payload.showDetails ?? false });
+    const showDetails = evt.payload.showDetails ?? false;
+    const stateUpdate: Partial<TraceExplorationState> = { showDetails };
+
+    if (!showDetails) {
+      stateUpdate.traceId = undefined;
+      stateUpdate.spanId = undefined;
+    }
+
+    this.setState(stateUpdate);
   }
 
   getUrlState() {

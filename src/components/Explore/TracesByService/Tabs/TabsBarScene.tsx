@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject } from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject, sceneGraph } from '@grafana/scenes';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, Box, Stack, TabsBar, Tab } from '@grafana/ui';
 import React from 'react';
@@ -36,9 +36,11 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
     const exploration = getTraceExplorationScene(model);
     const { actionView } = metricScene.useState();
     const { value: metric } = exploration.getMetricVariable().useState();
+    const dataState = sceneGraph.getData(model).useState();
+    const tracesCount = dataState.data?.series?.[0]?.length;
 
     return (
-      <Box paddingY={1}>
+      <Box>
         <div className={styles.actions}>
           <Stack gap={2}>
             <ShareExplorationAction exploration={exploration} />
@@ -53,6 +55,7 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
                 label={tab.displayName(metric as MetricFunction)}
                 active={actionView === tab.value}
                 onChangeTab={() => metricScene.setActionView(tab.value)}
+                counter={tab.value === 'traceList' ? tracesCount : undefined}
               />
             );
           })}
@@ -87,6 +90,7 @@ function getStyles(theme: GrafanaTheme2) {
       [theme.breakpoints.up(theme.breakpoints.values.md)]: {
         position: 'absolute',
         right: 0,
+        top: 5,
         zIndex: 2,
       },
     }),
