@@ -12,7 +12,12 @@ import {
   SceneObjectState,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
+import {
+  explorationDS,
+  MetricFunction,
+  VAR_FILTERS_EXPR,
+  VAR_LATENCY_THRESHOLD_EXPR,
+} from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
@@ -241,15 +246,23 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   };
 }
 
-function buildQuery(type: MetricFunction) {
-  let typeQuery = 'status = error';
-  if (type === 'duration') {
-    typeQuery = 'duration > trace:duration * .3';
+function buildQuery(metric: MetricFunction) {
+  let metricQuery = 'status = error';
+  switch (metric) {
+    case 'errors':
+      metricQuery = 'status = error';
+      break;
+    case 'duration':
+      metricQuery = 'duration > trace:duration * .3';
+      break;
+    default:
+      metricQuery = 'kind = server';
+      break;
   }
 
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} &>> { ${typeQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR} ${VAR_LATENCY_THRESHOLD_EXPR}} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
     limit: 200,

@@ -7,19 +7,17 @@ import {
   PanelBuilders,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
   SceneDataTransformer,
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2, DataFrame } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { MakeOptional, MetricFunction, explorationDS } from 'utils/shared';
+import { MakeOptional, MetricFunction } from 'utils/shared';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
-import { buildQuery } from '../../TracesByServiceScene';
 import { map, Observable } from 'rxjs';
 
 export interface SpanListSceneState extends SceneObjectState {
@@ -31,10 +29,6 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
   constructor(state: MakeOptional<SpanListSceneState, 'metric'>) {
     super({
       $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: explorationDS,
-          queries: [buildQuery(state.metric as MetricFunction)],
-        }),
         transformations: [
           () => (source: Observable<DataFrame[]>) => {
             return source.pipe(
@@ -59,18 +53,18 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
             },
           },
           {
-            id: "organize",
+            id: 'organize',
             options: {
               indexByName: {
-                "Trace Service": 0,
-                "Trace Name": 1,
-                "Span ID": 2,
-                "Duration": 3,
-                "Start time": 4,
-                "status": 5
+                'Trace Service': 0,
+                'Trace Name': 1,
+                'Span ID': 2,
+                Duration: 3,
+                'Start time': 4,
+                status: 5,
               },
-            }
-          }
+            },
+          },
         ],
       }),
     });
@@ -103,26 +97,31 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                         .setHoverHeader(true)
                         .setOverrides((builder) => {
                           return builder
-                            .matchFieldsWithName('spanID').overrideLinks([{
-                              title: 'Span: ${__value.raw}',
-                              url: '',
-                              onClick: (clickEvent) => {
-                                const data = sceneGraph.getData(this);
-                                const firstSeries = data.state.data?.series[0];
-                                const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
-                                const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
-                                const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
-                                const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
+                            .matchFieldsWithName('spanID')
+                            .overrideLinks([
+                              {
+                                title: 'Span: ${__value.raw}',
+                                url: '',
+                                onClick: (clickEvent) => {
+                                  const data = sceneGraph.getData(this);
+                                  const firstSeries = data.state.data?.series[0];
+                                  const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
+                                  const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
+                                  const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
+                                  const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
 
-                                traceId &&
-                                  locationService.partial({
-                                    traceId,
-                                    spanId,
-                                  });
+                                  traceId &&
+                                    locationService.partial({
+                                      traceId,
+                                      spanId,
+                                    });
+                                },
                               },
-                            }])
-                            .matchFieldsWithName('traceService').overrideCustomFieldConfig('width', 350)
-                            .matchFieldsWithName('traceName').overrideCustomFieldConfig('width', 350)
+                            ])
+                            .matchFieldsWithName('traceService')
+                            .overrideCustomFieldConfig('width', 350)
+                            .matchFieldsWithName('traceName')
+                            .overrideCustomFieldConfig('width', 350);
                         })
                         .build(),
                     }),
@@ -159,7 +158,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 }
 
 const SkeletonComponent = () => {
-  const styles = useStyles2(getStyles);
+  const styles = useStyles2(getSkeletonStyles);
 
   return (
     <div className={styles.container}>
@@ -179,7 +178,7 @@ const SkeletonComponent = () => {
   );
 };
 
-function getStyles(theme: GrafanaTheme2) {
+function getSkeletonStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       height: '100%',

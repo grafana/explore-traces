@@ -30,6 +30,7 @@ import {
   MetricFunction,
   VAR_DATASOURCE,
   VAR_GROUPBY,
+  VAR_LATENCY_THRESHOLD,
   VAR_METRIC,
 } from '../../utils/shared';
 import { getTraceExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
@@ -211,7 +212,7 @@ export class TraceExplorationScene extends SceneObjectBase {
         <Stack gap={2} justifyContent={'space-between'}>
           {dsVariable && (
             <Stack gap={1} alignItems={'center'}>
-              <div>Data source</div>
+              <div className={styles.datasourceLabel}>Data source</div>
               <dsVariable.Component model={dsVariable} />
             </Stack>
           )}
@@ -278,6 +279,11 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
         name: VAR_GROUPBY,
         defaultToAll: false,
       }),
+      new CustomVariable({
+        name: VAR_LATENCY_THRESHOLD,
+        defaultToAll: false,
+        hide: VariableHide.hideVariable,
+      }),
     ],
   });
 }
@@ -335,6 +341,9 @@ function getStyles(theme: GrafanaTheme2) {
       '&:hover': {
         textDecoration: 'underline',
       },
+    }),
+    datasourceLabel: css({
+      fontSize: '12px',
     }),
   };
 }

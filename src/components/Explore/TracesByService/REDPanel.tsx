@@ -20,7 +20,7 @@ import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
 import { RadioButtonList, useStyles2 } from '@grafana/ui';
-import { getTraceByServiceScene } from '../../../utils/utils';
+import { getLatencyThresholdVariable, getTraceByServiceScene } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
 import { SelectionColor } from '../layouts/allComparison';
@@ -92,11 +92,15 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                 }
 
                 if (yBuckets?.length) {
-                  const tenPercentOfBuckets = Math.floor(yBuckets.length / 5);
-                  const minBucket = yBuckets.length - tenPercentOfBuckets;
+                  const slowestBuckets = Math.floor(yBuckets.length / 4);
+                  const minBucket = yBuckets.length - slowestBuckets;
 
                   const selection: ComparisonSelection = {};
-                  selection.duration = { from: yBucketToDuration(minBucket, yBuckets), to: '' };
+                  const minDuration = yBucketToDuration(minBucket, yBuckets);
+
+                  getLatencyThresholdVariable(this).changeValueTo(minDuration);
+
+                  selection.duration = { from: minDuration, to: '' };
                   selection.raw = {
                     x: {
                       from: timeRange.state.value.from.unix() * 1000,

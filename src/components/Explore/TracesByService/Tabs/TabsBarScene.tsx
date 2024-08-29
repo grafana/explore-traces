@@ -11,16 +11,20 @@ import { buildBreakdownScene } from './Breakdown/BreakdownScene';
 import { MetricFunction } from 'utils/shared';
 
 interface ActionViewDefinition {
-  displayName: string;
+  displayName: (metric: MetricFunction) => string;
   value: ActionViewType;
   getScene: (metric: MetricFunction) => SceneObject;
 }
 
 export type ActionViewType = 'traceList' | 'breakdown' | 'structure';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildBreakdownScene },
-  { displayName: 'Structure', value: 'structure', getScene: buildStructureScene },
-  { displayName: 'Trace list', value: 'traceList', getScene: buildSpansScene },
+  { displayName: breakdownDisplayName, value: 'breakdown', getScene: buildBreakdownScene },
+  { displayName: structureDisplayName, value: 'structure', getScene: buildStructureScene },
+  {
+    displayName: tracesDisplayName,
+    value: 'traceList',
+    getScene: buildSpansScene,
+  },
 ];
 
 export interface TabsBarSceneState extends SceneObjectState {}
@@ -31,6 +35,7 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
     const styles = useStyles2(getStyles);
     const exploration = getTraceExplorationScene(model);
     const { actionView } = metricScene.useState();
+    const { value: metric } = exploration.getMetricVariable().useState();
 
     return (
       <Box paddingY={1}>
@@ -45,7 +50,7 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
             return (
               <Tab
                 key={index}
-                label={tab.displayName}
+                label={tab.displayName(metric as MetricFunction)}
                 active={actionView === tab.value}
                 onChangeTab={() => metricScene.setActionView(tab.value)}
               />
@@ -55,6 +60,25 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
       </Box>
     );
   };
+}
+
+function breakdownDisplayName(_: MetricFunction) {
+  return 'Breakdown';
+}
+
+function structureDisplayName(metric: MetricFunction) {
+  switch (metric) {
+    case 'rate':
+      return 'Service Structure';
+    case 'errors':
+      return 'Root Cause Errors';
+    case 'duration':
+      return 'Root Cause Latency';
+  }
+}
+
+function tracesDisplayName(metric: MetricFunction) {
+  return `${metric === 'errors' ? 'Errored' : metric === 'duration' ? 'Slow' : ''} Traces`.trim();
 }
 
 function getStyles(theme: GrafanaTheme2) {
