@@ -10,7 +10,7 @@ import {
   SceneObjectState,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import { Field, Icon, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -27,7 +27,7 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
@@ -112,6 +112,15 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       filteredAttributes = filteredAttributes?.concat(radioAttributesSpan);
     }
 
+    const exploration = getTraceExplorationScene(model);
+    const { value: metric } = exploration.getMetricVariable().useState();
+    let infoText = 'Attributes are ordered by their rate of requests per second.';
+    if (metric === 'errors') {
+      infoText = 'Attributes are ordered by their rate of errors per second.';
+    } else if (metric === 'duration') {
+      infoText = 'Attributes are ordered by their average duration.';
+    }
+
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
@@ -142,6 +151,14 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
               <body.Selector model={body} />
             </div>
           )}
+        </div>
+        <div className={styles.infoFlex}>
+          <div className={styles.tagsFlex}>
+            <Icon name={'info-circle'} />
+            <div>
+              {infoText}
+            </div>
+          </div>
         </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
@@ -185,6 +202,17 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'row',
+    }),
+    infoFlex: css({
+      display: 'flex',
+      gap: '16px',
+      alignItems: 'center',
+      padding: '8px',
+    }),
+    tagsFlex: css({
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'center',
     }),
   };
 }
