@@ -6,7 +6,7 @@ import { GrotNotFound } from './GrotNotFound';
 import { css } from '@emotion/css';
 
 export interface Props {
-  message: string;
+  message: string | React.ReactNode;
   imgWidth?: number;
 }
 
@@ -18,7 +18,8 @@ export const EmptyState = ({ message, imgWidth }: Props) => {
       <Box paddingY={6}>
         <Stack direction="column" alignItems="center" gap={3}>
           <GrotNotFound width={imgWidth ?? 300} />
-          <Text variant="h5">{message}</Text>
+          {typeof message === 'string' &&  <Text textAlignment={'center'} variant="h5">{message}</Text>}
+          {typeof message !== 'string' &&  message}
         </Stack>
       </Box>
     </div>

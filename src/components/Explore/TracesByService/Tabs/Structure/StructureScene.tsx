@@ -17,11 +17,12 @@ import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
-import { Stack, useTheme2 } from '@grafana/ui';
+import { Alert, Stack, Text, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 import { locationService } from '@grafana/runtime';
+import { getTraceExplorationScene } from 'utils/utils';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -216,9 +217,25 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
     const { tree, loading, panel } = model.useState();
-
     const styles = getStyles(useTheme2());
     const theme = useTheme2();
+
+    const exploration = getTraceExplorationScene(model);
+    const { value: metric } = exploration.getMetricVariable().useState();
+
+    let metricMessage = 'server'; 
+    if (metric === 'errors') {
+      metricMessage = 'error';
+    } else if (metric === 'duration') {
+      metricMessage = 'slow';
+    }
+
+    const noDataMessage = 
+      <>
+        <Text textAlignment={'center'} variant='h5'>The structure tab shows {metricMessage} spans beneath what you are currently investigating.</Text>
+        <Text textAlignment={'center'} variant='h5'>Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</Text>
+        <Alert title='' severity='info'>The structure tab works best with full traces.</Alert>
+      </>;
 
     return (
       <Stack direction={'column'} gap={2}>
@@ -234,7 +251,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         ) : tree && tree.children.length ? (
           <div className={styles.traceViewList}>{panel && <panel.Component model={panel} />}</div>
         ) : (
-          <EmptyState message={'No data available'} />
+          <EmptyState message={noDataMessage} />
         )}
       </Stack>
     );
