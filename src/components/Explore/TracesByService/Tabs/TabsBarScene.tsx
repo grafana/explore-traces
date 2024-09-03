@@ -69,7 +69,7 @@ function breakdownDisplayName(_: MetricFunction) {
   return 'Breakdown';
 }
 
-function structureDisplayName(metric: MetricFunction) {
+export function structureDisplayName(metric: MetricFunction) {
   switch (metric) {
     case 'rate':
       return 'Service Structure';

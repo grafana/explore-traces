@@ -22,12 +22,14 @@ import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
-import { Alert, Stack, Text, useTheme2 } from '@grafana/ui';
+import { Button, Icon, Stack, Text, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 import { locationService } from '@grafana/runtime';
 import { getTraceExplorationScene } from 'utils/utils';
+import { structureDisplayName } from '../TabsBarScene';
+import { primarySignalOptions } from 'pages/Explore/primary-signals';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -244,11 +246,26 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
       metricMessage = 'slow';
     }
 
+    const tabName = structureDisplayName(metric as MetricFunction);
+
     const noDataMessage = 
       <>
-        <Text textAlignment={'center'} variant='h5'>The structure tab shows {metricMessage} spans beneath what you are currently investigating.</Text>
-        <Text textAlignment={'center'} variant='h5'>Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</Text>
-        <Alert title='' severity='info'>The structure tab works best with full traces.</Alert>
+        <Text textAlignment={'center'} variant='h2'>No data</Text>
+        <Text textAlignment={'center'} variant='h5'><div className={styles.longText}>The structure tab shows {metricMessage} spans beneath what you are currently investigating. Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</div></Text>
+        <Text textAlignment={'center'} variant='h5'><Icon name='info-circle' /> The structure tab works best with full traces.</Text>
+        <div className={styles.actionContainer}>
+          Read more about 
+          <a
+              href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
+              className={styles.link}
+              title={`Read more about ${tabName.toLowerCase()}`}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {`${tabName.toLowerCase()}`}
+          </a>
+          <Button variant='primary' fill='solid' onClick={() => exploration.onChangePrimarySignal(primarySignalOptions[0]?.value || '')}>Apply full traces filter</Button>
+        </div>
       </>;
 
     return (
@@ -313,6 +330,23 @@ const getStyles = (theme: GrafanaTheme2) => {
       'div[data-testid="span-detail-component"] > :nth-child(4) > :nth-child(1)': {
         display: 'none',
       },
+    }),
+    longText: css({
+      maxWidth: '800px',
+      margin: '0 auto',
+    }),
+    link: css({
+      margin: '6px',
+      color: theme.colors.text.link,
+      marginRight: theme.spacing(2),
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    }),
+    actionContainer: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     }),
   };
 };
