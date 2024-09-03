@@ -44,7 +44,7 @@ function getStyles(theme: GrafanaTheme2, firstTagColor: string, secondTagColor: 
       display: 'flex',
       gap: '16px',
       alignItems: 'center',
-      paddingBottom: theme.spacing(2),
+      padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
     }),
     tagsFlex: css({
       display: 'flex',
