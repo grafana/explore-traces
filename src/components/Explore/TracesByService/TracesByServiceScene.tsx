@@ -231,7 +231,7 @@ const MetricTypeTooltip = () => {
             'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
           }
         >
-          Read docs
+          Read documentation
         </LinkButton>
       </div>
     </Stack>

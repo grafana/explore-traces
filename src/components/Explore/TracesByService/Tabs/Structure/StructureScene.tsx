@@ -28,6 +28,7 @@ import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 import { locationService } from '@grafana/runtime';
+import { getTraceExplorationScene } from '../../../../../utils/utils';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -231,13 +232,32 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
     const { tree, loading, panel } = model.useState();
-
+    const traceExploration = getTraceExplorationScene(model);
+    const { value } = traceExploration.getMetricVariable().useState();
     const styles = getStyles(useTheme2());
     const theme = useTheme2();
 
+    const metric = value as MetricFunction;
+
+    let description = '';
+    switch (metric) {
+      case 'rate':
+        description =
+          'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        break;
+      case 'errors':
+        description =
+          'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        break;
+      case 'duration':
+        description =
+          'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        break;
+    }
+
     return (
-      <Stack direction={'column'} gap={2}>
-        <div>Select a service or operation to view its span structure and investigate slowest spans.</div>
+      <Stack direction={'column'} gap={1}>
+        <div className={styles.description}>{description}</div>
         {loading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
@@ -258,7 +278,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 }
 
 function buildQuery(metric: MetricFunction) {
-  let metricQuery = 'status = error';
+  let metricQuery;
   switch (metric) {
     case 'errors':
       metricQuery = 'status = error';
@@ -286,6 +306,9 @@ function buildQuery(metric: MetricFunction) {
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+    }),
     traceViewList: css({
       display: 'flex',
       flexDirection: 'column',
