@@ -1,4 +1,4 @@
-import { BusEventBase, BusEventWithPayload } from '@grafana/data';
+import { BusEventWithPayload } from '@grafana/data';
 import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
@@ -21,6 +21,8 @@ export const VAR_GROUPBY = 'groupBy';
 export const VAR_METRIC = 'metric';
 export const VAR_LATENCY_THRESHOLD = 'latencyThreshold';
 export const VAR_LATENCY_THRESHOLD_EXPR = '${latencyThreshold}';
+export const VAR_LATENCY_PARTIAL_THRESHOLD = 'partialLatencyThreshold';
+export const VAR_LATENCY_PARTIAL_THRESHOLD_EXPR = '${partialLatencyThreshold}';
 export const explorationDS = { uid: VAR_DATASOURCE_EXPR };
 
 export const ALL = 'All';
@@ -64,10 +66,6 @@ export interface ComparisonSelection {
   timeRange?: { from: number; to: number };
   duration?: { from: string; to: string };
   query?: string;
-}
-
-export class StartingPointSelectedEvent extends BusEventBase {
-  public static type = 'start-point-selected-event';
 }
 
 export interface DetailsSceneUpdatedPayload {

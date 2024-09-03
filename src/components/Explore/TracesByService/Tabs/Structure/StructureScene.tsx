@@ -16,6 +16,7 @@ import {
   explorationDS,
   MetricFunction,
   VAR_FILTERS_EXPR,
+  VAR_LATENCY_PARTIAL_THRESHOLD_EXPR,
   VAR_LATENCY_THRESHOLD_EXPR,
 } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
@@ -236,6 +237,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
     return (
       <Stack direction={'column'} gap={2}>
+        <div>Select a service or operation to view its span structure and investigate slowest spans.</div>
         {loading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
@@ -262,7 +264,7 @@ function buildQuery(metric: MetricFunction) {
       metricQuery = 'status = error';
       break;
     case 'duration':
-      metricQuery = 'duration > trace:duration * .3';
+      metricQuery = `duration > ${VAR_LATENCY_PARTIAL_THRESHOLD_EXPR}`;
       break;
     default:
       metricQuery = 'kind = server';

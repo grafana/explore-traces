@@ -20,7 +20,11 @@ import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
 import { RadioButtonList, useStyles2 } from '@grafana/ui';
-import { getLatencyThresholdVariable, getTraceByServiceScene } from '../../../utils/utils';
+import {
+  getLatencyPartialThresholdVariable,
+  getLatencyThresholdVariable,
+  getTraceByServiceScene,
+} from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
 import { SelectionColor } from '../layouts/allComparison';
@@ -93,12 +97,18 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
 
                 if (yBuckets?.length) {
                   const slowestBuckets = Math.floor(yBuckets.length / 4);
-                  const minBucket = yBuckets.length - slowestBuckets;
+                  let minBucket = yBuckets.length - slowestBuckets - 1;
+                  if (minBucket < 0) {
+                    minBucket = 0;
+                  }
 
                   const selection: ComparisonSelection = {};
-                  const minDuration = yBucketToDuration(minBucket, yBuckets);
+                  const minDuration = yBucketToDuration(minBucket - 1, yBuckets);
 
                   getLatencyThresholdVariable(this).changeValueTo(minDuration);
+                  getLatencyPartialThresholdVariable(this).changeValueTo(
+                    yBucketToDuration(minBucket - 1, yBuckets, 0.3)
+                  );
 
                   selection.duration = { from: minDuration, to: '' };
                   selection.raw = {
@@ -106,7 +116,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                       from: timeRange.state.value.from.unix() * 1000,
                       to: timeRange.state.value.to.unix() * 1000,
                     },
-                    y: { from: minBucket, to: yBuckets.length - 1 },
+                    y: { from: minBucket - 0.5, to: yBuckets.length - 0.5 },
                   };
 
                   this.setState({
