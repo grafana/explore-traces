@@ -240,51 +240,69 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const exploration = getTraceExplorationScene(model);
     const { value } = exploration.getMetricVariable().useState();
 
-      const metric = value as MetricFunction;
+    const metric = value as MetricFunction;
 
-      let description = '';
-      let emptyMsg = '';
-      switch (metric) {
-          case 'rate':
-              description =
-                  'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
-              emptyMsg = 'server';
-              break;
-          case 'errors':
-              description =
-                  'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
-              emptyMsg = 'error';
-              break;
-          case 'duration':
-              description =
-                  'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
-              emptyMsg = 'slow';
-              break;
-      }
+    let description = '';
+    let emptyMsg = '';
+    switch (metric) {
+      case 'rate':
+        description =
+          'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'server';
+        break;
+      case 'errors':
+        description =
+          'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'error';
+        break;
+      case 'duration':
+        description =
+          'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'slow';
+        break;
+    }
 
     const tabName = structureDisplayName(metric);
 
-    const noDataMessage =
+    const noDataMessage = (
       <>
-        <Text textAlignment={'center'} variant='h2'>No data</Text>
-        <Text textAlignment={'center'} variant='h5'><div className={styles.longText}>The structure tab shows {emptyMsg} spans beneath what you are currently investigating. Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</div></Text>
-        <Text textAlignment={'center'} variant='h5'><Icon name='info-circle' /> The structure tab works best with full traces.</Text>
+        <Text textAlignment={'center'} variant="h3">
+          No data
+        </Text>
+        <Text textAlignment={'center'} variant="body">
+          <div className={styles.longText}>
+            The structure tab shows {emptyMsg} spans beneath what you are currently investigating. Currently, there are
+            no descendant {emptyMsg} spans beneath the spans you are investigating.
+          </div>
+        </Text>
+        <Stack gap={0.5} alignItems={'center'}>
+          <Icon name="info-circle" />
+          <Text textAlignment={'center'} variant="body">
+            The structure tab works best with full traces.
+          </Text>
+        </Stack>
+
         <div className={styles.actionContainer}>
           Read more about
           <a
-              href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
-              className={styles.link}
-              title={`Read more about ${tabName.toLowerCase()}`}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              {`${tabName.toLowerCase()}`}
+            href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
+            className={styles.link}
+            title={`Read more about ${tabName.toLowerCase()}`}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {`${tabName.toLowerCase()}`}
           </a>
-          <Button variant='primary' fill='solid' onClick={() => exploration.onChangePrimarySignal(primarySignalOptions[0]?.value || '')}>Apply full traces filter</Button>
+          <Button
+            variant="primary"
+            fill="solid"
+            onClick={() => exploration.onChangePrimarySignal(primarySignalOptions[0]?.value || '')}
+          >
+            Apply full traces filter
+          </Button>
         </div>
-      </>;
-
-
+      </>
+    );
 
     return (
       <Stack direction={'column'} gap={1}>
