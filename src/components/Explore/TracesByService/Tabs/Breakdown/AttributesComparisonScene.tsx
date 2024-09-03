@@ -13,7 +13,7 @@ import {
   SceneQueryRunner,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { getTheme, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -42,6 +42,7 @@ import {
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 import { computeHighestDifference } from '../../../../../utils/comparison';
+import { AttributesDescription } from './AttributesDescription';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -175,19 +176,15 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
     return (
       <div className={styles.container}>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            Attributes are ordered by the difference between the baseline and selection values for each value.
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.baselineTag} />
-            <div>Baseline</div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.selectionTag} />
-            <div>Selection</div>
-          </div>
-        </div>
+        <AttributesDescription 
+          desctiption='Attributes are ordered by the difference between the baseline and selection values for each value.'
+          showTags={true}
+          firstTag='Baseline' 
+          firstTagColor={traceExploration.getMetricFunction() === 'duration' ? BaselineColor : getTheme().visualization.getColorByName('semi-dark-green')}
+          secondTag='Selection'
+          secondTagColor={traceExploration.getMetricFunction() === 'duration' ? SelectionColor : getTheme().visualization.getColorByName('semi-dark-red')}
+        />
+        
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
@@ -333,31 +330,6 @@ function getStyles(theme: GrafanaTheme2, metric: MetricFunction) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
-    }),
-    baselineTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: metric === 'duration' ? BaselineColor : theme.visualization.getColorByName('semi-dark-green'),
-    }),
-    selectionTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: metric === 'duration' ? SelectionColor : theme.visualization.getColorByName('semi-dark-red'),
-    }),
-    infoFlex: css({
-      display: 'flex',
-      gap: '16px',
-      alignItems: 'center',
-      paddingBottom: theme.spacing(2),
-    }),
-    tagsFlex: css({
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
     }),
   };
 }

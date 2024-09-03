@@ -29,6 +29,7 @@ import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
 import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
+import { AttributesDescription } from './AttributesDescription';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -114,32 +115,24 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
     const exploration = getTraceExplorationScene(model);
     const { value: metric } = exploration.getMetricVariable().useState();
-    let infoText = 'Attributes are ordered by their rate of requests per second.';
+    let description = 'Attributes are ordered by their rate of requests per second.';
     if (metric === 'errors') {
-      infoText = 'Attributes are ordered by their rate of errors per second.';
+      description = 'Attributes are ordered by their rate of errors per second.';
     } else if (metric === 'duration') {
-      infoText = 'Attributes are ordered by their average duration.';
+      description = 'Attributes are ordered by their average duration.';
     }
 
     return (
       <div className={styles.container}>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            {infoText}
-          </div>
-          {metric !== 'duration' && (
-            <>
-              <div className={styles.tagsFlex}>
-                <div className={styles.rateTag} />
-                <div>Rate</div>
-              </div>
-              <div className={styles.tagsFlex}>
-                <div className={styles.errorTag} />
-                <div>Error</div>
-              </div>
-            </>
-          )}
-        </div>
+        <AttributesDescription 
+          desctiption={description}
+          showTags={metric !== 'duration'}
+          firstTag='Rate'
+          firstTagColor='green'
+          secondTag='Error'
+          secondTagColor='red'
+        />
+
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
@@ -211,31 +204,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'row',
-    }),
-    infoFlex: css({
-      display: 'flex',
-      gap: '16px',
-      alignItems: 'center',
-      paddingBottom: theme.spacing(2),
-    }),
-    tagsFlex: css({
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
-    }),
-    rateTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: 'green',
-    }),
-    errorTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: 'red',
     }),
   };
 }
