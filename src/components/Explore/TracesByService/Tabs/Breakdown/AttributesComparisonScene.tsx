@@ -13,7 +13,7 @@ import {
   SceneQueryRunner,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -175,6 +175,19 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
     return (
       <div className={styles.container}>
+        <div className={styles.infoFlex}>
+          <div className={styles.tagsFlex}>
+            Attributes are ordered by the difference between the baseline and selection values for each value.
+          </div>
+          <div className={styles.tagsFlex}>
+            <div className={styles.baselineTag} />
+            <div>Baseline</div>
+          </div>
+          <div className={styles.tagsFlex}>
+            <div className={styles.selectionTag} />
+            <div>Selection</div>
+          </div>
+        </div>
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
@@ -192,22 +205,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
               <body.Selector model={body} />
             </div>
           )}
-        </div>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            <Icon name={'info-circle'} />
-            <div>
-              Attributes are ordered by the difference between the baseline and selection values for each value.
-            </div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.baselineTag} />
-            <div>Baseline</div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.selectionTag} />
-            <div>Selection</div>
-          </div>
         </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
@@ -355,7 +352,7 @@ function getStyles(theme: GrafanaTheme2, metric: MetricFunction) {
       display: 'flex',
       gap: '16px',
       alignItems: 'center',
-      padding: '8px',
+      paddingBottom: theme.spacing(2),
     }),
     tagsFlex: css({
       display: 'flex',

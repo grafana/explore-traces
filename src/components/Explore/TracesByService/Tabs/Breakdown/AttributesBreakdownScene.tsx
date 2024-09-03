@@ -10,7 +10,7 @@ import {
   SceneObjectState,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Field, Icon, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -123,6 +123,23 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
     return (
       <div className={styles.container}>
+        <div className={styles.infoFlex}>
+          <div className={styles.tagsFlex}>
+            {infoText}
+          </div>
+          {metric !== 'duration' && (
+            <>
+              <div className={styles.tagsFlex}>
+                <div className={styles.rateTag} />
+                <div>Rate</div>
+              </div>
+              <div className={styles.tagsFlex}>
+                <div className={styles.errorTag} />
+                <div>Error</div>
+              </div>
+            </>
+          )}
+        </div>
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
@@ -151,14 +168,6 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
               <body.Selector model={body} />
             </div>
           )}
-        </div>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            <Icon name={'info-circle'} />
-            <div>
-              {infoText}
-            </div>
-          </div>
         </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
@@ -207,12 +216,26 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       gap: '16px',
       alignItems: 'center',
-      padding: '8px',
+      paddingBottom: theme.spacing(2),
     }),
     tagsFlex: css({
       display: 'flex',
       gap: '8px',
       alignItems: 'center',
+    }),
+    rateTag: css({
+      display: 'inline-block',
+      width: '16px',
+      height: '4px',
+      borderRadius: '4px',
+      backgroundColor: 'green',
+    }),
+    errorTag: css({
+      display: 'inline-block',
+      width: '16px',
+      height: '4px',
+      borderRadius: '4px',
+      backgroundColor: 'red',
     }),
   };
 }
