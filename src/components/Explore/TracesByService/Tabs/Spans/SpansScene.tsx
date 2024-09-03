@@ -1,12 +1,6 @@
 import React from 'react';
 
-import {
-  SceneComponentProps,
-  SceneFlexItem,
-  SceneObject,
-  SceneObjectBase,
-  SceneObjectState,
-} from '@grafana/scenes';
+import { SceneComponentProps, SceneFlexItem, SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { SpanListScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListScene';
 import { getTraceExplorationScene } from 'utils/utils';
 import { MetricFunction } from 'utils/shared';
