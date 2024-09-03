@@ -16,6 +16,7 @@ import {
   explorationDS,
   MetricFunction,
   VAR_FILTERS_EXPR,
+  VAR_LATENCY_PARTIAL_THRESHOLD_EXPR,
   VAR_LATENCY_THRESHOLD_EXPR,
 } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
@@ -237,24 +238,39 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const theme = useTheme2();
 
     const exploration = getTraceExplorationScene(model);
-    const { value: metric } = exploration.getMetricVariable().useState();
+    const { value } = exploration.getMetricVariable().useState();
 
-    let metricMessage = 'server'; 
-    if (metric === 'errors') {
-      metricMessage = 'error';
-    } else if (metric === 'duration') {
-      metricMessage = 'slow';
-    }
+      const metric = value as MetricFunction;
 
-    const tabName = structureDisplayName(metric as MetricFunction);
+      let description = '';
+      let emptyMsg = '';
+      switch (metric) {
+          case 'rate':
+              description =
+                  'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+              emptyMsg = 'server';
+              break;
+          case 'errors':
+              description =
+                  'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+              emptyMsg = 'error';
+              break;
+          case 'duration':
+              description =
+                  'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+              emptyMsg = 'slow';
+              break;
+      }
 
-    const noDataMessage = 
+    const tabName = structureDisplayName(metric);
+
+    const noDataMessage =
       <>
         <Text textAlignment={'center'} variant='h2'>No data</Text>
-        <Text textAlignment={'center'} variant='h5'><div className={styles.longText}>The structure tab shows {metricMessage} spans beneath what you are currently investigating. Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</div></Text>
+        <Text textAlignment={'center'} variant='h5'><div className={styles.longText}>The structure tab shows {emptyMsg} spans beneath what you are currently investigating. Currently, there are no descendant {metricMessage} spans beneath the spans you are investigating.</div></Text>
         <Text textAlignment={'center'} variant='h5'><Icon name='info-circle' /> The structure tab works best with full traces.</Text>
         <div className={styles.actionContainer}>
-          Read more about 
+          Read more about
           <a
               href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
               className={styles.link}
@@ -268,8 +284,11 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         </div>
       </>;
 
+
+
     return (
-      <Stack direction={'column'} gap={2}>
+      <Stack direction={'column'} gap={1}>
+        <div className={styles.description}>{description}</div>
         {loading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
@@ -290,13 +309,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 }
 
 function buildQuery(metric: MetricFunction) {
-  let metricQuery = 'status = error';
+  let metricQuery;
   switch (metric) {
     case 'errors':
       metricQuery = 'status = error';
       break;
     case 'duration':
-      metricQuery = 'duration > trace:duration * .3';
+      metricQuery = `duration > ${VAR_LATENCY_PARTIAL_THRESHOLD_EXPR}`;
       break;
     default:
       metricQuery = 'kind = server';
@@ -318,6 +337,9 @@ function buildQuery(metric: MetricFunction) {
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+    }),
     traceViewList: css({
       display: 'flex',
       flexDirection: 'column',

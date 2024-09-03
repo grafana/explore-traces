@@ -206,17 +206,18 @@ const MetricTypeTooltip = () => {
     <Stack direction={'column'} gap={2}>
       <div className={styles.tooltip.title}>RED metrics for traces</div>
       <div className={styles.tooltip.text}>
-        <div>Metrics are generated based on tracing data.</div>
+        <div>Explore rate, errors, and duration (RED) metrics generated from traces by Tempo.</div>
         <div>
-          <span className={styles.tooltip.emphasize}>Rate</span> - Number of requests per second
+          <span className={styles.tooltip.emphasize}>Rate</span> - Spans per second that match your filter, useful to
+          find unusual spikes in activity
         </div>
         <div>
-          <span className={styles.tooltip.emphasize}>Errors</span> - Number of those requests that are failing (overall
-          issues in tracing ecosystem)
+          <span className={styles.tooltip.emphasize}>Errors</span> -Spans that are failing, overall issues in tracing
+          ecosystem
         </div>
         <div>
-          <span className={styles.tooltip.emphasize}>Duration</span> - Amount of time those requests take, represented
-          as a heat map. (response time, latency)
+          <span className={styles.tooltip.emphasize}>Duration</span> - Amount of time those spans take, represented as a
+          heat map (responds time, latency)
         </div>
       </div>
 
@@ -230,7 +231,7 @@ const MetricTypeTooltip = () => {
             'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
           }
         >
-          Read docs
+          Read documentation
         </LinkButton>
       </div>
     </Stack>

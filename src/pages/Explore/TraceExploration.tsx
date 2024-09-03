@@ -30,6 +30,7 @@ import {
   MetricFunction,
   VAR_DATASOURCE,
   VAR_GROUPBY,
+  VAR_LATENCY_PARTIAL_THRESHOLD,
   VAR_LATENCY_THRESHOLD,
   VAR_METRIC,
 } from '../../utils/shared';
@@ -289,6 +290,11 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
       }),
       new CustomVariable({
         name: VAR_LATENCY_THRESHOLD,
+        defaultToAll: false,
+        hide: VariableHide.hideVariable,
+      }),
+      new CustomVariable({
+        name: VAR_LATENCY_PARTIAL_THRESHOLD,
         defaultToAll: false,
         hide: VariableHide.hideVariable,
       }),
