@@ -27,7 +27,7 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
           to: Math.round(rawSelection.x.to / 1000),
         };
 
-        const yFrom = yBucketToDuration(args[0].y.from, yBuckets);
+        const yFrom = yBucketToDuration(args[0].y.from - 1, yBuckets);
         const yTo = yBucketToDuration(args[0].y.to, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };
 
@@ -63,11 +63,15 @@ export const histogramPanelConfig = () => {
     .setOption('rowsFrame', { value: 'Spans' });
 };
 
-export function yBucketToDuration(yValue: number, buckets?: number[]) {
+export function yBucketToDuration(yValue: number, buckets?: number[], multiplier?: number) {
   if (!buckets) {
     return '';
   }
-  const rawValue = buckets[Math.floor(yValue)];
+  if (yValue < 0) {
+    return '0';
+  }
+
+  const rawValue = buckets[Math.floor(yValue)] * (multiplier || 1);
   if (!rawValue || isNaN(rawValue)) {
     return '';
   }
