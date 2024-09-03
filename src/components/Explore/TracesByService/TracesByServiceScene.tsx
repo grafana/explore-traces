@@ -24,6 +24,7 @@ import {
   MetricFunction,
   ComparisonSelection,
   ALL,
+  VAR_LATENCY_THRESHOLD_EXPR,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
@@ -66,7 +67,13 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const metricVariable = exploration.getMetricVariable();
     metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.setState({ selection: undefined });
+        this.setState({
+          selection: undefined,
+          $data: new SceneQueryRunner({
+            datasource: explorationDS,
+            queries: [buildQuery(newState.value as MetricFunction)],
+          }),
+        }); // clear selection when metric changes and rerun query
         this.updateBody();
       }
     });
@@ -178,16 +185,16 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const styles = useStyles2(getStyles);
 
     return (
-      <div>
+      <>
         <div className={styles.title}>
-          <Tooltip content={<MetricTypeTooltip />} placement={'bottom-start'} interactive>
+          <Tooltip content={<MetricTypeTooltip />} placement={'right-start'} interactive>
             <span className={styles.hand}>
               Select metric type <Icon name={'info-circle'} />
             </span>
           </Tooltip>
         </div>
         <body.Component model={body} />
-      </div>
+      </>
     );
   };
 }
@@ -201,13 +208,15 @@ const MetricTypeTooltip = () => {
       <div className={styles.tooltip.text}>
         <div>Metrics are generated based on tracing data.</div>
         <div>
-          <span className={styles.tooltip.emphasize}>Rate</span> - Explanation
+          <span className={styles.tooltip.emphasize}>Rate</span> - Number of requests per second
         </div>
         <div>
-          <span className={styles.tooltip.emphasize}>Errors</span> - Explanation
+          <span className={styles.tooltip.emphasize}>Errors</span> - Number of those requests that are failing (overall
+          issues in tracing ecosystem)
         </div>
         <div>
-          <span className={styles.tooltip.emphasize}>Duration</span> - Explanation
+          <span className={styles.tooltip.emphasize}>Duration</span> - Amount of time those requests take, represented
+          as a heat map. (response time, latency)
         </div>
       </div>
 
@@ -217,7 +226,9 @@ const MetricTypeTooltip = () => {
           fill="solid"
           size={'sm'}
           target={'_blank'}
-          href={'https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces/'}
+          href={
+            'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
+          }
         >
           Read docs
         </LinkButton>
@@ -258,13 +269,21 @@ const MAIN_PANEL_HEIGHT = 240;
 export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
 export function buildQuery(type: MetricFunction) {
-  const typeQuery = type === 'errors' ? ' && status = error' : '';
+  let typeQuery = '';
+  switch (type) {
+    case 'errors':
+      typeQuery = ' && status = error';
+      break;
+    case 'duration':
+      typeQuery = `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}`;
+      break;
+  }
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR}${typeQuery}} | select(status)`,
     queryType: 'traceql',
     tableType: 'spans',
-    limit: 100,
+    limit: 200,
     spss: 10,
     filters: [],
   };

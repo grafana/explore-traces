@@ -12,7 +12,12 @@ import {
   SceneObjectState,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import { explorationDS, MetricFunction, VAR_FILTERS_EXPR } from '../../../../../utils/shared';
+import {
+  explorationDS,
+  MetricFunction,
+  VAR_FILTERS_EXPR,
+  VAR_LATENCY_THRESHOLD_EXPR,
+} from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
@@ -30,6 +35,8 @@ export interface ServicesTabSceneState extends SceneObjectState {
   tree?: TreeNode;
   metric?: MetricFunction;
 }
+
+const ROOT_SPAN_ID = '0000000000000000';
 
 export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   constructor(state: Partial<ServicesTabSceneState>) {
@@ -63,6 +70,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
           const merged = mergeTraces(response);
+          merged.children.sort((a, b) => countSpans(b) - countSpans(a));
           this.setState({
             tree: merged,
             panel: new SceneFlexLayout({
@@ -93,7 +101,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const to = timeRange.state.value.to;
 
     return PanelBuilders.traces()
-      .setTitle('Trace')
+      .setTitle(`Structure for ${tree.serviceName} [${countSpans(tree)} spans used]`)
       .setOption('createFocusSpanLink' as any, (traceId: string, spanId: string): LinkModel<Field> => {
         return {
           title: 'Open trace',
@@ -126,7 +134,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   }
 
   private buildData(tree: TreeNode) {
-    const trace = this.getTrace(tree, tree.traceID, '000000000000000');
+    const trace = this.getTrace(tree, ROOT_SPAN_ID);
     const traceName = trace[0].serviceName + ':' + trace[0].operationName;
 
     return createDataFrame({
@@ -147,6 +155,11 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
           name: 'spanID',
           type: FieldType.string,
           values: trace.map((x) => x.spanID),
+        },
+        {
+          name: 'parentSpanID',
+          type: FieldType.string,
+          values: trace.map((x) => x.parentSpanId),
         },
         {
           name: 'serviceName',
@@ -177,40 +190,41 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     });
   }
 
-  private getTrace(node: TreeNode, traceID: string, spanID: string) {
+  private getTrace(node: TreeNode, spanID: string) {
     const erroredSpans = node.spans.reduce(
       (acc, c) => (c.attributes?.find((a) => a.key === 'status')?.value.stringValue === 'error' ? acc + 1 : acc),
       0
     );
+
+    // start time needs to be different from zero otherwise for the root, otherwise the Trace View won't render it
+    let startTime = 0.0001;
+    if (spanID !== ROOT_SPAN_ID) {
+      startTime =
+        node.spans.reduce((acc, c) => acc + parseInt(c.startTimeUnixNano, 10), 0) / node.spans.length / 1000000;
+    }
+
     const values = [
       {
-        references: [
-          {
-            refType: 'CHILD_OF',
-            traceID: traceID,
-            spanID: spanID,
-          },
-          // Add last 5 spans of the list as external references
-          // refType = 'EXTERNAL' doesn't mean anything, it's just to be different from CHILD_OF and FOLLOW_FROM
-          ...node.spans.slice(-5).map((x) => ({
-            refType: 'EXTERNAL',
-            traceID: x.traceId,
-            spanID: x.spanID,
-          })),
-        ],
+        // Add last 5 spans of the list as external references
+        // refType = 'EXTERNAL' doesn't mean anything, it's just to be different from CHILD_OF and FOLLOW_FROM
+        references: node.spans.slice(-5).map((x) => ({
+          refType: 'EXTERNAL',
+          traceID: x.traceId,
+          spanID: x.spanID,
+        })),
         traceID: node.traceID,
         spanID: node.spans[0].spanID,
+        parentSpanId: spanID,
         serviceName: node.serviceName,
         operationName: node.operationName,
         statusCode: erroredSpans > 0 ? 2 /*error*/ : 0 /*unset*/,
         duration: node.spans.reduce((acc, c) => acc + parseInt(c.durationNanos, 10), 0) / node.spans.length / 1000000,
-        startTime:
-          node.spans.reduce((acc, c) => acc + parseInt(c.startTimeUnixNano, 10), 0) / node.spans.length / 1000000,
+        startTime,
       },
     ];
 
     for (const child of node.children) {
-      values.push(...this.getTrace(child, node.traceID, node.spans[0].spanID));
+      values.push(...this.getTrace(child, node.spans[0].spanID));
     }
     return values;
   }
@@ -258,18 +272,28 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   };
 }
 
-function buildQuery(type: MetricFunction) {
-  let typeQuery = 'status = error';
-  if (type === 'duration') {
-    typeQuery = 'duration > trace:duration * .3';
+function buildQuery(metric: MetricFunction) {
+  let metricQuery = 'status = error';
+  switch (metric) {
+    case 'errors':
+      metricQuery = 'status = error';
+      break;
+    case 'duration':
+      metricQuery = 'duration > trace:duration * .3';
+      break;
+    default:
+      metricQuery = 'kind = server';
+      break;
   }
 
   return {
     refId: 'A',
-    query: `{${VAR_FILTERS_EXPR}} &>> { ${typeQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
+    query: `{${VAR_FILTERS_EXPR} ${
+      metric === 'duration' ? `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}` : ''
+    }} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
-    limit: 200,
+    limit: 400,
     spss: 40,
     filters: [],
   };
@@ -292,6 +316,14 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
   };
 };
+
+function countSpans(tree: TreeNode) {
+  let count = tree.spans.length;
+  for (const child of tree.children) {
+    count += countSpans(child);
+  }
+  return count;
+}
 
 export function buildStructureScene(metric: MetricFunction) {
   return new SceneFlexItem({
