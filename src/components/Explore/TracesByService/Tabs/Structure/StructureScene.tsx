@@ -16,17 +16,21 @@ import {
   explorationDS,
   MetricFunction,
   VAR_FILTERS_EXPR,
+  VAR_LATENCY_PARTIAL_THRESHOLD_EXPR,
   VAR_LATENCY_THRESHOLD_EXPR,
 } from '../../../../../utils/shared';
 import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
-import { Stack, useTheme2 } from '@grafana/ui';
+import { Button, Icon, Stack, Text, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 import { locationService } from '@grafana/runtime';
+import { getTraceExplorationScene } from 'utils/utils';
+import { structureDisplayName } from '../TabsBarScene';
+import { primarySignalOptions } from 'pages/Explore/primary-signals';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -230,12 +234,79 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
     const { tree, loading, panel } = model.useState();
-
     const styles = getStyles(useTheme2());
     const theme = useTheme2();
 
+    const exploration = getTraceExplorationScene(model);
+    const { value } = exploration.getMetricVariable().useState();
+
+    const metric = value as MetricFunction;
+
+    let description = '';
+    let emptyMsg = '';
+    switch (metric) {
+      case 'rate':
+        description =
+          'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'server';
+        break;
+      case 'errors':
+        description =
+          'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'error';
+        break;
+      case 'duration':
+        description =
+          'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+        emptyMsg = 'slow';
+        break;
+    }
+
+    const tabName = structureDisplayName(metric);
+
+    const noDataMessage = (
+      <>
+        <Text textAlignment={'center'} variant="h3">
+          No data
+        </Text>
+        <Text textAlignment={'center'} variant="body">
+          <div className={styles.longText}>
+            The structure tab shows {emptyMsg} spans beneath what you are currently investigating. Currently, there are
+            no descendant {emptyMsg} spans beneath the spans you are investigating.
+          </div>
+        </Text>
+        <Stack gap={0.5} alignItems={'center'}>
+          <Icon name="info-circle" />
+          <Text textAlignment={'center'} variant="body">
+            The structure tab works best with full traces.
+          </Text>
+        </Stack>
+
+        <div className={styles.actionContainer}>
+          Read more about
+          <a
+            href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
+            className={styles.link}
+            title={`Read more about ${tabName.toLowerCase()}`}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {`${tabName.toLowerCase()}`}
+          </a>
+          <Button
+            variant="primary"
+            fill="solid"
+            onClick={() => exploration.onChangePrimarySignal(primarySignalOptions[0]?.value || '')}
+          >
+            Apply full traces filter
+          </Button>
+        </div>
+      </>
+    );
+
     return (
-      <Stack direction={'column'} gap={2}>
+      <Stack direction={'column'} gap={1}>
+        <div className={styles.description}>{description}</div>
         {loading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
@@ -248,7 +319,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         ) : tree && tree.children.length ? (
           <div className={styles.traceViewList}>{panel && <panel.Component model={panel} />}</div>
         ) : (
-          <EmptyState message={'No data available'} />
+          <EmptyState message={noDataMessage} />
         )}
       </Stack>
     );
@@ -256,13 +327,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 }
 
 function buildQuery(metric: MetricFunction) {
-  let metricQuery = 'status = error';
+  let metricQuery;
   switch (metric) {
     case 'errors':
       metricQuery = 'status = error';
       break;
     case 'duration':
-      metricQuery = 'duration > trace:duration * .3';
+      metricQuery = `duration > ${VAR_LATENCY_PARTIAL_THRESHOLD_EXPR}`;
       break;
     default:
       metricQuery = 'kind = server';
@@ -284,6 +355,9 @@ function buildQuery(metric: MetricFunction) {
 
 const getStyles = (theme: GrafanaTheme2) => {
   return {
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+    }),
     traceViewList: css({
       display: 'flex',
       flexDirection: 'column',
@@ -296,6 +370,23 @@ const getStyles = (theme: GrafanaTheme2) => {
       'div[data-testid="span-detail-component"] > :nth-child(4) > :nth-child(1)': {
         display: 'none',
       },
+    }),
+    longText: css({
+      maxWidth: '800px',
+      margin: '0 auto',
+    }),
+    link: css({
+      margin: '6px',
+      color: theme.colors.text.link,
+      marginRight: theme.spacing(2),
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    }),
+    actionContainer: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     }),
   };
 };
