@@ -4,66 +4,55 @@ import React, {  } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { useTheme2 } from '@grafana/ui';
 
-type Props = {
-  desctiption: string;
-  showTags: boolean;
-  firstTag: string;
-  firstTagColor: string;
-  secondTag: string;
-  secondTagColor: string;
+type Tag = {
+  label: string;
+  color: string;
 };
 
-export function AttributesDescription({ desctiption, showTags, firstTag, firstTagColor, secondTag, secondTagColor }: Props) {
+type Props = {
+  desctiption: string;
+  tags: Tag[];
+};
+
+export function AttributesDescription({ desctiption, tags }: Props) {
   const theme = useTheme2();
-  const styles = getStyles(theme, firstTagColor, secondTagColor);
+  const styles = getStyles(theme);
 
   return (
     <div className={styles.infoFlex}>
       <div className={styles.tagsFlex}>
         {desctiption}
       </div>
-      {showTags && (
-        <>
-          <div className={styles.tagsFlex}>
-            <div className={styles.firstTag} />
-            <div>{firstTag}</div>
+      {tags.length > 0 && (
+        tags.map((tag) => (
+          <div className={styles.tagsFlex} key={tag.label}>
+            <div className={styles.tag} style={{backgroundColor: tag.color}} />
+            <div>{tag.label}</div>
           </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.secondTag} />
-            <div>{secondTag}</div>
-          </div>
-        </>
+        ))
       )}
     </div>
   );
 }
 
-function getStyles(theme: GrafanaTheme2, firstTagColor: string, secondTagColor: string) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     infoFlex: css({
       display: 'flex',
-      gap: '16px',
+      gap: theme.spacing(2),
       alignItems: 'center',
       padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
     }),
     tagsFlex: css({
       display: 'flex',
-      gap: '8px',
+      gap: theme.spacing(1),
       alignItems: 'center',
     }),
-    firstTag: css({
+    tag: css({
       display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: firstTagColor,
-    }),
-    secondTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: secondTagColor,
+      width: theme.spacing(2),
+      height: theme.spacing(0.5),
+      borderRadius: theme.spacing(0.5),
     }),
   };
 }

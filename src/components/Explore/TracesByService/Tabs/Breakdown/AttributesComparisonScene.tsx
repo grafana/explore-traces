@@ -178,11 +178,16 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
       <div className={styles.container}>
         <AttributesDescription 
           desctiption='Attributes are ordered by the difference between the baseline and selection values for each value.'
-          showTags={true}
-          firstTag='Baseline' 
-          firstTagColor={traceExploration.getMetricFunction() === 'duration' ? BaselineColor : getTheme().visualization.getColorByName('semi-dark-green')}
-          secondTag='Selection'
-          secondTagColor={traceExploration.getMetricFunction() === 'duration' ? SelectionColor : getTheme().visualization.getColorByName('semi-dark-red')}
+          tags={[
+            {
+              label: 'Baseline',
+              color: traceExploration.getMetricFunction() === 'duration' ? BaselineColor : getTheme().visualization.getColorByName('semi-dark-green')
+            },
+            {
+              label: 'Selection',
+              color: traceExploration.getMetricFunction() === 'duration' ? SelectionColor : getTheme().visualization.getColorByName('semi-dark-red')
+            }
+          ]}
         />
         
         <div className={styles.controls}>

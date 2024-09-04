@@ -126,11 +126,10 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       <div className={styles.container}>
         <AttributesDescription 
           desctiption={description}
-          showTags={metric !== 'duration'}
-          firstTag='Rate'
-          firstTagColor='green'
-          secondTag='Error'
-          secondTagColor='red'
+          tags={metric === 'duration' ? [] : [
+            { label: 'Rate', color: 'green' }, 
+            { label: 'Error', color: 'red' }
+          ]}
         />
 
         <div className={styles.controls}>
