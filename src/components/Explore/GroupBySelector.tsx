@@ -1,10 +1,10 @@
 import { css } from '@emotion/css';
 import { useResizeObserver } from '@react-aria/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field } from '@grafana/ui';
-import { ALL, ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field, InputActionMeta } from '@grafana/ui';
+import { ALL, ignoredAttributes, maxOptions, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 
 type Props = {
   options: Array<SelectableValue<string>>;
@@ -17,10 +17,10 @@ type Props = {
 export function GroupBySelector({ options, radioAttributes, value, onChange, showAll = false }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
+  const [selectQuery, setSelectQuery] = useState<string>('');
 
   const [labelSelectorRequiredWidth, setLabelSelectorRequiredWidth] = useState<number>(0);
   const [availableWidth, setAvailableWidth] = useState<number>(0);
-
   const useHorizontalLabelSelector = availableWidth > labelSelectorRequiredWidth;
 
   const controlsContainer = useRef<HTMLDivElement>(null);
@@ -43,7 +43,14 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
       value: attribute,
     }));
 
-  const selectOptions = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
+  const otherAttrOptions = useMemo(() => {
+    const ops = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
+    return filteredOptions(ops, selectQuery);
+  }, [selectQuery, options, radioAttributes]);
+
+  const attrOptions = useMemo(() => {
+    return filteredOptions(options, selectQuery);
+  }, [selectQuery, options]);
 
   const getModifiedSelectOptions = (options: Array<SelectableValue<string>>) => {
     return options
@@ -80,12 +87,18 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
           <>
             <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
             <Select
-              value={value && getModifiedSelectOptions(selectOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
+              value={value && getModifiedSelectOptions(otherAttrOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
-              options={getModifiedSelectOptions(selectOptions)}
+              options={getModifiedSelectOptions(otherAttrOptions)}
               onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
               className={styles.select}
               isClearable
+              onInputChange={(value: string, { action }: InputActionMeta) => {
+                if (action === 'input-change') {
+                  setSelectQuery(value);
+                }
+              }}
+              onCloseMenu={() => setSelectQuery('')}
               virtualized
             />
           </>
@@ -93,10 +106,16 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
           <Select
             value={value}
             placeholder={'Select attribute'}
-            options={getModifiedSelectOptions(options)}
+            options={getModifiedSelectOptions(attrOptions)}
             onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
             className={styles.select}
             isClearable
+            onInputChange={(value: string, { action }: InputActionMeta) => {
+              if (action === 'input-change') {
+                setSelectQuery(value);
+              }
+            }}
+            onCloseMenu={() => setSelectQuery('')}
             virtualized
           />
         )}
@@ -115,4 +134,24 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
     }),
   };
+}
+
+export const filteredOptions = (options: Array<SelectableValue<string>>, query: string) => {
+  if (options.length === 0) {
+    return [];
+  }
+
+  if (query.length === 0) {
+    return options.slice(0, maxOptions);
+  }
+
+  const queryLowerCase = query.toLowerCase();
+  return options
+    .filter((tag) => {
+      if (tag.value && tag.value.length > 0) {
+        return tag.value.toLowerCase().includes(queryLowerCase);
+      }
+      return false;
+    })
+    .slice(0, maxOptions);
 }
