@@ -14,6 +14,7 @@ import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
+  MetricFunction,
   RESOURCE,
   RESOURCE_ATTR,
   SPAN,
@@ -115,12 +116,19 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
     const exploration = getTraceExplorationScene(model);
     const { value: metric } = exploration.getMetricVariable().useState();
-    let description = 'Attributes are ordered by their rate of requests per second.';
-    if (metric === 'errors') {
-      description = 'Attributes are ordered by their rate of errors per second.';
-    } else if (metric === 'duration') {
-      description = 'Attributes are ordered by their average duration.';
+    const getDescription = (metric: MetricFunction) => {
+      switch (metric) {
+        case 'rate':
+          return 'Attributes are ordered by their rate of requests per second.';
+        case 'errors':
+          return 'Attributes are ordered by their rate of errors per second.';
+        case 'duration':
+          return 'Attributes are ordered by their average duration.';
+        default:
+          throw new Error('Metric not supported');
+      }
     }
+    const description = getDescription(metric as MetricFunction);
 
     return (
       <div className={styles.container}>
