@@ -242,22 +242,31 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
     const metric = value as MetricFunction;
 
-    let description = '';
+    let description;
     let emptyMsg = '';
     switch (metric) {
       case 'rate':
         description =
-          'Analyse the service structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+          <>
+            <div>Analyse the service structure of the traces that match the current filters.</div>
+            <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
+          </>;
         emptyMsg = 'server';
         break;
       case 'errors':
         description =
-          'Analyse the errors structure of the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+          <>
+            <div>Analyse the errors structure of the traces that match the current filters.</div>
+            <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
+          </>;
         emptyMsg = 'error';
         break;
       case 'duration':
         description =
-          'Analyse the structure of slow spans from the traces that match the current filters. Each panel represents an aggregate view compiled using spans from multiple traces.';
+          <>
+            <div>Analyse the structure of slow spans from the traces that match the current filters.</div>
+            <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
+          </>;
         emptyMsg = 'slow';
         break;
     }
