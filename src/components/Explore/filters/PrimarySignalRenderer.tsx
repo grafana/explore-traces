@@ -60,7 +60,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     },
   }),
   heading: css({
-    padding: theme.spacing(1, 1, 1, 0.75),
+    padding: theme.spacing(1, 1, 0.75, 0.75),
     borderLeft: '2px solid transparent',
     borderBottom: `1px solid ${theme.colors.border.weak}`,
   }),
