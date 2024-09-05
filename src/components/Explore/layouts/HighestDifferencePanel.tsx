@@ -63,9 +63,10 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
                 variant="primary"
                 icon={'search-plus'}
                 fill="text"
-                tooltip={'Add to filters'}
                 onClick={() => model.onAddToFilters()}
-              />
+              >
+                Add to filters
+              </Button>
             </Stack>
 
             <div className={styles.differenceValue}>
