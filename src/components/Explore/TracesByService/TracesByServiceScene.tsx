@@ -178,27 +178,12 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
   private updateQueryRunner(metric: MetricFunction) {
     const selection = this.state.selection;
-    const fromTimerange = (selection?.timeRange?.from || 0) * 1000;
-    const toTimerange = (selection?.timeRange?.to || 0) * 1000;
-
-    const timeRange =
-      fromTimerange || toTimerange
-        ? new SceneTimeRange({
-            from: fromTimerange?.toFixed(0),
-            to: toTimerange?.toFixed(0),
-            value: {
-              from: dateTime(fromTimerange),
-              to: dateTime(toTimerange),
-              raw: { from: dateTime(fromTimerange), to: dateTime(toTimerange) },
-            },
-          })
-        : undefined;
 
     this.setState({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
         queries: [buildQuery(metric, selection)],
-        $timeRange: timeRange,
+        $timeRange: timeRangeFromSelection(selection),
       }),
     });
   }
@@ -325,6 +310,22 @@ export function buildQuery(type: MetricFunction, selection?: ComparisonSelection
     spss: 10,
     filters: [],
   };
+}
+
+function timeRangeFromSelection(selection?: ComparisonSelection) {
+  const fromTimerange = (selection?.timeRange?.from || 0) * 1000;
+  const toTimerange = (selection?.timeRange?.to || 0) * 1000;
+  return fromTimerange && toTimerange
+    ? new SceneTimeRange({
+        from: fromTimerange.toFixed(0),
+        to: toTimerange.toFixed(0),
+        value: {
+          from: dateTime(fromTimerange),
+          to: dateTime(toTimerange),
+          raw: { from: dateTime(fromTimerange), to: dateTime(toTimerange) },
+        },
+      })
+    : undefined;
 }
 
 function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
