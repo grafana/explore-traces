@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field, InputActionMeta } from '@grafana/ui';
-import { ALL, ignoredAttributes, maxOptions, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { ALL, ignoredAttributes, maxOptions, MetricFunction, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 import { AttributesBreakdownScene } from './TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
 import { AttributesComparisonScene } from './TracesByService/Tabs/Breakdown/AttributesComparisonScene';
 import { getFiltersVariable, getMetricVariable } from 'utils/utils';
@@ -44,12 +44,12 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
 
   const radioOptions = radioAttributes
     .filter((op) => {
+      // remove radio options that are in the dropdown
       let checks = !!options.find((o) => o.value === op);
 
-      // if filters (primary signal) has kind key selected, then don't add kind to options 
-      // as you would overwrite it in the query if it's selected
-      if (filtersVariable.state.filters.find((f) => f.key === 'kind')) {
-        checks = checks && op !== 'kind'
+      // remove radio options that are in the filters
+      if (filters.find((f) => f.key === op && (f.operator === '=' || f.operator === '!='))) {
+        return false;
       }
 
       // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options 
