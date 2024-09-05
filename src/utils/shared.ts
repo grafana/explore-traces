@@ -58,6 +58,8 @@ export const ignoredAttributes = [
   'trace:id',
   'traceDuration',
 ];
+// Limit maximum options in select dropdowns for performance reasons
+export const maxOptions = 1000;
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 

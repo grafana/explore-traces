@@ -8,6 +8,7 @@ import { FilterByVariable } from './FilterByVariable';
 import { ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 import { getTraceExplorationScene } from 'utils/utils';
 import { VariableValue } from '@grafana/scenes';
+import { filteredOptions } from '../GroupBySelector';
 
 interface Props {
   filter: AdHocVariableFilter;
@@ -25,8 +26,6 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     isValuesLoading?: boolean;
   }>({});
 
-  // Limit maximum options in select dropdowns for performance reasons
-  const maxOptions = 10000;
   const [keyQuery, setKeyQuery] = useState<string>('');
   const [valueQuery, setValueQuery] = useState<string>('');
 
@@ -57,19 +56,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       return;
     }
 
-    if (keyQuery.length === 0) {
-      return state.keys.slice(0, maxOptions);
-    }
-
-    const queryLowerCase = keyQuery.toLowerCase();
-    return state.keys
-      .filter((tag) => {
-        if (tag.value && tag.value.length > 0) {
-          return tag.value.toLowerCase().includes(queryLowerCase);
-        }
-        return false;
-      })
-      .slice(0, maxOptions);
+    return filteredOptions(state.keys, keyQuery);
   }, [keyQuery, state.keys]);
 
   const valueOptions = useMemo(() => {
@@ -77,19 +64,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       return;
     }
 
-    if (valueQuery.length === 0) {
-      return state.values.slice(0, maxOptions);
-    }
-
-    const queryLowerCase = valueQuery.toLowerCase();
-    return state.values
-      .filter((tag) => {
-        if (tag.value && tag.value.length > 0) {
-          return tag.value.toLowerCase().includes(queryLowerCase);
-        }
-        return false;
-      })
-      .slice(0, maxOptions);
+    return filteredOptions(state.values, valueQuery);
   }, [valueQuery, state.values]);
   
   const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {

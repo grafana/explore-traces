@@ -329,7 +329,6 @@ function getStyles(theme: GrafanaTheme2) {
     controls: css({
       display: 'flex',
       gap: theme.spacing(1),
-      backgroundColor: theme.colors.background.primary,
       zIndex: 3,
     }),
     filters: css({
