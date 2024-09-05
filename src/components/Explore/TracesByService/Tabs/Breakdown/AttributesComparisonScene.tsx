@@ -13,7 +13,7 @@ import {
   SceneQueryRunner,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { getTheme, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
@@ -42,6 +42,7 @@ import {
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 import { computeHighestDifference } from '../../../../../utils/comparison';
+import { AttributesDescription } from './AttributesDescription';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -175,6 +176,20 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
 
     return (
       <div className={styles.container}>
+        <AttributesDescription 
+          desctiption='Attributes are ordered by the difference between the baseline and selection values for each value.'
+          tags={[
+            {
+              label: 'Baseline',
+              color: traceExploration.getMetricFunction() === 'duration' ? BaselineColor : getTheme().visualization.getColorByName('semi-dark-green')
+            },
+            {
+              label: 'Selection',
+              color: traceExploration.getMetricFunction() === 'duration' ? SelectionColor : getTheme().visualization.getColorByName('semi-dark-red')
+            }
+          ]}
+        />
+        
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
@@ -192,22 +207,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
               <body.Selector model={body} />
             </div>
           )}
-        </div>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            <Icon name={'info-circle'} />
-            <div>
-              Attributes are ordered by the difference between the baseline and selection values for each value.
-            </div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.baselineTag} />
-            <div>Baseline</div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.selectionTag} />
-            <div>Selection</div>
-          </div>
         </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
@@ -336,31 +335,6 @@ function getStyles(theme: GrafanaTheme2, metric: MetricFunction) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
-    }),
-    baselineTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: metric === 'duration' ? BaselineColor : theme.visualization.getColorByName('semi-dark-green'),
-    }),
-    selectionTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: metric === 'duration' ? SelectionColor : theme.visualization.getColorByName('semi-dark-red'),
-    }),
-    infoFlex: css({
-      display: 'flex',
-      gap: '16px',
-      alignItems: 'center',
-      padding: '8px',
-    }),
-    tagsFlex: css({
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
     }),
   };
 }
