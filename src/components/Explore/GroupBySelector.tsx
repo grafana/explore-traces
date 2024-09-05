@@ -28,8 +28,9 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
   const useHorizontalLabelSelector = availableWidth > labelSelectorRequiredWidth;
   const controlsContainer = useRef<HTMLDivElement>(null);
 
-  const filtersVariable = getFiltersVariable(model);
-  const metricVariable = getMetricVariable(model);
+  const { filters } = getFiltersVariable(model).useState();
+  const { value: metric } = getMetricVariable(model).useState();
+  const metricValue = metric as MetricFunction;
 
   useResizeObserver({
     ref: controlsContainer,
@@ -53,13 +54,13 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
 
       // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options 
       // as you would overwrite it in the query if it's selected
-      if (filtersVariable.state.filters.find((f) => f.key === 'nestedSetParent')) {
+      if (filters.find((f) => f.key === 'nestedSetParent')) {
         checks = checks && op !== 'rootName' && op !== 'rootServiceName'
       }
 
       // if rate or error rate metric is selected, then don't add status to options
       // as you would overwrite it in the query if it's selected
-      if (metricVariable.state.value === 'rate' || metricVariable.state.value === 'errors') {
+      if (metricValue === 'rate' || metricValue === 'errors') {
         checks = checks && op !== 'status'
       }
 
