@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DashboardCursorSync, GrafanaTheme2, MetricFindValue } from '@grafana/data';
+import { DashboardCursorSync, GrafanaTheme2, MetricFindValue, dateTime } from '@grafana/data';
 import {
   behaviors,
   SceneComponentProps,
@@ -13,6 +13,7 @@ import {
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
   SceneQueryRunner,
+  SceneTimeRange,
 } from '@grafana/scenes';
 
 import { REDPanel } from './REDPanel';
@@ -50,10 +51,6 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
       body: state.body ?? new SceneFlexLayout({ children: [] }),
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery(state.metric as MetricFunction)],
-      }),
       ...state,
     });
 
@@ -69,11 +66,8 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       if (newState.value !== prevState.value) {
         this.setState({
           selection: undefined,
-          $data: new SceneQueryRunner({
-            datasource: explorationDS,
-            queries: [buildQuery(newState.value as MetricFunction)],
-          }),
         }); // clear selection when metric changes and rerun query
+        this.updateQueryRunner(newState.value as MetricFunction);
         this.updateBody();
       }
     });
@@ -91,6 +85,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         this.setActionView('breakdown');
         const groupByVar = getGroupByVariable(this);
         groupByVar.changeValueTo(ALL);
+        this.updateQueryRunner(metricVariable.getValue() as MetricFunction);
       }
     });
 
@@ -98,6 +93,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       this.updateAttributes();
     });
 
+    this.updateQueryRunner(metricVariable.getValue() as MetricFunction);
     this.updateAttributes();
   }
 
@@ -178,6 +174,33 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         this.setState({ actionView: actionViewDef.value });
       }
     }
+  }
+
+  private updateQueryRunner(metric: MetricFunction) {
+    const selection = this.state.selection;
+    const fromTimerange = (selection?.timeRange?.from || 0) * 1000;
+    const toTimerange = (selection?.timeRange?.to || 0) * 1000;
+
+    const timeRange =
+      fromTimerange || toTimerange
+        ? new SceneTimeRange({
+            from: fromTimerange?.toFixed(0),
+            to: toTimerange?.toFixed(0),
+            value: {
+              from: dateTime(fromTimerange),
+              to: dateTime(toTimerange),
+              raw: { from: dateTime(fromTimerange), to: dateTime(toTimerange) },
+            },
+          })
+        : undefined;
+
+    this.setState({
+      $data: new SceneQueryRunner({
+        datasource: explorationDS,
+        queries: [buildQuery(metric, selection)],
+        $timeRange: timeRange,
+      }),
+    });
   }
 
   static Component = ({ model }: SceneComponentProps<TracesByServiceScene>) => {
@@ -269,14 +292,28 @@ function getStyles(theme: GrafanaTheme2) {
 const MAIN_PANEL_HEIGHT = 240;
 export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
-export function buildQuery(type: MetricFunction) {
+export function buildQuery(type: MetricFunction, selection?: ComparisonSelection) {
   let typeQuery = '';
   switch (type) {
     case 'errors':
       typeQuery = ' && status = error';
       break;
     case 'duration':
-      typeQuery = `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}`;
+      if (selection) {
+        const duration = [];
+        if (selection.duration?.from.length) {
+          duration.push(`duration >= ${selection.duration.from}`);
+        }
+        if (selection.duration?.to.length) {
+          duration.push(`duration <= ${selection.duration.to}`);
+        }
+        if (duration.length) {
+          typeQuery += '&& ' + duration.join(' && ');
+        }
+      }
+      if (!typeQuery.length) {
+        typeQuery = `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}`;
+      }
       break;
   }
   return {
