@@ -4,6 +4,7 @@ import { DashboardCursorSync, GrafanaTheme2, MetricFindValue, dateTime } from '@
 import {
   behaviors,
   SceneComponentProps,
+  SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -26,6 +27,7 @@ import {
   ComparisonSelection,
   ALL,
   VAR_LATENCY_THRESHOLD_EXPR,
+  filterStreamingProgressTransformations,
 } from '../../../utils/shared';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { ActionViewType, TabsBarScene, actionViewsDefinitions } from './Tabs/TabsBarScene';
@@ -180,10 +182,13 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const selection = this.state.selection;
 
     this.setState({
-      $data: new SceneQueryRunner({
-        datasource: explorationDS,
-        queries: [buildQuery(metric, selection)],
-        $timeRange: timeRangeFromSelection(selection),
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: explorationDS,
+          queries: [buildQuery(metric, selection)],
+          $timeRange: timeRangeFromSelection(selection),
+        }),
+        transformations: filterStreamingProgressTransformations,
       }),
     });
   }

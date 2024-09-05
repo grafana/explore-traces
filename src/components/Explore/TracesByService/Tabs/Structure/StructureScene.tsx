@@ -14,6 +14,7 @@ import {
 } from '@grafana/scenes';
 import {
   explorationDS,
+  filterStreamingProgressTransformations,
   MetricFunction,
   VAR_FILTERS_EXPR,
   VAR_LATENCY_PARTIAL_THRESHOLD_EXPR,
@@ -49,14 +50,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
           datasource: explorationDS,
           queries: [buildQuery(state.metric as MetricFunction)],
         }),
-        transformations: [
-          {
-            id: 'filterByRefId',
-            options: {
-              exclude: 'streaming-progress',
-            },
-          },
-        ],
+        transformations: filterStreamingProgressTransformations,
       }),
       loading: true,
       ...state,
@@ -363,8 +357,11 @@ const getStyles = (theme: GrafanaTheme2) => {
       flexDirection: 'column',
       gap: theme.spacing.x1,
       // Hide the minimap and header components
-      'div[class*="panel-content"] > div > :not([class*="TraceTimelineViewer"])': {
-        display: 'none',
+      'div[class*="panel-content"] > div': {
+        overflow: 'auto',
+        '> :not([class*="TraceTimelineViewer"])': {
+          display: 'none',
+        },
       },
       // Hide the Span and Resource accordions from span details
       'div[data-testid="span-detail-component"] > :nth-child(4) > :nth-child(1)': {
