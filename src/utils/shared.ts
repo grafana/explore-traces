@@ -77,3 +77,12 @@ export interface DetailsSceneUpdatedPayload {
 export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
 }
+
+export const filterStreamingProgressTransformations = [
+  {
+    id: 'filterByRefId',
+    options: {
+      exclude: 'streaming-progress',
+    },
+  },
+];

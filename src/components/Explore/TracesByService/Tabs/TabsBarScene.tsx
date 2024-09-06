@@ -72,16 +72,16 @@ function breakdownDisplayName(_: MetricFunction) {
 export function structureDisplayName(metric: MetricFunction) {
   switch (metric) {
     case 'rate':
-      return 'Service Structure';
+      return 'Service structure';
     case 'errors':
-      return 'Root Cause Errors';
+      return 'Root cause errors';
     case 'duration':
-      return 'Root Cause Latency';
+      return 'Root cause latency';
   }
 }
 
 function tracesDisplayName(metric: MetricFunction) {
-  return `${metric === 'errors' ? 'Errored' : metric === 'duration' ? 'Slow' : ''} Traces`.trim();
+  return metric === 'errors' ? 'Errored traces' : metric === 'duration' ? 'Slow traces' : 'Traces';
 }
 
 function getStyles(theme: GrafanaTheme2) {
