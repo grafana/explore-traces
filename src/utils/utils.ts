@@ -103,7 +103,7 @@ export function getLatencyPartialThresholdVariable(scene: SceneObject): CustomVa
 export function getMetricVariable(scene: SceneObject): CustomVariable {
   const variable = sceneGraph.lookupVariable(VAR_METRIC, scene);
   if (!(variable instanceof CustomVariable)) {
-    throw new Error('MEtric variable not found');
+    throw new Error('Metric variable not found');
   }
   return variable;
 }
