@@ -14,6 +14,7 @@ import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
+  MetricFunction,
   RESOURCE,
   RESOURCE_ATTR,
   SPAN,
@@ -27,8 +28,9 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene, getTraceExplorationScene } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
+import { AttributesDescription } from './AttributesDescription';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -112,8 +114,32 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
       filteredAttributes = filteredAttributes?.concat(radioAttributesSpan);
     }
 
+    const exploration = getTraceExplorationScene(model);
+    const { value: metric } = exploration.getMetricVariable().useState();
+    const getDescription = (metric: MetricFunction) => {
+      switch (metric) {
+        case 'rate':
+          return 'Attributes are ordered by their rate of requests per second.';
+        case 'errors':
+          return 'Attributes are ordered by their rate of errors per second.';
+        case 'duration':
+          return 'Attributes are ordered by their average duration.';
+        default:
+          throw new Error('Metric not supported');
+      }
+    }
+    const description = getDescription(metric as MetricFunction);
+
     return (
       <div className={styles.container}>
+        <AttributesDescription 
+          desctiption={description}
+          tags={metric === 'duration' ? [] : [
+            { label: 'Rate', color: 'green' }, 
+            { label: 'Error', color: 'red' }
+          ]}
+        />
+
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
