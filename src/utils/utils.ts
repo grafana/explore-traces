@@ -19,6 +19,7 @@ import {
   VAR_GROUPBY,
   VAR_LATENCY_PARTIAL_THRESHOLD,
   VAR_LATENCY_THRESHOLD,
+  VAR_METRIC,
 } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
@@ -95,6 +96,14 @@ export function getLatencyPartialThresholdVariable(scene: SceneObject): CustomVa
   const variable = sceneGraph.lookupVariable(VAR_LATENCY_PARTIAL_THRESHOLD, scene);
   if (!(variable instanceof CustomVariable)) {
     throw new Error('Partial latency threshold variable not found');
+  }
+  return variable;
+}
+
+export function getMetricVariable(scene: SceneObject): CustomVariable {
+  const variable = sceneGraph.lookupVariable(VAR_METRIC, scene);
+  if (!(variable instanceof CustomVariable)) {
+    throw new Error('Metric variable not found');
   }
   return variable;
 }

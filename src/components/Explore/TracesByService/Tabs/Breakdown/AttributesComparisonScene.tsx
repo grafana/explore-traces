@@ -173,7 +173,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     const traceExploration = getTraceExplorationScene(model);
     const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles, traceExploration.getMetricFunction());
-
+    
     return (
       <div className={styles.container}>
         <AttributesDescription 
@@ -199,6 +199,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 value={variable.getValueText()}
                 onChange={model.onChange}
                 showAll={true}
+                model={model}
               />
             </div>
           )}

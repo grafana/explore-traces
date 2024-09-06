@@ -159,6 +159,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
                   radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
                   value={variable.getValueText()}
                   onChange={model.onChange}
+                  model={model}
                 />
               </div>
             </div>

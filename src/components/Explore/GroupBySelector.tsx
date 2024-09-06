@@ -4,7 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field, InputActionMeta } from '@grafana/ui';
-import { ALL, ignoredAttributes, maxOptions, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { ALL, ignoredAttributes, maxOptions, MetricFunction, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { AttributesBreakdownScene } from './TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
+import { AttributesComparisonScene } from './TracesByService/Tabs/Breakdown/AttributesComparisonScene';
+import { getFiltersVariable, getMetricVariable } from 'utils/utils';
 
 type Props = {
   options: Array<SelectableValue<string>>;
@@ -12,9 +15,10 @@ type Props = {
   value?: string;
   onChange: (label: string) => void;
   showAll?: boolean;
+  model: AttributesBreakdownScene | AttributesComparisonScene;
 };
 
-export function GroupBySelector({ options, radioAttributes, value, onChange, showAll = false }: Props) {
+export function GroupBySelector({ options, radioAttributes, value, onChange, showAll = false, model }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
   const [selectQuery, setSelectQuery] = useState<string>('');
@@ -22,8 +26,11 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
   const [labelSelectorRequiredWidth, setLabelSelectorRequiredWidth] = useState<number>(0);
   const [availableWidth, setAvailableWidth] = useState<number>(0);
   const useHorizontalLabelSelector = availableWidth > labelSelectorRequiredWidth;
-
   const controlsContainer = useRef<HTMLDivElement>(null);
+
+  const { filters } = getFiltersVariable(model).useState();
+  const { value: metric } = getMetricVariable(model).useState();
+  const metricValue = metric as MetricFunction;
 
   useResizeObserver({
     ref: controlsContainer,
@@ -36,7 +43,29 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
   });
 
   const radioOptions = radioAttributes
-    .filter((attr) => !!options.find((op) => op.value === attr))
+    .filter((op) => {
+      // remove radio options that are in the dropdown
+      let checks = !!options.find((o) => o.value === op);
+
+      // remove radio options that are in the filters
+      if (filters.find((f) => f.key === op && (f.operator === '=' || f.operator === '!='))) {
+        return false;
+      }
+
+      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options 
+      // as you would overwrite it in the query if it's selected
+      if (filters.find((f) => f.key === 'nestedSetParent')) {
+        checks = checks && op !== 'rootName' && op !== 'rootServiceName'
+      }
+
+      // if rate or error rate metric is selected, then don't add status to options
+      // as you would overwrite it in the query if it's selected
+      if (metricValue === 'rate' || metricValue === 'errors') {
+        checks = checks && op !== 'status'
+      }
+
+      return checks
+    })
     .map((attribute) => ({
       label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''),
       text: attribute,
