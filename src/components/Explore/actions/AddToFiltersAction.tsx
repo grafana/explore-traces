@@ -4,6 +4,7 @@ import { DataFrame } from '@grafana/data';
 import { SceneObjectState, SceneObjectBase, SceneComponentProps, AdHocFiltersVariable } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 import { getFiltersVariable, getLabelValue } from '../../../utils/utils';
+import { DATABASE_CALLS_KEY } from 'pages/Explore/primary-signals';
 
 export interface AddToFiltersActionState extends SceneObjectState {
   frame: DataFrame;
@@ -47,7 +48,7 @@ export const addToFilters = (variable: AdHocFiltersVariable, label: string, valu
   // ensure we set the new filter with latest value
   // and remove any existing filter for the same key
   // and also keep span.db.name as it is a primary filter
-  const filtersWithoutNew = variable.state.filters.filter((f) => f.key === 'span.db.name' || f.key !== label);
+  const filtersWithoutNew = variable.state.filters.filter((f) => f.key === DATABASE_CALLS_KEY || f.key !== label);
 
   variable.setState({
     filters: [
