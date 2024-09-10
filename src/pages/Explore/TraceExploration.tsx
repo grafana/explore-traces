@@ -71,7 +71,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
-      controls: state.controls ?? [new SceneTimePicker({ isOnCanvas: true }), new SceneRefreshPicker({})],
+      controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}).getRef(),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
