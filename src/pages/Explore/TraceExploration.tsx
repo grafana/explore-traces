@@ -21,7 +21,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Badge, Icon, Stack, useStyles2 } from '@grafana/ui';
+import { Badge, Button, Dropdown, Icon, Menu, Stack, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import {
@@ -71,7 +71,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
-      controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
+      controls: state.controls ?? [new SceneTimePicker({ isOnCanvas: true }), new SceneRefreshPicker({})],
       body: buildSplitLayout(),
       detailsScene: new DetailsScene({}).getRef(),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
@@ -212,9 +212,30 @@ export class TraceExplorationScene extends SceneObjectBase {
     const traceExploration = getTraceExplorationScene(model);
     const { controls, topScene } = traceExploration.useState();
     const styles = useStyles2(getStyles);
+    const [menuVisible, setMenuVisible] = React.useState(false);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = getFiltersVariable(traceExploration);
+
+    const menu = 
+    <Menu>
+      <div className={styles.menu}>
+        <Menu.Item 
+          label="Give feedback" 
+          ariaLabel="Give feedback" 
+          icon={"comment-alt-message"}
+          url='https://forms.gle/52nPMeDvZ4iZD9iV8'
+          target='_blank'
+        />
+        <Menu.Item 
+          label="Documentation" 
+          ariaLabel="Documentation" 
+          icon={"external-link-alt"} 
+          url='https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/'
+          target='_blank'
+        />
+      </div>
+    </Menu>;
 
     return (
       <div className={styles.container}>
@@ -225,29 +246,27 @@ export class TraceExplorationScene extends SceneObjectBase {
               <dsVariable.Component model={dsVariable} />
             </Stack>
           )}
-          <div className={styles.controls}>
-            <div className={styles.feedbackContainer}>
-              <Icon name="comment-alt-message" />
-              <a
-                href="https://forms.gle/52nPMeDvZ4iZD9iV8"
-                className={styles.feedback}
-                title="Share your thoughts about the Explore Traces App in Grafana."
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Give feedback
-              </a>
+          <div className={styles.previewAndHelpMenuContainer}>
+            <div className={styles.preview}>
+              <Badge text='&nbsp;Preview' color='blue' icon='rocket' tooltip={compositeVersion} />
             </div>
 
-            <div className={styles.previewWrapper}>
-              <Badge text={'Preview'} color={'blue'} icon={'rocket'} tooltip={compositeVersion} />
-            </div>
+            <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
+              <Button variant="secondary" icon='info-circle'
+                >Need help 
+                <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size='lg'/>
+              </Button>
+            </Dropdown>
+          </div>
+        </Stack>
+        <div className={styles.filterAndControlsContainer}>
+          <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
+          <div className={styles.controls}>
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
           </div>
-        </Stack>
-        <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
+        </div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
     );
@@ -326,37 +345,45 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(1),
     }),
-    controls: css({
+    datasourceLabel: css({
+      fontSize: '12px',
+    }),
+    previewAndHelpMenuContainer: css({
       display: 'flex',
       gap: theme.spacing(1),
       zIndex: 3,
     }),
-    filters: css({
-      backgroundColor: theme.colors.background.primary,
-      position: 'sticky',
-      top: `-${theme.spacing(2)}`,
-      zIndex: 2,
+    menu: css({
+      'svg, span': {
+        color: theme.colors.text.link,
+      }
     }),
-    previewWrapper: css({
+    preview: css({
       display: 'flex',
       alignItems: 'center',
       padding: '0 8px',
-    }),
-    feedbackContainer: css({
-      color: theme.colors.text.link,
-      display: 'flex',
-      alignItems: 'center',
-    }),
-    feedback: css({
-      margin: '6px',
-      color: theme.colors.text.link,
-      fontSize: theme.typography.bodySmall.fontSize,
-      '&:hover': {
-        textDecoration: 'underline',
+
+      '> div:first-child': {
+        padding: '5.5px',
       },
     }),
-    datasourceLabel: css({
-      fontSize: '12px',
+    helpIcon: css({
+      marginLeft: theme.spacing(1),
+    }),
+    filterAndControlsContainer: css({
+      backgroundColor: theme.colors.background.primary,
+      display: 'flex',
+      position: 'sticky',
+      top: `-${theme.spacing(2)}`,
+      zIndex: 3,
+    }),
+    filters: css({
+      display: 'contents',
+    }),
+    controls: css({
+      display: 'flex',
+      gap: theme.spacing(1),
+      marginLeft: theme.spacing(1),
     }),
   };
 }
