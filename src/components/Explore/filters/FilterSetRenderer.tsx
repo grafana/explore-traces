@@ -83,7 +83,7 @@ export function FilterSetRenderer({ model }: SceneComponentProps<FilterByVariabl
 
 const getStyles = (theme: GrafanaTheme2) => ({
   container: css({
-    height: '30px',
+    height: '32px',
     display: 'flex',
     border: `1px solid ${theme.colors.border.weak}`,
     alignItems: 'center',
@@ -96,5 +96,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
   }),
   clearFilters: css({
     fontSize: 12,
+    marginRight: '2px',
   }),
 });

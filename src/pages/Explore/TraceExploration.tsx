@@ -21,7 +21,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Badge, Icon, Stack, useStyles2 } from '@grafana/ui';
+import { Badge, Button, Dropdown, Icon, Menu, Stack, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import {
@@ -212,42 +212,59 @@ export class TraceExplorationScene extends SceneObjectBase {
     const traceExploration = getTraceExplorationScene(model);
     const { controls, topScene } = traceExploration.useState();
     const styles = useStyles2(getStyles);
+    const [menuVisible, setMenuVisible] = React.useState(false);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = getFiltersVariable(traceExploration);
 
+    const menu = 
+    <Menu>
+      <div className={styles.menu}>
+        <Menu.Item 
+          label="Give feedback" 
+          ariaLabel="Give feedback" 
+          icon={"comment-alt-message"}
+          url='https://forms.gle/52nPMeDvZ4iZD9iV8'
+          target='_blank'
+        />
+        <Menu.Item 
+          label="Documentation" 
+          ariaLabel="Documentation" 
+          icon={"external-link-alt"} 
+          url='https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/'
+          target='_blank'
+        />
+      </div>
+    </Menu>;
+
     return (
       <div className={styles.container}>
-        <Stack gap={2} justifyContent={'space-between'}>
-          {dsVariable && (
-            <Stack gap={1} alignItems={'center'}>
-              <div className={styles.datasourceLabel}>Data source</div>
-              <dsVariable.Component model={dsVariable} />
-            </Stack>
-          )}
-          <div className={styles.controls}>
-            <div className={styles.feedbackContainer}>
-              <Icon name="comment-alt-message" />
-              <a
-                href="https://forms.gle/52nPMeDvZ4iZD9iV8"
-                className={styles.feedback}
-                title="Share your thoughts about the Explore Traces App in Grafana."
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Give feedback
-              </a>
-            </div>
+        <div className={styles.headerContainer}>
+          <Stack gap={2} justifyContent={'space-between'}>
+            {dsVariable && (
+              <Stack gap={1} alignItems={'center'}>
+                <div className={styles.datasourceLabel}>Data source</div>
+                <dsVariable.Component model={dsVariable} />
+              </Stack>
+            )}
+            <div className={styles.controls}>
+              <div className={styles.preview}>
+                <Badge text='&nbsp;Preview' color='blue' icon='rocket' tooltip={compositeVersion} />
+              </div>
 
-            <div className={styles.previewWrapper}>
-              <Badge text={'Preview'} color={'blue'} icon={'rocket'} tooltip={compositeVersion} />
+              <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
+                <Button variant="secondary" icon='info-circle'
+                  >Need help 
+                  <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size='lg'/>
+                </Button>
+              </Dropdown>
+              {controls.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
             </div>
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-          </div>
-        </Stack>
+          </Stack>
         <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
+        </div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
     );
@@ -316,7 +333,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
       minHeight: '100%',
       flexDirection: 'column',
-      padding: theme.spacing(2),
+      padding: `0 ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(2)}`,
       overflow: 'auto' /* Needed for sticky positioning */,
       height: '1px' /* Needed for sticky positioning */,
     }),
@@ -326,37 +343,42 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(1),
     }),
+    headerContainer: css({
+      backgroundColor: theme.colors.background.canvas,
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'sticky',
+      top: 0,
+      zIndex: 3,
+      padding: `${theme.spacing(1.5)} 0`,
+    }),
+    datasourceLabel: css({
+      fontSize: '12px',
+    }),
     controls: css({
       display: 'flex',
       gap: theme.spacing(1),
       zIndex: 3,
     }),
-    filters: css({
-      backgroundColor: theme.colors.background.primary,
-      position: 'sticky',
-      top: `-${theme.spacing(2)}`,
-      zIndex: 2,
-    }),
-    previewWrapper: css({
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 8px',
-    }),
-    feedbackContainer: css({
-      color: theme.colors.text.link,
-      display: 'flex',
-      alignItems: 'center',
-    }),
-    feedback: css({
-      margin: '6px',
-      color: theme.colors.text.link,
-      fontSize: theme.typography.bodySmall.fontSize,
-      '&:hover': {
-        textDecoration: 'underline',
+    menu: css({
+      'svg, span': {
+        color: theme.colors.text.link,
       },
     }),
-    datasourceLabel: css({
-      fontSize: '12px',
+    preview: css({
+      display: 'flex',
+      alignItems: 'center',
+
+      '> div:first-child': {
+        padding: '5.5px',
+      },
+    }),
+    helpIcon: css({
+      marginLeft: theme.spacing(1),
+    }),
+    filters: css({
+      backgroundColor: theme.colors.background.primary,
+      paddingTop: theme.spacing(1),
     }),
   };
 }
