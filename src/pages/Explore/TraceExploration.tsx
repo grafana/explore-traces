@@ -239,33 +239,31 @@ export class TraceExplorationScene extends SceneObjectBase {
 
     return (
       <div className={styles.container}>
-        <Stack gap={2} justifyContent={'space-between'}>
-          {dsVariable && (
-            <Stack gap={1} alignItems={'center'}>
-              <div className={styles.datasourceLabel}>Data source</div>
-              <dsVariable.Component model={dsVariable} />
-            </Stack>
-          )}
-          <div className={styles.previewAndHelpMenuContainer}>
-            <div className={styles.preview}>
-              <Badge text='&nbsp;Preview' color='blue' icon='rocket' tooltip={compositeVersion} />
-            </div>
+        <div className={styles.headerContainer}>
+          <Stack gap={2} justifyContent={'space-between'}>
+            {dsVariable && (
+              <Stack gap={1} alignItems={'center'}>
+                <div className={styles.datasourceLabel}>Data source</div>
+                <dsVariable.Component model={dsVariable} />
+              </Stack>
+            )}
+            <div className={styles.controls}>
+              <div className={styles.preview}>
+                <Badge text='&nbsp;Preview' color='blue' icon='rocket' tooltip={compositeVersion} />
+              </div>
 
-            <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
-              <Button variant="secondary" icon='info-circle'
-                >Need help 
-                <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size='lg'/>
-              </Button>
-            </Dropdown>
-          </div>
-        </Stack>
-        <div className={styles.filterAndControlsContainer}>
-          <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
-          <div className={styles.controls}>
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-          </div>
+              <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
+                <Button variant="secondary" icon='info-circle'
+                  >Need help 
+                  <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size='lg'/>
+                </Button>
+              </Dropdown>
+              {controls.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
+            </div>
+          </Stack>
+        <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
         </div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>
@@ -335,7 +333,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
       minHeight: '100%',
       flexDirection: 'column',
-      padding: theme.spacing(2),
+      padding: `0 ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(2)}`,
       overflow: 'auto' /* Needed for sticky positioning */,
       height: '1px' /* Needed for sticky positioning */,
     }),
@@ -345,10 +343,19 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(1),
     }),
+    headerContainer: css({
+      backgroundColor: theme.colors.background.canvas,
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'sticky',
+      top: 0,
+      zIndex: 3,
+      paddingTop: theme.spacing(2),
+    }),
     datasourceLabel: css({
       fontSize: '12px',
     }),
-    previewAndHelpMenuContainer: css({
+    controls: css({
       display: 'flex',
       gap: theme.spacing(1),
       zIndex: 3,
@@ -356,12 +363,11 @@ function getStyles(theme: GrafanaTheme2) {
     menu: css({
       'svg, span': {
         color: theme.colors.text.link,
-      }
+      },
     }),
     preview: css({
       display: 'flex',
       alignItems: 'center',
-      padding: '0 8px',
 
       '> div:first-child': {
         padding: '5.5px',
@@ -370,20 +376,9 @@ function getStyles(theme: GrafanaTheme2) {
     helpIcon: css({
       marginLeft: theme.spacing(1),
     }),
-    filterAndControlsContainer: css({
-      backgroundColor: theme.colors.background.primary,
-      display: 'flex',
-      position: 'sticky',
-      top: `-${theme.spacing(2)}`,
-      zIndex: 3,
-    }),
     filters: css({
-      display: 'contents',
-    }),
-    controls: css({
-      display: 'flex',
-      gap: theme.spacing(1),
-      marginLeft: theme.spacing(1),
+      backgroundColor: theme.colors.background.primary,
+      paddingTop: theme.spacing(1),
     }),
   };
 }
