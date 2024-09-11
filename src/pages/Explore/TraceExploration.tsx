@@ -350,7 +350,7 @@ function getStyles(theme: GrafanaTheme2) {
       position: 'sticky',
       top: 0,
       zIndex: 3,
-      paddingTop: theme.spacing(2),
+      padding: `${theme.spacing(1.5)} 0`,
     }),
     datasourceLabel: css({
       fontSize: '12px',
