@@ -5,7 +5,6 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
-  SceneObject,
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
@@ -15,7 +14,6 @@ import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
 import { barsPanelConfig } from '../panels/barsPanel';
-import { ComparisonControl } from './ComparisonControl';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
@@ -33,7 +31,6 @@ import { buildHistogramQuery } from '../queries/histogram';
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
   metric: MetricFunction;
-  actions?: SceneObject[];
   yBuckets?: number[];
 }
 
@@ -41,15 +38,6 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   constructor(state: RateMetricsPanelState) {
     super({
       yBuckets: [],
-      actions:
-        state.metric === 'duration'
-          ? []
-          : [
-              new ComparisonControl({
-                selection: { query: 'status = error' },
-                buttonLabel: 'Investigate errors',
-              }),
-            ],
       ...state,
     });
 
@@ -119,14 +107,9 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                     y: { from: minBucket - 0.5, to: yBuckets.length - 0.5 },
                   };
 
-                  this.setState({
-                    actions: [
-                      new ComparisonControl({
-                        selection,
-                        buttonLabel: 'Investigate slowest traces',
-                      }),
-                    ],
-                  });
+                  if (!parent.state.selection?.duration) {
+                    parent.setState({ selection });
+                  }
                 }
               }
 
@@ -234,7 +217,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<REDPanel>) => {
-    const { panel, metric, actions } = model.useState();
+    const { panel, metric } = model.useState();
     const styles = useStyles2(getStyles);
 
     if (!panel) {
@@ -278,12 +261,6 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
               <span>{getTitle()}</span>
             </div>
             {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
-          </div>
-
-          <div className={styles.actions}>
-            {actions?.map((action) => (
-              <action.Component model={action} key={action.state.key} />
-            ))}
           </div>
         </div>
         <panel.Component model={panel} />
@@ -329,11 +306,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     titleRadioWrapper: css({
       display: 'flex',
-    }),
-    actions: css({
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
     }),
     subtitle: css({
       display: 'flex',

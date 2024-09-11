@@ -1,4 +1,5 @@
 import { DataFrame } from '@grafana/data';
+import { ComparisonSelection, MetricFunction } from './shared';
 
 export const computeHighestDifference = (frame: DataFrame) => {
   const baselineField = frame.fields.find((f) => f.name === 'Baseline');
@@ -16,4 +17,11 @@ export const computeHighestDifference = (frame: DataFrame) => {
   }
 
   return { maxDifference, maxDifferenceIndex };
+};
+
+export const getDefaultSelectionForMetric = (metric: MetricFunction): ComparisonSelection | undefined => {
+  if (metric === 'duration') {
+    return undefined;
+  }
+  return { query: 'status = error' };
 };
