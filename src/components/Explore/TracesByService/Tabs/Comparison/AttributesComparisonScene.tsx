@@ -16,14 +16,7 @@ import {
 import { getTheme, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import {
-  VAR_FILTERS,
-  explorationDS,
-  VAR_FILTERS_EXPR,
-  ALL,
-  radioAttributesSpan,
-  MetricFunction,
-} from '../../../../../utils/shared';
+import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL, radioAttributesSpan } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -42,7 +35,8 @@ import {
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 import { computeHighestDifference } from '../../../../../utils/comparison';
-import { AttributesDescription } from './AttributesDescription';
+import { AttributesDescription } from '../Breakdown/AttributesDescription';
+import { isEqual } from 'lodash';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -65,14 +59,21 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private _onActivate() {
     const variable = getGroupByVariable(this);
 
+    variable.changeValueTo(ALL);
+
     this.updateData();
 
-    variable.subscribeToState(() => {
-      this.setBody(variable);
+    variable.subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
+        this.setBody(variable);
+      }
     });
 
-    getTraceByServiceScene(this).subscribeToState(() => {
-      this.setBody(variable);
+    getTraceByServiceScene(this).subscribeToState((newState, prevState) => {
+      if (!isEqual(newState.selection, prevState.selection)) {
+        this.updateData();
+        this.setBody(variable);
+      }
     });
 
     sceneGraph.getTimeRange(this).subscribeToState(() => {
@@ -172,24 +173,30 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     const variable = getGroupByVariable(model);
     const traceExploration = getTraceExplorationScene(model);
     const { attributes } = getTraceByServiceScene(model).useState();
-    const styles = useStyles2(getStyles, traceExploration.getMetricFunction());
-    
+    const styles = useStyles2(getStyles);
+
     return (
       <div className={styles.container}>
-        <AttributesDescription 
-          desctiption='Attributes are ordered by the difference between the baseline and selection values for each value.'
+        <AttributesDescription
+          desctiption="Attributes are ordered by the difference between the baseline and selection values for each value."
           tags={[
             {
               label: 'Baseline',
-              color: traceExploration.getMetricFunction() === 'duration' ? BaselineColor : getTheme().visualization.getColorByName('semi-dark-green')
+              color:
+                traceExploration.getMetricFunction() === 'duration'
+                  ? BaselineColor
+                  : getTheme().visualization.getColorByName('semi-dark-green'),
             },
             {
               label: 'Selection',
-              color: traceExploration.getMetricFunction() === 'duration' ? SelectionColor : getTheme().visualization.getColorByName('semi-dark-red')
-            }
+              color:
+                traceExploration.getMetricFunction() === 'duration'
+                  ? SelectionColor
+                  : getTheme().visualization.getColorByName('semi-dark-red'),
+            },
           ]}
         />
-        
+
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
@@ -306,7 +313,7 @@ function getValueForMetaType(frames: DataFrame[], metaType: string) {
   }, 1);
 }
 
-function getStyles(theme: GrafanaTheme2, metric: MetricFunction) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       flexGrow: 1,

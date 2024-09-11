@@ -6,7 +6,7 @@ import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { Select, RadioButtonGroup, useStyles2, useTheme2, measureText, Field, InputActionMeta } from '@grafana/ui';
 import { ALL, ignoredAttributes, maxOptions, MetricFunction, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
 import { AttributesBreakdownScene } from './TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
-import { AttributesComparisonScene } from './TracesByService/Tabs/Breakdown/AttributesComparisonScene';
+import { AttributesComparisonScene } from './TracesByService/Tabs/Comparison/AttributesComparisonScene';
 import { getFiltersVariable, getMetricVariable } from 'utils/utils';
 
 type Props = {
@@ -52,19 +52,19 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
         return false;
       }
 
-      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options 
+      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options
       // as you would overwrite it in the query if it's selected
       if (filters.find((f) => f.key === 'nestedSetParent')) {
-        checks = checks && op !== 'rootName' && op !== 'rootServiceName'
+        checks = checks && op !== 'rootName' && op !== 'rootServiceName';
       }
 
       // if rate or error rate metric is selected, then don't add status to options
       // as you would overwrite it in the query if it's selected
       if (metricValue === 'rate' || metricValue === 'errors') {
-        checks = checks && op !== 'status'
+        checks = checks && op !== 'status';
       }
 
-      return checks
+      return checks;
     })
     .map((attribute) => ({
       label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''),
@@ -183,4 +183,4 @@ export const filteredOptions = (options: Array<SelectableValue<string>>, query: 
       return false;
     })
     .slice(0, maxOptions);
-}
+};

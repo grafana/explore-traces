@@ -37,6 +37,7 @@ import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '..
 import { MiniREDPanel } from './MiniREDPanel';
 import { Icon, LinkButton, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
+import { getDefaultSelectionForMetric } from '../../../utils/comparison';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -66,9 +67,10 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     const metricVariable = exploration.getMetricVariable();
     metricVariable.subscribeToState((newState, prevState) => {
       if (newState.value !== prevState.value) {
-        this.setState({
-          selection: undefined,
-        }); // clear selection when metric changes and rerun query
+        const selection = getDefaultSelectionForMetric(newState.value as MetricFunction);
+        if (selection) {
+          this.setState({ selection });
+        }
         this.updateQueryRunner(newState.value as MetricFunction);
         this.updateBody();
       }
@@ -83,8 +85,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       }
 
       // Set group by to All when starting a comparison
-      if (newState.selection && newState.selection !== prevState.selection) {
-        this.setActionView('breakdown');
+      if (!isEqual(newState.selection, prevState.selection)) {
         const groupByVar = getGroupByVariable(this);
         groupByVar.changeValueTo(ALL);
         this.updateQueryRunner(metricVariable.getValue() as MetricFunction);

@@ -9,6 +9,7 @@ import { buildSpansScene } from './Spans/SpansScene';
 import { buildStructureScene } from './Structure/StructureScene';
 import { buildBreakdownScene } from './Breakdown/BreakdownScene';
 import { MetricFunction } from 'utils/shared';
+import { buildComparisonScene } from './Comparison/ComparisonScene';
 
 interface ActionViewDefinition {
   displayName: (metric: MetricFunction) => string;
@@ -16,9 +17,10 @@ interface ActionViewDefinition {
   getScene: (metric: MetricFunction) => SceneObject;
 }
 
-export type ActionViewType = 'traceList' | 'breakdown' | 'structure';
+export type ActionViewType = 'traceList' | 'breakdown' | 'structure' | 'comparison';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: breakdownDisplayName, value: 'breakdown', getScene: buildBreakdownScene },
+  { displayName: comparisonDisplayName, value: 'comparison', getScene: buildComparisonScene },
   { displayName: structureDisplayName, value: 'structure', getScene: buildStructureScene },
   {
     displayName: tracesDisplayName,
@@ -67,6 +69,10 @@ export class TabsBarScene extends SceneObjectBase<TabsBarSceneState> {
 
 function breakdownDisplayName(_: MetricFunction) {
   return 'Breakdown';
+}
+
+function comparisonDisplayName(_: MetricFunction) {
+  return 'Comparison';
 }
 
 export function structureDisplayName(metric: MetricFunction) {
