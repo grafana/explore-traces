@@ -62,7 +62,10 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   public _onActivate() {
     this.state.$data?.subscribeToState((state) => {
       this.setState({ loading: state.data?.state === LoadingState.Loading });
-      if (state.data?.state === LoadingState.Done && state.data?.series.length) {
+      if (
+        (state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Streaming) &&
+        state.data?.series.length
+      ) {
         const frame = state.data?.series[0].fields[0].values[0];
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
@@ -240,27 +243,30 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     let emptyMsg = '';
     switch (metric) {
       case 'rate':
-        description =
+        description = (
           <>
             <div>Analyse the service structure of the traces that match the current filters.</div>
             <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
-          </>;
+          </>
+        );
         emptyMsg = 'server';
         break;
       case 'errors':
-        description =
+        description = (
           <>
             <div>Analyse the errors structure of the traces that match the current filters.</div>
             <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
-          </>;
+          </>
+        );
         emptyMsg = 'error';
         break;
       case 'duration':
-        description =
+        description = (
           <>
             <div>Analyse the structure of slow spans from the traces that match the current filters.</div>
             <div>Each panel represents an aggregate view compiled using spans from multiple traces.</div>
-          </>;
+          </>
+        );
         emptyMsg = 'slow';
         break;
     }
@@ -350,8 +356,8 @@ function buildQuery(metric: MetricFunction) {
     }} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
-    limit: 400,
-    spss: 40,
+    limit: 200,
+    spss: 20,
     filters: [],
   };
 }

@@ -4,7 +4,7 @@ export function nestedSetLeft(span: Span): number {
   if (span.attributes) {
     for (const a of span.attributes) {
       if (a.key === 'nestedSetLeft') {
-        return parseInt(a.value.intValue || '0', 10);
+        return parseInt(a.value.intValue || a.value.Value?.int_value || '0', 10);
       }
     }
   }
@@ -16,7 +16,7 @@ export function nestedSetRight(span: Span): number {
   if (span.attributes) {
     for (const a of span.attributes) {
       if (a.key === 'nestedSetRight') {
-        return parseInt(a.value.intValue || '0', 10);
+        return parseInt(a.value.intValue || a.value.Value?.int_value || '0', 10);
       }
     }
   }
