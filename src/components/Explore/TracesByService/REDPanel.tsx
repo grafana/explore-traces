@@ -133,7 +133,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                     new ComparisonControl({
                       selection: { query: 'status = error' },
                       buttonLabel: 'Investigate errors',
-                      buttonTooltip: `Compares ${tooltipSignal} with errors (selection) to ${tooltipSignal} without errors (baseline)`,
+                      buttonTooltip: `Compares errored ${tooltipSignal} (selection) with non-errored ${tooltipSignal} (baseline)`,
                     })
                   ],
                 });
