@@ -9,13 +9,14 @@ import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '..
 import { ComparisonSelection } from '../../../utils/shared';
 
 export interface ComparisonControlState extends SceneObjectState {
-  selection?: ComparisonSelection;
-  buttonLabel?: string;
+  selection: ComparisonSelection;
+  buttonLabel: string;
+  buttonTooltip: string;
 }
 
 export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
-  public constructor({ selection, buttonLabel }: ComparisonControlState) {
-    super({ selection, buttonLabel });
+  public constructor({ selection, buttonLabel, buttonTooltip }: ComparisonControlState) {
+    super({ selection, buttonLabel, buttonTooltip });
   }
 
   public startInvestigation = () => {
@@ -34,7 +35,7 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {
-    const { buttonLabel } = model.useState();
+    const { buttonLabel, buttonTooltip } = model.useState();
     const { selection } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
 
@@ -46,6 +47,7 @@ export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
           fill="solid"
           icon={selection ? 'times' : 'bolt'}
           onClick={selection ? model.stopInvestigation : model.startInvestigation}
+          tooltip={buttonTooltip}
         >
           {selection ? 'Clear investigation' : buttonLabel}
         </Button>

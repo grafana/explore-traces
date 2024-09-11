@@ -1,11 +1,12 @@
 import { SelectableValue } from '@grafana/data';
 
+export const FULL_TRACES_VALUE = 'full_traces';
 export const DATABASE_CALLS_KEY = 'span.db.name';
 
 export const primarySignalOptions: Array<SelectableValue<string>> = [
   {
     label: 'Full traces',
-    value: 'full_traces',
+    value: FULL_TRACES_VALUE,
     filter: { key: 'nestedSetParent', operator: '<', value: '0' },
     description: 'Inspect full journeys of requests across services',
   },

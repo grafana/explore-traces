@@ -24,11 +24,13 @@ import {
   getLatencyPartialThresholdVariable,
   getLatencyThresholdVariable,
   getTraceByServiceScene,
+  getTraceExplorationScene,
 } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
 import { SelectionColor } from '../layouts/allComparison';
 import { buildHistogramQuery } from '../queries/histogram';
+import { FULL_TRACES_VALUE } from 'pages/Explore/primary-signals';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -41,15 +43,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   constructor(state: RateMetricsPanelState) {
     super({
       yBuckets: [],
-      actions:
-        state.metric === 'duration'
-          ? []
-          : [
-              new ComparisonControl({
-                selection: { query: 'status = error' },
-                buttonLabel: 'Investigate errors',
-              }),
-            ],
+      actions: [],
       ...state,
     });
 
@@ -76,6 +70,10 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                 }),
               });
             } else {
+              const exploration = getTraceExplorationScene(this);
+              const primarySignal = exploration.state.primarySignal;
+              const tooltipSignal = primarySignal === FULL_TRACES_VALUE ? 'traces' : 'spans';
+
               let yBuckets: number[] | undefined = [];
               if (this.isDuration()) {
                 yBuckets = data.state.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
@@ -124,10 +122,21 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                       new ComparisonControl({
                         selection,
                         buttonLabel: 'Investigate slowest traces',
+                        buttonTooltip: `Compares slowest ${tooltipSignal} (selection) with non-slowest ${tooltipSignal} (baseline)`,
                       }),
                     ],
                   });
                 }
+              } else {
+                this.setState({
+                  actions: [
+                    new ComparisonControl({
+                      selection: { query: 'status = error' },
+                      buttonLabel: 'Investigate errors',
+                      buttonTooltip: `Compares ${tooltipSignal} with errors (selection) to ${tooltipSignal} without errors (baseline)`,
+                    })
+                  ],
+                });
               }
 
               // update panel
