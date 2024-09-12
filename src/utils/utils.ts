@@ -3,11 +3,11 @@ import {
   AdHocFiltersVariable,
   CustomVariable,
   DataSourceVariable,
-  getUrlSyncManager,
   sceneGraph,
   SceneObject,
   SceneObjectUrlValues,
   SceneTimeRange,
+  sceneUtils,
 } from '@grafana/scenes';
 
 import { TraceExploration } from '../pages/Explore';
@@ -32,7 +32,7 @@ export function newTracesExploration(initialDS?: string): TraceExploration {
 }
 
 export function getUrlForExploration(exploration: TraceExploration) {
-  const params = getUrlSyncManager().getUrlState(exploration);
+  const params = sceneUtils.getUrlState(exploration);
   return getUrlForValues(params);
 }
 
