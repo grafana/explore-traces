@@ -108,7 +108,7 @@ To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 #### Install the Explore Traces plugin
 
 Explore Traces is distributed as a Grafana Plugin.
-You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-pyroscope-app/).
+You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-exploretraces-app/).
 
 <!-- This is true for the other plugins. Will this be true for Explore Traces?
 {{< admonition type="note" >}}
