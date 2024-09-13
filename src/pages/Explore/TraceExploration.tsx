@@ -384,9 +384,6 @@ function getStyles(theme: GrafanaTheme2) {
         padding: '5.5px',
       },
     }),
-    hand: css({
-      cursor: 'pointer',
-    }),
     tooltip: css({
       fontSize: '14px',
       lineHeight: '22px',
