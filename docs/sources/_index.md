@@ -152,14 +152,40 @@ After you’ve identified the problem process, you can filter and explore using 
 This includes filters like `http.path`, `db.statement`, or span name.
 This identifies activities conducted by the resource.
 
-Your investigations follow these general steps:
+Most investigations follow these steps:
 
-1. Determine the metric you want to use: rates, errors, or duration.
+1. Choose the metric you want to use: rates, errors, or duration.
 1. Define filters to refine the view of your data.
 1. Investigate the data to compare a baseline and selected data.
 1. Inspect data to drill down to view a breakdown, structure of the span tree, or individual spans.
 
-### Determine which RED metric
+### Example
+
+For example, say that you want to figure out the source of errors in your spans.
+You'll need to compare the errors in the traces to locate the problem trace.
+Here's how this works.
+
+First, we select **Full traces** as the signal type and then choose the **Errors** metric.
+Because we want to compare the error rates, we use the **Comparison** tab.
+This tab compares errors in traces over the given time range versus traces that don't have errors.
+The results are ordered by the difference in those attributes by the highest ones first.
+You can see what's causing the most issues immediately.
+This error shows that there is a 99.34% variance in this operation which occurs 100% of the error span.
+
+![Errors are immediately visible by the large red bars](images/explore-traces-errors-metric-flow.png)
+
+To dig deeper into this issues, we select **Inspect** to focus in on the problem.
+It's easy to spot the problem: the tall, red bar indicates that the problems are happening with  `HTTP GET /api/datasources/proxy/uid/:uid/*`.
+Next, we use **Add to filters** to focus just on the API call.
+
+![Add to filters to focus on the API call](images/explore-traces-errors-add-filters-flow.png)
+
+Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in then.
+Clicking on an entry links to the detailed tracing and span data.
+
+![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
+
+### Choose a RED metric
 
 Explore Traces uses RED metrics generated from your tracing data to guide your investigation.
 In this context, RED metrics mean:
@@ -167,7 +193,14 @@ In this context, RED metrics mean:
 * **Errors** show spans that are failing.
 * **Duration** displays the amount of time those spans take; represented as a heat map that shows response time and latency.
 
-1. Select a metric type a graph to select a **Rate**, **Error**, or **Duration** metric type. Notice that your selection adds to the filter bar.
+When you select a RED metric, the tabs underneath the metrics selection changes match the context.
+For example, selecting **Duration** displays the **Breakdown**, **Root cause latency**, and **Slow traces tabs**.
+Choosing **Errors** changes the tabs to **Breakdown**, **Root cause errors**, and **Errored traces**. Rate provides **Breakdown**, **Service structure**, and **Traces** tabs.
+These tabs are used when you [compare tracing data](#compare-tracing-data).
+
+To choose a RED metric:
+
+1. Select a metric type a graph to select a **Rate**, **Errors**, or **Duration** metric type. Notice that your selection changes the first drop-down list on the filter bar.
 1. Optional: Select the signal you want to observe. **Full traces** are the default selection.
 1. Look for spikes or trends in the data to help identify issues.
 
@@ -175,7 +208,7 @@ In this context, RED metrics mean:
 If no data or limited data appears, refresh the page. Verify that you have selected the correct data source in the Data source drop-down.
 {{< /admonition >}}
 
-### Change the signal type to observe
+#### Change the primary signal type to observe
 
 Tracing data is highly structured and annotated and reflects events that happen in your services.
 You can choose the type of services you want to observe and think about.
@@ -186,6 +219,23 @@ By default, Explore Traces displays information about full traces. You can chang
 
 ![Selecting a signal type](explore-traces-select-signal.png)
 
+You can use any one of these primary signal types.
+
+Full traces
+: Inspect full journeys of requests across services
+
+Server spans
+: Explore server-specific segments of traces
+
+Consumer spans
+: Analyze interactions initiated by consumer services
+
+Database calls
+: Evaluate the performance issues in database interactions
+
+All spans
+: View and analyze raw span data
+
 ### Define filters
 
 Next, refine your investigation by adding filters.
@@ -193,10 +243,10 @@ Next, refine your investigation by adding filters.
 Each time you add a filter, the condition appears in the list of filters.
 The list of filters expands as you investigate and explore your tracing data using Explore Traces.
 
-1. Refine your investigation by adding filters or select **Analyze the current selection**.
+1. Refine your investigation by adding filters.
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
-1. Optional: Select **Add to filters** or **Analyze Traces** to drill-down into the data.
-1. Select **Analyze Traces** to focus the displayed data into your filtered view.
+1. Optional: Select **Add to filters** to drill-down into the data.
+1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
 1. Select filters to hone in on the problem areas. Each filter that select adds to the Filter statement at the top of the page. You can select filters in the following ways:
     1. Select **Inspect**.
     1. Use the **Search** field.
@@ -228,38 +278,36 @@ You can remove all or individual filters.
 
 To remove a filter, select **Remove filter** (**X**) at the end of the filter you want to remove.
 
-To remove all filters, select **Clear filters** from the right side of the Filter bar.
+To remove all filters, select **Clear filters** (**X**)from the right side of the Filter bar.
 
 Selecting **Clear filters** resets your investigation back to the first metric you selected.
 For example, if you selected Errors metrics and **Group by** the `host` service.name, selecting **Clear filters** resets the search back to just **Errors** selected as the metric type.
 
 ### Compare tracing data
 
-After you select **Analyze Traces**, you can compare the tracing data you’ve filtered with additional selections. Your original selection becomes the baseline data.
+You can compare the tracing data you’ve filtered with additional selections.
+Your original selection becomes the baseline data.
 You can make additional selections to compare with the baseline.
 
-The behavior of the comparison is different depending upon the RED metric you've chosen.
+When you select a RED metric, the tabs underneath the metrics selection changes match the context.
+For example, selecting **Duration** displays the **Breakdown**, **Root cause latency**, and **Slow traces tabs**.
+Choosing **Errors** changes the tabs to **Breakdown**, **Root cause errors**, and **Errored traces**.
+Rate provides **Breakdown**, **Service structure**, and **Traces** tabs.
 
-The **Breakdown** view shows the comparison results.
+The behavior of the comparison also differs depending upon the RED metric you've chosen.
+For example, the **Breakdown** view shows the comparison results.
+When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
+However, when you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
 
-To compare tracing data after selecting Analyze Traces, select Investigate errors.
+Each tab provides a brief explanation about the information provided.
 
-1. For Rate and Error investigations, select **Comparison**. For Duration investigations, select an area of the histogram to start an investigation.
+To compare tracing data after selecting filters:
+
+1. For **Rate** and Error investigations, select **Inspect**. For **Duration** investigations, select an area of the histogram to start an investigation.
 1. Optional: Click and drag on the top graph or histogram to focus on a specific time frame or data range.
 1. Optional: Add additional filters or change how the data displays by selecting a different attribute to search by.
 1. Use **Breakdown**, **Structure**, and **Spans** tabs to view a summary, trace structure, or a list of spans matching your filter criteria.
 1. Optional: Add, remove, or modify filters.
-
-If you use the Structure or Spans view, you can return to the comparison by selecting **Comparison**.
-
-Use the **Structure** view to see a list of the traces and spans that match the filters.
-You can modify the structure to show available attributes, for example, errors, services, and databases.
-
-![Using the Duration histogram and Structure view](explore-traces-histogram-structure.png)
-
-Use the **Spans** view to see a list of all spans that match the filter criteria. You can expand the details contained in a span to locate specific errors.
-
-![Identifying the error in the span](explore-traces-error-spans.png)
 
 <!-- Notes >
 Comparison - Nadine may have something on this. It's always showing you four every comparison of the exceptional events and the normal events for errors. That means the error vs the non errors. Duration - longest running span. Highligh which attributes are present on the longest running spans and the errors that are present on the longest running spans.
@@ -268,7 +316,7 @@ Service structure - Lot of functionality built into them. It's another high valu
 
 Example flow - I know a service has some errors and now I want to understand why.
 
-Server spans > rate of service span errors- off service is failing. select those. comparison is the path of I want to see what i'sc orrelating at the level of the service. The root cause serriors what it's beneath the service using the structure of the spans.
+Server spans > rate of service span errors- off service is failing. select those. comparison is the path of I want to see what it's correlating at the level of the service. The root cause erriors what it's beneath the service using the structure of the spans.
 
 Root cause latency - shows the structure of the metrics we're observing. Observing rate, then shows the services. -->
 
