@@ -253,11 +253,11 @@ The list of filters expands as you investigate and explore your tracing data usi
 
 #### Group by attributes
 
-Using the Group by filter, you can group the selected metric by different attributes.
+Using the **Group by** filter, you can group the selected metric by different attributes.
 For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
 
 The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
-However, in the drop-down, you can choose any resource level attribute to group by.
+However, in the drop-down list, you can choose any resource level attribute to group by.
 
 You can use **Other** attributes to select a different attribute.
 
