@@ -118,10 +118,10 @@ All Grafana Cloud instances come with the Explore Traces plugin preinstalled.
 
 #### Install in your Grafana instance
 
-You can install Explore Traces in your own Grafana instance using `grafana-cli`:
+You can install Explore Traces in your own Grafana instance using `grafana cli`:
 
 ```shell
-grafana-cli --pluginUrl=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip plugins install grafana-traces-app
+grafana cli --pluginUrl=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip plugins install grafana-traces-app
 ```
 
 Alternatively, follow these steps to install Explore Traces in Grafana:
