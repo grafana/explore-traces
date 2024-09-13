@@ -20,15 +20,16 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
           return;
         }
         const rawSelection = args[0];
+        // @ts-ignore
         const newSelection: ComparisonSelection = { raw: rawSelection };
 
         newSelection.timeRange = {
-          from: Math.round(rawSelection.x.from / 1000),
-          to: Math.round(rawSelection.x.to / 1000),
+          from: Math.round((rawSelection.x?.from || 0) / 1000),
+          to: Math.round((rawSelection.x?.to || 0) / 1000),
         };
 
-        const yFrom = yBucketToDuration(args[0].y.from - 1, yBuckets);
-        const yTo = yBucketToDuration(args[0].y.to, yBuckets);
+        const yFrom = yBucketToDuration((args[0].y?.from || 0) - 1, yBuckets);
+        const yTo = yBucketToDuration(args[0].y?.to || 0, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };
 
         parent.setState({ selection: newSelection });

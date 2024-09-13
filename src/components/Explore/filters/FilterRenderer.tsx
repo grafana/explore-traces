@@ -49,7 +49,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     if (key && state.keys === undefined && !state.isKeysLoading) {
       updateKeys();
     }
-  }, [filter, key, metric, model, state]);  
+  }, [filter, key, metric, model, state]);
 
   const keyOptions = useMemo(() => {
     if (!state.keys) {
@@ -66,36 +66,42 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
 
     return filteredOptions(state.values, valueQuery);
   }, [valueQuery, state.values]);
-  
+
   const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
     // Ensure we always have the same order of keys
     const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
     const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
-    const intrinsicAttributes = keys.filter(
-      (k) => { 
-        let checks = !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR) && ignoredAttributes.indexOf(k.value!) === -1;
+    const intrinsicAttributes = keys.filter((k) => {
+      let checks =
+        !k.value?.includes(RESOURCE_ATTR) &&
+        !k.value?.includes(SPAN_ATTR) &&
+        ignoredAttributes.indexOf(k.value!) === -1;
 
-        // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes 
-        // as you would overwrite it in the query if it's selected in the drop down
-        if (filters.find((f) => f.key === 'kind')) {
-          checks = checks && k.value !== 'kind' && k.value !== 'span:kind'
-        }
-
-        // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes 
-        // as you would overwrite it in the query if it's selected in the drop down
-        if (filters.find((f) => f.key === 'nestedSetParent')) {
-          checks = checks && k.value !== 'rootName' && k.value !== 'rootServiceName' && k.value !== 'trace:rootName' && k.value !== 'trace:rootService'
-        }
-
-        // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
-        // as you would overwrite it in the query if it's selected in the drop down
-        if (metric === 'rate' || metric === 'errors') {
-          checks = checks && k.value !== 'status' && k.value !== 'span:status'
-        }
-
-        return checks
+      // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (filters.find((f) => f.key === 'kind')) {
+        checks = checks && k.value !== 'kind' && k.value !== 'span:kind';
       }
-    );
+
+      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (filters.find((f) => f.key === 'nestedSetParent')) {
+        checks =
+          checks &&
+          k.value !== 'rootName' &&
+          k.value !== 'rootServiceName' &&
+          k.value !== 'trace:rootName' &&
+          k.value !== 'trace:rootService';
+      }
+
+      // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (metric === 'rate' || metric === 'errors') {
+        checks = checks && k.value !== 'status' && k.value !== 'span:status';
+      }
+
+      return checks;
+    });
     return intrinsicAttributes
       ?.concat(resourceAttributes)
       .concat(spanAttributes)
@@ -122,7 +128,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       value={key}
       placeholder={'Select attribute'}
       options={keyOptions}
-      onChange={(v) => model._updateFilter(filter, 'key', v.value)}
+      onChange={(v) => model._updateFilter(filter, { key: v.value })}
       isLoading={state.isKeysLoading}
       autoFocus={keyAutoFocus}
       openMenuOnFocus={keyAutoFocus}
@@ -147,7 +153,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       value={value}
       placeholder={'value'}
       options={valueOptions}
-      onChange={(v) => model._updateFilter(filter, 'value', v.value)}
+      onChange={(v) => model._updateFilter(filter, { value: v.value })}
       isLoading={state.isValuesLoading}
       autoFocus={valueAutoFocus}
       openMenuOnFocus={valueAutoFocus}
@@ -177,7 +183,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         value={filter.operator}
         disabled={model.state.readOnly}
         options={operators}
-        onChange={(v) => model._updateFilter(filter, 'operator', v.value)}
+        onChange={(v) => model._updateFilter(filter, { operator: v.value })}
       />
       {valueSelect}
       {filter.value.length > 0 && (

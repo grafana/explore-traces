@@ -5,7 +5,6 @@ import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
   CustomVariable,
   DataSourceVariable,
-  getUrlSyncManager,
   SceneComponentProps,
   SceneFlexItem,
   sceneGraph,
@@ -107,10 +106,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
       }
     });
-
-    return () => {
-      getUrlSyncManager().cleanUp(this);
-    };
   }
 
   public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
@@ -217,25 +212,26 @@ export class TraceExplorationScene extends SceneObjectBase {
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = getFiltersVariable(traceExploration);
 
-    const menu = 
-    <Menu>
-      <div className={styles.menu}>
-        <Menu.Item 
-          label="Give feedback" 
-          ariaLabel="Give feedback" 
-          icon={"comment-alt-message"}
-          url='https://forms.gle/52nPMeDvZ4iZD9iV8'
-          target='_blank'
-        />
-        <Menu.Item 
-          label="Documentation" 
-          ariaLabel="Documentation" 
-          icon={"external-link-alt"} 
-          url='https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/'
-          target='_blank'
-        />
-      </div>
-    </Menu>;
+    const menu = (
+      <Menu>
+        <div className={styles.menu}>
+          <Menu.Item
+            label="Give feedback"
+            ariaLabel="Give feedback"
+            icon={'comment-alt-message'}
+            url="https://forms.gle/52nPMeDvZ4iZD9iV8"
+            target="_blank"
+          />
+          <Menu.Item
+            label="Documentation"
+            ariaLabel="Documentation"
+            icon={'external-link-alt'}
+            url="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/"
+            target="_blank"
+          />
+        </div>
+      </Menu>
+    );
 
     return (
       <div className={styles.container}>
@@ -249,13 +245,13 @@ export class TraceExplorationScene extends SceneObjectBase {
             )}
             <div className={styles.controls}>
               <div className={styles.preview}>
-                <Badge text='&nbsp;Preview' color='blue' icon='rocket' tooltip={compositeVersion} />
+                <Badge text="&nbsp;Preview" color="blue" icon="rocket" tooltip={compositeVersion} />
               </div>
 
               <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
-                <Button variant="secondary" icon='info-circle'
-                  >Need help 
-                  <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size='lg'/>
+                <Button variant="secondary" icon="info-circle">
+                  Need help
+                  <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size="lg" />
                 </Button>
               </Dropdown>
               {controls.map((control) => (
@@ -263,7 +259,9 @@ export class TraceExplorationScene extends SceneObjectBase {
               ))}
             </div>
           </Stack>
-        <div className={styles.filters}>{filtersVariable && <filtersVariable.Component model={filtersVariable} />}</div>
+          <div className={styles.filters}>
+            {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
+          </div>
         </div>
         <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
       </div>

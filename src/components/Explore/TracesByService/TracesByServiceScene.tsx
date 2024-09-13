@@ -1,6 +1,13 @@
 import React from 'react';
 
-import { DashboardCursorSync, GrafanaTheme2, MetricFindValue, dateTime } from '@grafana/data';
+import {
+  DashboardCursorSync,
+  GrafanaTheme2,
+  MetricFindValue,
+  dateTime,
+  DataFrame,
+  GetTagResponse,
+} from '@grafana/data';
 import {
   behaviors,
   SceneComponentProps,
@@ -38,6 +45,7 @@ import { MiniREDPanel } from './MiniREDPanel';
 import { Icon, LinkButton, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { getDefaultSelectionForMetric } from '../../../utils/comparison';
+import { map, Observable } from 'rxjs';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
@@ -124,8 +132,14 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
       return;
     }
 
-    ds.getTagKeys?.().then((tagKeys: MetricFindValue[]) => {
-      const attributes = tagKeys.map((l) => l.text);
+    ds.getTagKeys?.().then((tagKeys: GetTagResponse | MetricFindValue[]) => {
+      let keys: MetricFindValue[] = [];
+      if ('data' in tagKeys) {
+        keys = (tagKeys as GetTagResponse).data;
+      } else {
+        keys = tagKeys;
+      }
+      const attributes = keys.map((l) => l.text);
       if (attributes !== this.state.attributes) {
         this.setState({ attributes });
       }
@@ -189,7 +203,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
           queries: [buildQuery(metric, selection)],
           $timeRange: timeRangeFromSelection(selection),
         }),
-        transformations: filterStreamingProgressTransformations,
+        transformations: [...filterStreamingProgressTransformations, ...spanListTransformations],
       }),
     });
   }
@@ -396,3 +410,41 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
     ],
   });
 }
+
+const spanListTransformations = [
+  () => (source: Observable<DataFrame[]>) => {
+    return source.pipe(
+      map((data: DataFrame[]) => {
+        return data.map((df) => ({
+          ...df,
+          fields: df.fields.filter((f) => !f.name.startsWith('nestedSet')),
+        }));
+      })
+    );
+  },
+  {
+    id: 'sortBy',
+    options: {
+      fields: {},
+      sort: [
+        {
+          field: 'Duration',
+          desc: true,
+        },
+      ],
+    },
+  },
+  {
+    id: 'organize',
+    options: {
+      indexByName: {
+        'Trace Service': 0,
+        'Trace Name': 1,
+        'Span ID': 2,
+        Duration: 3,
+        'Start time': 4,
+        status: 5,
+      },
+    },
+  },
+];
