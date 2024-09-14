@@ -288,7 +288,7 @@ Each tab provides a brief explanation about the information provided.
 #### Comparison
 
 The **Comparison** tab shows attributes that are ordered by the difference between the baseline and selection values for each value.
-For example, if you're viewing Error metrics, then the comparison shows the exceptional events versus the normal events for errors.
+For example, if you're viewing **Error** metrics, then the comparison shows the exceptional events versus the normal events for errors.
 
 The behavior of the comparison also differs depending upon the RED metric you've chosen.
 For example, the **Breakdown** view shows the comparison results.
@@ -298,16 +298,22 @@ However, when you select **Rate**, **Breakdown** orders attributes by their rate
 #### Structure
 
 Each RED metric lets you investigate data based upon the trace and span structure.
+
 * Rate provides **Service structure**
 * Errors provides **Root cause errors**
 * Duration metrics provides **Root cause latency**
 
 For **Rate**, the **Service structure** tab shows you how your applications work with each other.
 Using this view helps you analyze the service structure of the traces that match the current filters.
+
 For **Errors**, the **Root cause errors** tab shows the structure of the errors to help you analyze the error structure of the traces. You can use this tab to view what's beneath the service using the structure of the spans.
+
+![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
+
 When you select **Duration** metrics, the **Root cause latency** tab shows the structure of the longest running spans so you can analyze the structure of slow spans.
 
 Each panel represents an aggregate view compiled using spans from multiple traces.
+
 
 #### Trace list
 
