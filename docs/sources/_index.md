@@ -81,7 +81,6 @@ For more information, refer to [Use traces to find solutions](https://grafana.co
 You can access Explore Traces using Grafana Cloud or a self-managed OSS Grafana or Grafana Enterprise.
 
 The easiest way to access Explore Traces is in Grafana Cloud. No setup or installation is required.
-If you have a Tempo data source or Cloud Traces data source configured, then you have access to Explore Traces.
 
 To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
 
@@ -90,7 +89,7 @@ To use Explore Traces with self-managed Grafana, you need to install the Explore
 To use Explore Traces, you need:
 
 * A Grafana Cloud account
-* A Grafana stack in Grafana Cloud with a configured Hosted Traces or Tempo data source
+* A Grafana stack in Grafana Cloud with a configured Tempo data source receiving tracing data 
 
 To access Explore Traces:
 
@@ -170,8 +169,8 @@ Next, we use **Add to filters** to focus just on the API call.
 
 ![Add to filters to focus on the API call](images/explore-traces-errors-add-filters-flow.png)
 
-Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in then.
-Clicking on an entry links to the detailed tracing and span data.
+Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in them.
+Clicking on an entry opens up one of the individual traces used to construct that aggregate view so you can deep dive into a single example transaction. 
 
 ![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
 
@@ -179,7 +178,7 @@ Clicking on an entry links to the detailed tracing and span data.
 
 Explore Traces uses RED metrics generated from your tracing data to guide your investigation.
 In this context, RED metrics mean:
-* **Rates** show the spans per second that match your filter.
+* **Rates** show the rate of incoming spans per second
 * **Errors** show spans that are failing.
 * **Duration** displays the amount of time those spans take; represented as a heat map that shows response time and latency.
 
@@ -195,7 +194,7 @@ To choose a RED metric:
 1. Look for spikes or trends in the data to help identify issues.
 
 {{< admonition type="tip" >}}
-If no data or limited data appears, refresh the page. Verify that you have selected the correct data source in the Data source drop-down.
+If no data or limited data appears, refresh the page. Verify that you have selected the correct data source in the Data source drop-down as well as a valid time range.
 {{< /admonition >}}
 
 #### Change the primary signal type to observe
@@ -221,7 +220,7 @@ Consumer spans
 : Analyze interactions initiated by consumer services
 
 Database calls
-: Evaluate the performance issues in database interactions
+: Evaluate performance issues in database interactions
 
 All spans
 : View and analyze raw span data
@@ -230,7 +229,7 @@ All spans
 
 Next, refine your investigation by adding filters.
 
-Each time you add a filter, the condition appears in the list of filters.
+Each time you add a filter, the condition appears in the list of filters at the top of the page.
 The list of filters expands as you investigate and explore your tracing data using Explore Traces.
 
 1. Refine your investigation by adding filters.
