@@ -32,7 +32,7 @@ Traces record the details of a request to help understand why an issue is or was
 
 Tracing is best used for analyzing the performance of your system, identifying bottlenecks, monitoring latency, and providing a complete picture of how requests are processed.
 
-Explore Traces helps you easily get started and make sense of your tracing data so you can automatically visualize insights from your Tempo and Hosted traces data.
+Explore Traces helps you make sense of your tracing data so you can automatically visualize insights from your Tempo traces data.
 Before this app, you would use [TraceQL](https://grafana.com/docs/tempo/<TEMPO_VERSION>/traceql/), the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
 
 <!-- need new video {{< youtube id="Yqx8yCMCvgQ" >}} -->
@@ -54,7 +54,7 @@ This section provides an overview of some of these concepts and links to additio
 
 ### Rate, error, and duration metrics
 
-The Explore Traces app lets you explore rate, errors, and duration (RED) metrics generated from your traces by Tempo.
+The Explore Traces app lets you explore rate, error, and duration (RED) metrics generated from your traces by Tempo.
 
 | Metric | Meaning | Useful for investigating |
 |---|---|---|
@@ -78,9 +78,9 @@ For more information, refer to [Use traces to find solutions](https://grafana.co
 
 ## Access or install Explore Traces
 
-You can access Explore Traces using Grafana Cloud, Grafana, and Grafana Enterprise.
+You can access Explore Traces using Grafana Cloud or a self-managed OSS Grafana or Grafana Enterprise.
 
-The easiest way to access Explore Traces is in Grafana Cloud.
+The easiest way to access Explore Traces is in Grafana Cloud. No setup or installation is required.
 If you have a Tempo data source or Cloud Traces data source configured, then you have access to Explore Traces.
 
 To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
@@ -110,11 +110,9 @@ To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 Explore Traces is distributed as a Grafana Plugin.
 You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-exploretraces-app/).
 
-<!-- This is true for the other plugins. Will this be true for Explore Traces?
 {{< admonition type="note" >}}
 All Grafana Cloud instances come with the Explore Traces plugin preinstalled.
 {{< /admonition >}}
--->
 
 #### Install in your Grafana instance
 
@@ -129,7 +127,7 @@ Alternatively, follow these steps to install Explore Traces in Grafana:
 1. In Grafana, go to **Administration** > **Plugins and data** > **Plugins**.
 2. Search for "Explore Traces".
 3. Select Explore Traces.
-4. Click **Install**
+4. Click **Install**.
 
 The plugin is automatically activated after installation.
 
@@ -243,9 +241,8 @@ The list of filters expands as you investigate and explore your tracing data usi
 
 1. Refine your investigation by adding filters.
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
-1. Optional: Select **Add to filters** to drill-down into the data.
 1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
-1. Select filters to hone in on the problem areas. Each filter that select adds to the Filter statement at the top of the page. You can select filters in the following ways:
+1. Select filters to hone in on the problem areas. Each filter that you select adds to the Filter statement at the top of the page. You can select filters in the following ways:
     1. Select **Inspect**.
     1. Use the **Search** field.
 
@@ -268,7 +265,7 @@ Selecting an option for a filter automatically updates the displayed data. If th
 To modify an applied filter:
 
 1. Select the filter to modify in the Filter bar.
-1. Select a filter from the drop-down menu.
+1. Select the value you want to filter by from the drop-down menu the opens up.
 
 #### Remove one or more filters
 
@@ -276,7 +273,7 @@ You can remove all or individual filters.
 
 To remove a filter, select **Remove filter** (**X**) at the end of the filter you want to remove.
 
-To remove all filters, select **Clear filters** (**X**)from the right side of the Filter bar.
+To remove all filters, select **Clear filters** (**X**) from the right side of the Filter bar.
 
 Selecting **Clear filters** resets your investigation back to the first metric you selected.
 For example, if you selected Errors metrics and **Group by** the `host` service.name, selecting **Clear filters** resets the search back to just **Errors** selected as the metric type.
@@ -301,7 +298,7 @@ Each tab provides a brief explanation about the information provided.
 
 To compare tracing data after selecting filters:
 
-1. For **Rate** and Error investigations, select **Inspect**. For **Duration** investigations, select an area of the histogram to start an investigation.
+1. For **Rate** and **Error** investigations, select **Inspect**. For **Duration** investigations, select an area of the histogram to start an investigation.
 1. Optional: Click and drag on the top graph or histogram to focus on a specific time frame or data range.
 1. Optional: Add additional filters or change how the data displays by selecting a different attribute to search by.
 1. Use **Breakdown**, **Structure**, and **Spans** tabs to view a summary, trace structure, or a list of spans matching your filter criteria.
@@ -322,6 +319,6 @@ Root cause latency - shows the structure of the metrics we're observing. Observi
 
 Use the time picker at the top right to modify the data shown in Explore Traces.
 
-You can view data for up to the last three hours. This is a limitation of TraceQL metrics.
+You can select a time range of up to 24h hours in duration. This time range can be any 24h period in your configured trace data retention period (30 days by default).
 
 For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).
