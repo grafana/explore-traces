@@ -143,9 +143,10 @@ GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-
 
 Most investigations follow these steps:
 
+1. Select the primary signal. 
 1. Choose the metric you want to use: rates, errors, or duration.
 1. Define filters to refine the view of your data.
-1. Investigate the data to compare a baseline and selected data.
+1. Use the comparison, structural or trace list to drill down into the issue.
 1. Inspect data to drill down to view a breakdown, structure of the span tree, or individual spans.
 
 ### Example
@@ -154,7 +155,7 @@ For example, say that you want to figure out the source of errors in your spans.
 You'll need to compare the errors in the traces to locate the problem trace.
 Here's how this works.
 
-First, we select **Full traces** as the signal type and then choose the **Errors** metric.
+First, you select **Full traces** as the signal type and then choose the **Errors** metric.
 Because we want to compare the error rates, we use the **Comparison** tab.
 This tab compares errors in traces over the given time range versus traces that don't have errors.
 The results are ordered by the difference in those attributes by the highest ones first.
@@ -163,7 +164,7 @@ This error shows that there is a 99.34% variance in this operation which occurs 
 
 ![Errors are immediately visible by the large red bars](images/explore-traces-errors-metric-flow.png)
 
-To dig deeper into this issues, we select **Inspect** to focus in on the problem.
+To dig deeper into this issue, we select **Inspect** to focus in on the problem.
 It's easy to spot the problem: the tall, red bar indicates that the problems are happening with  `HTTP GET /api/datasources/proxy/uid/:uid/*`.
 Next, we use **Add to filters** to focus just on the API call.
 
