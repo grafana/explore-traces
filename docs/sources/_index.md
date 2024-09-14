@@ -141,12 +141,6 @@ GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-
 
 ## Investigate tracing data
 
-When investigating tracing data, you first narrow down the process level that's having the issue.
-This includes filters like cluster, namespace, environment, region, or process.
-
-After you’ve identified the problem process, you can filter and explore using process internals.
-This includes filters like `http.path`, `db.statement`, or span name.
-This identifies activities conducted by the resource.
 
 Most investigations follow these steps:
 
