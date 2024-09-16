@@ -28,7 +28,12 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene, getTraceExplorationScene } from 'utils/utils';
+import {
+  getAttributesAsOptions,
+  getGroupByVariable,
+  getTraceByServiceScene,
+  getTraceExplorationScene,
+} from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 import { AttributesDescription } from './AttributesDescription';
 
@@ -127,17 +132,21 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
         default:
           throw new Error('Metric not supported');
       }
-    }
+    };
     const description = getDescription(metric as MetricFunction);
 
     return (
       <div className={styles.container}>
-        <AttributesDescription 
+        <AttributesDescription
           desctiption={description}
-          tags={metric === 'duration' ? [] : [
-            { label: 'Rate', color: 'green' }, 
-            { label: 'Error', color: 'red' }
-          ]}
+          tags={
+            metric === 'duration'
+              ? []
+              : [
+                  { label: 'Rate', color: 'green' },
+                  { label: 'Error', color: 'red' },
+                ]
+          }
         />
 
         <div className={styles.controls}>

@@ -19,6 +19,7 @@ import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
+import { syncYAxis } from '../behaviors/syncYaxis';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -30,6 +31,7 @@ export function buildNormalLayout(
   const query = rateByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
+    $behaviors: [syncYAxis()],
     $data: new SceneDataTransformer({
       $data: new StepQueryRunner({
         maxDataPoints: 64,

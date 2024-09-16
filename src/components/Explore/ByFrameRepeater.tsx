@@ -19,7 +19,7 @@ import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 import { debounce } from 'lodash';
 import { Search } from './Search';
 import { getGroupByVariable } from 'utils/utils';
-import { GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
+import { EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -52,6 +52,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
               });
             } else {
               this.performRepeat(data.data);
+              this.publishEvent(new EventTimeseriesDataReceived({ series: data.data.series }), true);
             }
           } else if (data.data?.state === LoadingState.Error) {
             this.state.body.setState({

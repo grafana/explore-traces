@@ -365,7 +365,12 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
 
   return new SceneFlexLayout({
     direction: 'column',
-    $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
+    $behaviors: [
+      new behaviors.CursorSync({
+        key: 'metricCrosshairSync',
+        sync: DashboardCursorSync.Crosshair,
+      }),
+    ],
     children: [
       new SceneFlexLayout({
         direction: 'row',
