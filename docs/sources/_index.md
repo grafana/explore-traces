@@ -274,7 +274,7 @@ For example, if you selected Errors metrics and **Group by** the `host` service.
 
 ### Compare tracing data
 
-You can compare the tracing data you’ve filtered with additional selections.
+You can compare the tracing data you’ve filtered with other selections.
 Your original selection becomes the baseline data.
 You can make additional selections to compare with the baseline.
 
