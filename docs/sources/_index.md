@@ -145,17 +145,21 @@ Most investigations follow these steps:
 1. Select the primary signal.
 1. Choose the metric you want to use: rates, errors, or duration.
 1. Define filters to refine the view of your data.
-1. Use the comparison, structural or trace list to drill down into the issue.
+1. Use the structural or trace list to drill down into the issue.
 
 ### Example
 
 For example, say that you want to figure out the source of errors in your spans.
+
 You'll need to compare the errors in the traces to locate the problem trace.
 Here's how this works.
 
 First, you select **Full traces** as the signal type and then choose the **Errors** metric.
-To correlate attribute values with errors, you can use the **Comparison** tab.
-This tab surfaces attributes values that heavily correlate with erroring spans. 
+Using **Full traces** provides insights into the errors in the root of your traces or at the edge of your application.
+For other investigations, you could use **Server spans** signal type if you're interested in any entrypoint to any service or **Database calls** if you're concerned about databases.
+
+To correlate attribute values with errors, you can use the **Breakdown** tab.
+This tab surfaces attributes values that heavily correlate with erroring spans.
 The results are ordered by the difference in those attributes by the highest ones first which helps
 you see what's causing the errors immediately.
 This error shows that 99.34% of the time the span name was equal to `HTTP GET /api/datasources/proxy/uid/:uid/*`. The span was also erroring.
@@ -197,7 +201,7 @@ Server spans
 : Explore service-specific segments of traces
 
 Consumer spans
-: Analyze how queues are consumed. A consumer span indicates an async handoff between services. These handsoffs are almost always uses a queue. 
+: Analyze how queues are consumed. A consumer span indicates an async handoff between services. These handsoffs are almost always uses a queue.
 
 Database calls
 : Evaluate performance issues in database interactions
@@ -215,9 +219,9 @@ In this context, RED metrics mean:
 * **Duration** displays the amount of time those spans take; represented as a heat map that shows response time and latency.
 
 When you select a RED metric, the tabs underneath the metrics selection changes match the context.
-For example, selecting **Duration** displays the **Breakdown**, **Root cause latency**, and **Slow traces tabs**.
-Choosing **Errors** changes the tabs to **Breakdown**, **Root cause errors**, and **Errored traces**. Rate provides **Breakdown**, **Service structure**, and **Traces** tabs.
-These tabs are used when you [compare tracing data](#compare-tracing-data).
+For example, selecting **Duration** displays **Root cause latency** and **Slow traces tabs**.
+Choosing **Errors** changes the tabs to **Root cause errors** and **Errored traces**. Rate provides **Service structure**, and **Traces** tabs.
+These tabs are used when you [analyze tracing data](#analyze-tracing-data).
 
 To choose a RED metric:
 
@@ -238,8 +242,8 @@ The list of filters expands as you investigate and explore your tracing data usi
 
 1. Refine your investigation by adding filters.
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
-1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
-1. Select filters to hone in on the problem areas. Each filter that you select adds to the Filter statement at the top of the page. You can select filters in the following ways:
+1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, latency, and other explorations.
+1. Select filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters in the following ways:
     1. Select **Inspect**.
     1. Use the **Search** field.
 
@@ -254,6 +258,18 @@ The app defaults to `service.name` and displays other commonly used resource lev
 However, in the drop-down list, you can choose any resource level attribute to group by.
 
 You can use **Other** attributes to select a different attribute.
+
+#### Use the Breakdown tab
+
+The **Breakdown** tab highlights attributes that are correlated with the selected metric.
+For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
+However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
+
+For example, the **Breakdown** view shows the comparison results.
+When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
+However, when you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
+
+You can change the **Scope** to show **Resource** or **Span**.
 
 #### Modify a filter
 
@@ -277,21 +293,11 @@ For example, if you selected Errors metrics and **Group by** the `host` service.
 
 ### Analyze tracing data
 
-You can further analyze the filtered spans using the dynamically changing tabs, **Comparison**, **Structure**, and **Trace list**. 
+You can further analyze the filtered spans using the dynamically changing tabs, **Structure** and **Trace list**.
 
 When you select a RED metric, the tabs underneath the metrics selection changes match the context.
 
 Each tab provides a brief explanation about the information provided.
-
-#### Comparison
-
-The **Comparison** tab highlights attributes that are correlated with the selected metric.
-For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors. However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
-
-The behavior of the comparison also differs depending upon the RED metric you've chosen.
-For example, the **Breakdown** view shows the comparison results.
-When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
-However, when you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
 
 #### Structure
 
