@@ -242,7 +242,7 @@ The list of filters expands as you investigate and explore your tracing data usi
 
 1. Refine your investigation by adding filters.
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
-1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, latency, and other explorations.
+1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
 1. Select filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters in the following ways:
     1. Select **Inspect**.
     1. Use the **Search** field.
@@ -262,12 +262,8 @@ You can use **Other** attributes to select a different attribute.
 #### Use the Breakdown tab for comparisons
 
 The **Breakdown** tab highlights attributes that are correlated with the selected metric.
-For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
-However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
-
-For example, the **Breakdown** view shows the comparison results.
 When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
-However, when you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
+When you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
 
 You can change the **Scope** to show **Resource** or **Span**.
 
@@ -293,11 +289,20 @@ For example, if you selected Errors metrics and **Group by** the `host` service.
 
 ### Analyze tracing data
 
-You can further analyze the filtered spans using the dynamically changing tabs, **Structure** and **Trace list**.
+You can further analyze the filtered spans using the dynamically changing tabs, **Comparison**, **Structure** and **Trace list**.
 
 When you select a RED metric, the tabs underneath the metrics selection changes match the context.
 
 Each tab provides a brief explanation about the information provided.
+
+#### Comparison
+
+The **Comparison** tab highlights attributes that are correlated with the selected metric.
+
+The behavior of the comparison also differs depending upon the RED metric you've chosen.
+For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
+However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
+
 
 #### Structure
 
