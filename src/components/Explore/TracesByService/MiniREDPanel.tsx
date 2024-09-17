@@ -131,6 +131,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
     const selectMetric = () => {
       reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_changed, {
         metric: model.state.metric,
+        location: 'panel',
       });
       traceExploration.onChangeMetricFunction(model.state.metric);
     };

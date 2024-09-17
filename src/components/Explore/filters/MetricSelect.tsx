@@ -24,7 +24,14 @@ export function MetricSelect({ model }: Props) {
         { label: 'Errors', value: 'errors' },
         { label: 'Duration', value: 'duration' },
       ]}
-      onChange={(v) => v.value && exploration.onChangeMetricFunction(v.value)}
+      onChange={(v) => {
+        v.value && exploration.onChangeMetricFunction(v.value);
+      
+        reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_changed, {
+          metric: v.value,
+          location: 'filter',
+        });
+      }}
     />
   );
 }
