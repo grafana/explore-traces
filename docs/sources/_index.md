@@ -1,9 +1,6 @@
 ---
 cascade:
-  _build:
-    list: false
-  noindex: true
-  FULL_PRODUCT_NAME: Grafana Explore Traces
+   FULL_PRODUCT_NAME: Grafana Explore Traces
   PRODUCT_NAME: Explore Traces
 description: Learn about traces and how you can use them to understand and troubleshoot
   your application and services.
@@ -170,6 +167,10 @@ Next, use **Add to filters** to focus just on the API call.
 ![Add to filters to focus on the API call](images/explore-traces-errors-add-filters-flow.png)
 
 Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in them.
+To view additional details, you right-click on a line and select **HTTP Outgoing Request**.
+
+![Contextual menu available in the Root cause errors view](images/explore-traces-errors-rcause-menu.png)
+
 Clicking on an entry opens up one of the individual traces used to construct that aggregate view so you can deep dive into a single example transaction.
 
 ![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
@@ -313,7 +314,6 @@ For **Errors**, the **Root cause errors** tab shows the structure of the errors 
 When you select **Duration** metrics, the **Root cause latency** tab shows the structure of the longest running spans so you can analyze the structure of slow spans.
 
 Each panel represents an aggregate view compiled using spans from multiple traces.
-
 
 #### Trace list
 
