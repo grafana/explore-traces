@@ -42,7 +42,7 @@ export const USER_EVENTS_ACTIONS = {
     new_filter_added_manually: 'new_filter_added_manually',
     app_initialized: 'app_initialized',
     global_docs_link_clicked: 'global_docs_link_clicked',
-    red_metric_docs_link_clicked: 'red_metric_docs_link_clicked',
+    metric_docs_link_clicked: 'metric_docs_link_clicked',
     feedback_link_clicked: 'feedback_link_clicked',
   },
 } as const;
