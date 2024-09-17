@@ -2,8 +2,7 @@ import React from 'react';
 
 import { SceneComponentProps, SceneFlexItem, SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { SpanListScene } from 'components/Explore/TracesByService/Tabs/Spans/SpanListScene';
-import { getTraceExplorationScene } from 'utils/utils';
-import { MetricFunction } from 'utils/shared';
+import { getMetricVariable, getTraceByServiceScene } from 'utils/utils';
 
 export interface SpansSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -17,13 +16,33 @@ export class SpansScene extends SceneObjectBase<SpansSceneState> {
   }
 
   private _onActivate() {
+    this._subs.add(
+      getTraceByServiceScene(this).state.$data?.subscribeToState(() => {
+        this.updateBody();
+      })
+    );
+
+    this._subs.add(
+      getTraceByServiceScene(this).subscribeToState((newState, prevState) => {
+        if (newState.$data?.state.key !== prevState.$data?.state.key) {
+          this.updateBody();
+        }
+      })
+    );
+
+    this._subs.add(
+      getMetricVariable(this).subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.updateBody();
+        }
+      })
+    );
+
     this.updateBody();
   }
 
   private updateBody() {
-    const traceExploration = getTraceExplorationScene(this);
-    const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
-    this.setState({ body: new SpanListScene({ metric }) });
+    this.setState({ body: new SpanListScene({}) });
   }
 
   public static Component = ({ model }: SceneComponentProps<SpansScene>) => {

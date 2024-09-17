@@ -1,4 +1,4 @@
-import { BusEventWithPayload } from '@grafana/data';
+import { BusEventWithPayload, DataFrame } from '@grafana/data';
 import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
@@ -76,6 +76,14 @@ export interface DetailsSceneUpdatedPayload {
 
 export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
   public static type = 'details-scene-updated';
+}
+
+export interface EventTimeseriesDataReceivedPayload {
+  series?: DataFrame[];
+}
+
+export class EventTimeseriesDataReceived extends BusEventWithPayload<EventTimeseriesDataReceivedPayload> {
+  public static type = 'timeseries-data-received';
 }
 
 export const filterStreamingProgressTransformations = [

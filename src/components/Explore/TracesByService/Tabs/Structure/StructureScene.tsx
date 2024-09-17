@@ -230,7 +230,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<StructureTabScene>) => {
-    const { tree, loading, panel } = model.useState();
+    const { tree, loading, panel, $data } = model.useState();
     const styles = getStyles(useTheme2());
     const theme = useTheme2();
 
@@ -238,6 +238,8 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const { value } = exploration.getMetricVariable().useState();
 
     const metric = value as MetricFunction;
+
+    const isLoading = loading || ($data?.state.data?.state === LoadingState.Streaming && !tree?.children.length);
 
     let description;
     let emptyMsg = '';
@@ -316,7 +318,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     return (
       <Stack direction={'column'} gap={1}>
         <div className={styles.description}>{description}</div>
-        {loading ? (
+        {isLoading ? (
           <Stack direction={'column'} gap={2}>
             <Skeleton
               count={4}
