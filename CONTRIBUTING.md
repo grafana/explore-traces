@@ -12,7 +12,8 @@ change and then reviewing the implementation separately.
 
 ## Contribute to documentation
 
-Have a great new feature you want to contribute or find something missing in the docs?
+Have a great new feature you want to contribute? Add docs for it!
+Find something missing in the docs? Update the docs!
 
 Consider contributing to the documentation.
 Use the [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/writing-guide/contribute-documentation/) for information on creating good documentation.
