@@ -330,7 +330,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
         ) : tree && tree.children.length ? (
           <div className={styles.traceViewList}>{panel && <panel.Component model={panel} />}</div>
         ) : (
-          <EmptyState message={noDataMessage} />
+          <EmptyState message={noDataMessage} padding={'32px'} />
         )}
       </Stack>
     );
