@@ -197,7 +197,7 @@ Server spans
 : Explore service-specific segments of traces
 
 Consumer spans
-: Analyze interactions initiated by consumer services
+: Analyze how queues are consumed. A consumer span indicates an async handoff between services. These handsoffs are almost always uses a queue. 
 
 Database calls
 : Evaluate performance issues in database interactions
