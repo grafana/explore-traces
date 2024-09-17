@@ -43,6 +43,9 @@ Using the app, you can:
 * Browse automatic visualizations of your data based on its characteristics
 * Do all of this without writing TraceQL queries
 
+<!-- make live when the app is available in play.grafana
+{{< docs/play title="the Grafana Play site" url="https://play.grafana.org/a/grafana-exploretraces-app/FIXME" >}} -->
+
 ## Concepts
 
 To use the Explore Traces app, you should understand traces, spans, RED metrics, and other concepts related to tracing.
