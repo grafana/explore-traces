@@ -15,7 +15,6 @@ change and then reviewing the implementation separately.
 Have a great new feature you want to contribute? Add docs for it!
 Find something missing in the docs? Update the docs!
 
-Consider contributing to the documentation.
 Use the [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/writing-guide/contribute-documentation/) for information on creating good documentation.
 The toolkit also provides [document templates](https://github.com/grafana/writers-toolkit/tree/main/docs/static/templates) to help get started.
 
