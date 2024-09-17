@@ -6,7 +6,7 @@
   "autoEnabled": true,
   "info": {
     "keywords": ["app", "tempo", "traces", "explore"],
-    "description": "Query-less exploration of trace data stored in Tempo",
+    "description": "Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.",
     "author": {
       "name": "Grafana"
     },
