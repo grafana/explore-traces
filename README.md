@@ -76,4 +76,4 @@ To learn more about Explore Traces, refer to our documentation in [the repositor
 
 ## Contribute
 
-Want to help with the project? Reading the [Contributor's guidelines][CONTRIBUTING.md] to learn more. 
+Want to help with the project? Read the [Contributor's guidelines][CONTRIBUTING.md] to learn more. 
