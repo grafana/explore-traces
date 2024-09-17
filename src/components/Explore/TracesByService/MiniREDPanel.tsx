@@ -22,6 +22,7 @@ import { getTraceExplorationScene } from '../../../utils/utils';
 import { MINI_PANEL_HEIGHT } from './TracesByServiceScene';
 import { buildHistogramQuery } from '../queries/histogram';
 import { histogramPanelConfig } from '../panels/histogram';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
 export interface MiniREDPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -128,6 +129,9 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
     const traceExploration = getTraceExplorationScene(model);
 
     const selectMetric = () => {
+      reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_changed, {
+        metric: model.state.metric,
+      });
       traceExploration.onChangeMetricFunction(model.state.metric);
     };
 
