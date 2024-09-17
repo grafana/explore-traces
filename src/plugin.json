@@ -16,7 +16,17 @@
     },
     "screenshots": [],
     "version": "%VERSION%",
-    "updated": "%TODAY%"
+    "updated": "%TODAY%",
+    "links": [
+      {
+        "name": "Github",
+        "url": "https://github.com/grafana/explore-traces"
+      },
+      {
+        "name": "Report bug",
+        "url": "https://github.com/grafana/explore-traces/issues/new"
+      }
+    ]
   },
   "includes": [
     {
