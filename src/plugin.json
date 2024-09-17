@@ -14,7 +14,20 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "patterns",
+        "path": "img/errors-add-filters-flow.png"
+      },
+      {
+        "name": "fields",
+        "path": "img/errors-metric-flow.png"
+      },
+      {
+        "name": "table",
+        "path": "img/errors-root-cause.png"
+      }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%",
     "links": [
