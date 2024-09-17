@@ -7,6 +7,7 @@ import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 import { FilterByVariable } from './FilterByVariable';
 import { getTraceExplorationScene } from '../../../utils/utils';
 import { MetricFunction } from '../../../utils/shared';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
 interface Props {
   model: FilterByVariable;
