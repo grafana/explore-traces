@@ -158,24 +158,24 @@ First, you select **Full traces** as the signal type and then choose the **Error
 Using **Full traces** provides insights into the errors in the root of your traces or at the edge of your application.
 For other investigations, you could use **Server spans** signal type if you're interested in any entrypoint to any service or **Database calls** if you're concerned about databases.
 
-To correlate attribute values with errors, you can use the **Breakdown** tab.
+To correlate attribute values with errors, you can use the **Comparison** tab.
 This tab surfaces attributes values that heavily correlate with erroring spans.
 The results are ordered by the difference in those attributes by the highest ones first which helps
 you see what's causing the errors immediately.
-This error shows that 99.34% of the time the span name was equal to `HTTP GET /api/datasources/proxy/uid/:uid/*`. The span was also erroring.
+You can see here that 99.34% of the time the span name was equal to `HTTP GET /api/datasources/proxy/uid/:uid/*` the span was also erroring.
 
 ![Errors are immediately visible by the large red bars](images/explore-traces-errors-metric-flow.png)
 
 To dig deeper into this issue, select **Inspect** to focus in on the problem.
 It's easy to spot the problem: the tall, red bar indicates that the problems are happening with  `HTTP GET /api/datasources/proxy/uid/:uid/*`.
-Next, use **Add to filters** to focus just on the API call.
+Next, use **Add to filters** to focus just on the erroring API call.
 
 ![Add to filters to focus on the API call](images/explore-traces-errors-add-filters-flow.png)
 
 Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in them.
 To view additional details, you right-click on a line and select **HTTP Outgoing Request**.
 
-![Contextual menu available in the Root cause errors view](images/explore-traces-errors-rcause-menu.png)
+![Contextual menu available in the Root cause errors tab](images/explore-traces-errors-rcause-menu.png)
 
 Clicking on an entry opens up one of the individual traces used to construct that aggregate view so you can deep dive into a single example transaction.
 
@@ -313,7 +313,7 @@ The structural tab lets you extract and view aggregate data from your traces.
 * Duration metrics provides **Root cause latency**
 
 For **Rate**, the **Service structure** tab shows you how your applications "talk" to each other to fulfill requests.
-Using this view helps you analyze the service structure of the traces that match the current filters.
+Using this tab helps you analyze the service structure of the traces that match the current filters.
 
 For **Errors**, the **Root cause errors** tab shows structure of errors beneath your selected filters. You can use this tab to immediately see the chain of errors that are causing issues higher up in traces.
 
