@@ -20,7 +20,7 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
-import { Badge, Button, Dropdown, Icon, Menu, Stack, useStyles2 } from '@grafana/ui';
+import { Badge, Button, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import {
@@ -244,9 +244,11 @@ export class TraceExplorationScene extends SceneObjectBase {
               </Stack>
             )}
             <div className={styles.controls}>
-              <div className={styles.preview}>
-                <Badge text="&nbsp;Preview" color="blue" icon="rocket" tooltip={compositeVersion} />
-              </div>
+              <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
+                <span className={styles.preview}>
+                  <Badge text='&nbsp;Preview' color='blue' icon='rocket' />
+                </span>
+              </Tooltip>
 
               <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
                 <Button variant="secondary" icon="info-circle">
@@ -268,6 +270,16 @@ export class TraceExplorationScene extends SceneObjectBase {
     );
   };
 }
+
+const PreviewTooltip = ({ text }: { text: string }) => {
+  const styles = useStyles2(getStyles);
+
+  return (
+    <Stack direction={'column'} gap={2}>
+      <div className={styles.tooltip}>{text}</div>
+    </Stack>
+  );
+};
 
 function buildSplitLayout() {
   return new SplitLayout({
@@ -364,12 +376,17 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
     preview: css({
-      display: 'flex',
-      alignItems: 'center',
+      cursor: 'help',
 
       '> div:first-child': {
         padding: '5.5px',
       },
+    }),
+    tooltip: css({
+      fontSize: '14px',
+      lineHeight: '22px',
+      width: '180px',
+      textAlign: 'center',
     }),
     helpIcon: css({
       marginLeft: theme.spacing(1),
