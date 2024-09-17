@@ -48,8 +48,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
                   children: [
                     new SceneFlexItem({
                       body: new EmptyStateScene({
-                        message: 'No data for selected query',
-                        imgWidth: 150,
+                        imgWidth: 110,
                       }),
                     }),
                   ],

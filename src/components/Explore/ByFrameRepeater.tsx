@@ -46,6 +46,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                   new SceneFlexItem({
                     body: new EmptyStateScene({
                       message: 'No data for selected query',
+                      padding: '48px',
                     }),
                   }),
                 ],

@@ -1,40 +1,41 @@
 import React from 'react';
 
-import { Box, Stack, Text, useStyles2 } from '@grafana/ui';
+import { Stack, Text, useStyles2 } from '@grafana/ui';
+import { GrafanaTheme2 } from '@grafana/data';
 
 import { GrotNotFound } from './GrotNotFound';
 import { css } from '@emotion/css';
 
 export interface Props {
-  message: string | React.ReactNode;
+  message?: string | React.ReactNode;
   imgWidth?: number;
+  padding?: string;
 }
 
-export const EmptyState = ({ message, imgWidth }: Props) => {
-  const styles = useStyles2(getStyles);
+export const EmptyState = ({ message, imgWidth, padding }: Props) => {
+  const styles = useStyles2(getStyles, padding);
 
   return (
     <div className={styles.container}>
-      <Box paddingY={6}>
-        <Stack direction="column" alignItems="center" gap={3}>
-          <GrotNotFound width={imgWidth ?? 300} />
-          {typeof message === 'string' &&  <Text textAlignment={'center'} variant="h5">{message}</Text>}
-          {typeof message !== 'string' &&  message}
-        </Stack>
-      </Box>
+      <Stack direction="column" alignItems="center" gap={3}>
+        <GrotNotFound width={imgWidth ?? 300} />
+        {typeof message === 'string' &&  <Text textAlignment={'center'} variant="h5">{message}</Text>}
+        {typeof message !== 'string' &&  message}
+      </Stack>
     </div>
   );
 };
 
 EmptyState.displayName = 'EmptyState';
 
-function getStyles() {
+function getStyles(theme: GrafanaTheme2, padding?: string) {
   return {
     container: css({
       width: '100%',
       display: 'flex',
       justifyContent: 'space-evenly',
       flexDirection: 'column',
+      padding: padding ? padding : 0,
     }),
   };
 }
