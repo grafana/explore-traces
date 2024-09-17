@@ -259,7 +259,7 @@ However, in the drop-down list, you can choose any resource level attribute to g
 
 You can use **Other** attributes to select a different attribute.
 
-#### Use the Breakdown tab for comparisons
+#### Use the Breakdown tab
 
 The **Breakdown** tab highlights attributes that are correlated with the selected metric.
 When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
