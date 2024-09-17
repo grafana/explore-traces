@@ -259,7 +259,7 @@ However, in the drop-down list, you can choose any resource level attribute to g
 
 You can use **Other** attributes to select a different attribute.
 
-#### Use the Breakdown tab
+#### Use the Breakdown tab for comparisons
 
 The **Breakdown** tab highlights attributes that are correlated with the selected metric.
 For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
