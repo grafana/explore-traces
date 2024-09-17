@@ -6,7 +6,7 @@
   "autoEnabled": true,
   "info": {
     "keywords": ["app", "tempo", "traces", "explore"],
-    "description": "Query-less exploration of trace data stored in Tempo",
+    "description": "Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.",
     "author": {
       "name": "Grafana"
     },
@@ -14,9 +14,32 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "patterns",
+        "path": "img/histogram-breakdown.png"
+      },
+      {
+        "name": "fields",
+        "path": "img/errors-metric-flow.png"
+      },
+      {
+        "name": "table",
+        "path": "img/errors-root-cause.png"
+      }
+    ],
     "version": "%VERSION%",
-    "updated": "%TODAY%"
+    "updated": "%TODAY%",
+    "links": [
+      {
+        "name": "Github",
+        "url": "https://github.com/grafana/explore-traces"
+      },
+      {
+        "name": "Report bug",
+        "url": "https://github.com/grafana/explore-traces/issues/new"
+      }
+    ]
   },
   "includes": [
     {
