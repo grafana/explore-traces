@@ -38,6 +38,7 @@ import { DetailsScene } from '../../components/Explore/TracesByService/DetailsSc
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
 import { VariableHide } from '@grafana/schema';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
@@ -212,26 +213,27 @@ export class TraceExplorationScene extends SceneObjectBase {
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = getFiltersVariable(traceExploration);
 
-    const menu = (
-      <Menu>
-        <div className={styles.menu}>
-          <Menu.Item
-            label="Give feedback"
-            ariaLabel="Give feedback"
-            icon={'comment-alt-message'}
-            url="https://forms.gle/52nPMeDvZ4iZD9iV8"
-            target="_blank"
-          />
-          <Menu.Item
-            label="Documentation"
-            ariaLabel="Documentation"
-            icon={'external-link-alt'}
-            url="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/"
-            target="_blank"
-          />
-        </div>
-      </Menu>
-    );
+    const menu = 
+    <Menu>
+      <div className={styles.menu}>
+        <Menu.Item 
+          label="Give feedback" 
+          ariaLabel="Give feedback" 
+          icon={"comment-alt-message"}
+          url='https://forms.gle/52nPMeDvZ4iZD9iV8'
+          target='_blank'
+          onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.global_docs_link_clicked)}
+        />
+        <Menu.Item
+          label="Documentation"
+          ariaLabel="Documentation"
+          icon={"external-link-alt"}
+          url='https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/'
+          target='_blank'
+          onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.feedback_link_clicked)}
+        />
+      </div>
+    </Menu>;
 
     return (
       <div className={styles.container}>
