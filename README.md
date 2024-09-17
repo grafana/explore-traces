@@ -2,113 +2,70 @@
 
 Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.
 
-## What are Grafana app plugins?
+## Access or install Explore Traces
 
-App plugins can let you create a custom out-of-the-box monitoring experience by custom pages, nested datasources and panel plugins.
+You can access Explore Traces using Grafana Cloud or a self-managed OSS Grafana or Grafana Enterprise.
 
-## What is @grafana/scenes?
+The easiest way to access Explore Traces is in Grafana Cloud. No setup or installation is required.
 
-[@grafana/scenes](https://github.com/grafana/scenes) is a framework to enable versatile app plugins implementation. It provides an easy way to build apps that resemble Grafana's dashboarding experience, including template variables support, versatile layouts, panels rendering and more.
+To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
 
-To learn more about @grafana/scenes usage please refer to the [documentation](https://grafana.com/developers/scenes)
+### Grafana Cloud
 
-## What does this template contain?
+To use Explore Traces, you need:
 
-1. An example of a simple scene. See [Home scene](./src/pages/Home/Home.tsx)
-1. An example of a scene with tabs. See [Scene with tabs](./src/pages/WithTabs/WithTabs.tsx)
-1. An example of a scene with drill down. See [Scene with drill down](./src/pages/WithDrilldown/WithDrilldown.tsx)
+* A Grafana Cloud account
+* A Grafana stack in Grafana Cloud with a configured Tempo data source receiving tracing data
 
-### Frontend
+To access Explore Traces:
 
-1. Install dependencies
+1. Open your Grafana stack in a web browser.
+1. In the main menu, select **Explore** > **Traces**.
 
-   ```bash
-   npm install
-   ```
+### Grafana
 
-2. Build plugin in development mode and run in watch mode
+To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 
-   ```bash
-   npm run dev
-   ```
+- Your own Grafana instance
+- A configured [Tempo data source](ref:tempo-data-source)
+- The [Explore Traces plugin](https://grafana.com/grafana/plugins/explore-traces-app/)
 
-3. Build plugin in production mode
+#### Install the Explore Traces plugin
 
-   ```bash
-   npm run build
-   ```
+Explore Traces is distributed as a Grafana Plugin.
+You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-exploretraces-app/).
 
-4. Run the tests (using Jest)
+>**NOTE:** All Grafana Cloud instances come with the Explore Traces plugin preinstalled.
 
-   ```bash
-   # Runs the tests and watches for changes, requires git init first
-   npm run test
+#### Install in your Grafana instance
 
-   # Exits after running all the tests
-   npm run test:ci
-   ```
+You can install Explore Traces in your own Grafana instance using `grafana cli`:
 
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
+```shell
+grafana cli --pluginUrl=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip plugins install grafana-traces-app
+```
 
-   ```bash
-   npm run server
-   ```
+Alternatively, follow these steps to install Explore Traces in Grafana:
 
-6. Run the E2E tests (using Cypress)
+1. In Grafana, go to **Administration** > **Plugins and data** > **Plugins**.
+2. Search for "Explore Traces".
+3. Select Explore Traces.
+4. Click **Install**.
 
-   ```bash
-   # Spins up a Grafana instance first that we tests against
-   npm run server
+The plugin is automatically activated after installation.
 
-   # Starts the tests
-   npm run e2e
-   ```
+#### Install for a Docker container
 
-7. Run the linter
+If you want to install the app in a Docker container, you need to configure the following environment variable:
 
-   ```bash
-   npm run lint
+```shell
+GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
+```
 
-   # or
+## Learn more 
 
-   npm run lint:fix
-   ```
+To learn more about Explore Traces, refer to our documentation in [the repository](docs/sources/_index.md) or published in the [Grafana open source](https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces) documentation. 
 
-# Distributing your plugin
+## Contribute 
 
-When distributing a Grafana plugin either within the community or privately the plugin must be signed so the Grafana application can verify its authenticity. This can be done with the `@grafana/sign-plugin` package.
-
-_Note: It's not necessary to sign a plugin during development. The docker development environment that is scaffolded with `@grafana/create-plugin` caters for running the plugin without a signature._
-
-## Initial steps
-
-Before signing a plugin please read the Grafana [plugin publishing and signing criteria](https://grafana.com/legal/plugins/#plugin-publishing-and-signing-criteria) documentation carefully.
-
-`@grafana/create-plugin` has added the necessary commands and workflows to make signing and distributing a plugin via the grafana plugins catalog as straightforward as possible.
-
-Before signing a plugin for the first time please consult the Grafana [plugin signature levels](https://grafana.com/legal/plugins/#what-are-the-different-classifications-of-plugins) documentation to understand the differences between the types of signature level.
-
-1. Create a [Grafana Cloud account](https://grafana.com/signup).
-2. Make sure that the first part of the plugin ID matches the slug of your Grafana Cloud account.
-   - _You can find the plugin ID in the `plugin.json` file inside your plugin directory. For example, if your account slug is `acmecorp`, you need to prefix the plugin ID with `acmecorp-`._
-3. Create a Grafana Cloud API key with the `PluginPublisher` role.
-4. Keep a record of this API key as it will be required for signing a plugin
-
-## Signing a plugin
-
-### Using Github actions release workflow
-
-If the plugin is using the github actions supplied with `@grafana/create-plugin` signing a plugin is included out of the box. The [release workflow](./.github/workflows/release.yml) can prepare everything to make submitting your plugin to Grafana as easy as possible. Before being able to sign the plugin however a secret needs adding to the Github repository.
-
-1. Please navigate to "settings > secrets > actions" within your repo to create secrets.
-2. Click "New repository secret"
-3. Name the secret "GRAFANA_API_KEY"
-4. Paste your Grafana Cloud API key in the Secret field
-5. Click "Add secret"
-
-#### Push a version tag
-
-To trigger the workflow we need to push a version tag to github. This can be achieved with the following steps:
-
-1. Run `npm version <major|minor|patch>`
-2. Run `git push origin main --follow-tags`
+Want to help with the project? Consider contributing to the project. 
