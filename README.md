@@ -1,6 +1,14 @@
 # Grafana Traces app
 
-Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.
+Distributed traces provide a way to monitor applications by tracking requests across services.
+Traces record the details of a request to help understand why an issue is or was happening.
+
+Tracing is best used for analyzing the performance of your system, identifying bottlenecks, monitoring latency, and providing a complete picture of how requests are processed.
+
+Explore Traces helps you make sense of your tracing data so you can automatically visualize insights from your Tempo traces data.
+Before this app, you would use [TraceQL](https://grafana.com/docs/tempo/latest/traceql/), the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
+
+![Explore Traces](docs/sources/explore-traces-homescreen.png)
 
 ## Access or install Explore Traces
 
@@ -62,10 +70,10 @@ If you want to install the app in a Docker container, you need to configure the 
 GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
 ```
 
-## Learn more 
+## Learn more
 
-To learn more about Explore Traces, refer to our documentation in [the repository](docs/sources/_index.md) or published in the [Grafana open source](https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces) documentation. 
+To learn more about Explore Traces, refer to our documentation in [the repository](docs/sources/_index.md) or published in the [Grafana open source](https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces) documentation.
 
-## Contribute 
+## Contribute
 
-Want to help with the project? Consider contributing to the project. 
+Want to help with the project? Consider contributing to the project.
