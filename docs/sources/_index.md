@@ -201,7 +201,7 @@ Server spans
 : Explore service-specific segments of traces
 
 Consumer spans
-: Analyze how queues are consumed. A consumer span indicates an async handoff between services. These handsoffs are almost always uses a queue.
+: Analyze how queues are consumed. A consumer span indicates an asynchronous handoff between services. These handoffs are almost always uses a queue.
 
 Database calls
 : Evaluate performance issues in database interactions
@@ -273,9 +273,9 @@ Selecting an option for a filter automatically updates the displayed data. If th
 To modify an applied filter:
 
 1. Select the filter to modify in the Filter bar.
--1. Select a new option from the drop-down list.
--
-- You can also click in the **Filter** bar to add filters using drop-down lists.
+1. Select an option from the drop-down list.
+
+You can also click in the **Filter** bar to add filters using drop-down lists.
 
 #### Remove one or more filters
 
@@ -335,6 +335,8 @@ Each RED metric has a trace list:
 
 Use the time picker at the top right to modify the data shown in Explore Traces.
 
-You can select a time range of up to 24h hours in duration. This time range can be any 24h period in your configured trace data retention period (30 days by default).
+You can select a time range of up to 24h hours in duration.
+This time range can be any 24h period in your configured trace data retention period.
+The default is 30 days.
 
 For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).
