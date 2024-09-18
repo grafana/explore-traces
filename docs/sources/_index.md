@@ -190,7 +190,7 @@ You can use the full trace (trace roots), or you can select a more specific type
 
 By default, Explore Traces displays information about full traces. You can change this by using the selector in the Filter bar.
 
-![Selecting a signal type](explore-traces-select-signal.png)
+![Selecting a signal type](images/explore-traces-select-signal.png)
 
 You can use any one of these primary signal types.
 
@@ -201,7 +201,7 @@ Server spans
 : Explore service-specific segments of traces
 
 Consumer spans
-: Analyze how queues are consumed. A consumer span indicates an asynchronous handoff between services. These handoffs are almost always uses a queue.
+: Analyze how queues are consumed. A consumer span indicates an asynchronous handoff between services. These handoffs are almost always a queue.
 
 Database calls
 : Evaluate performance issues in database interactions
@@ -250,7 +250,7 @@ The list of filters expands as you investigate and explore your tracing data usi
     * Select **Inspect**.
     * Use the **Filter** bar near the top.
 
-![Change filters for your investigation](explore-traces-filters.png)
+![Change filters for your investigation](images/explore-traces-filters.png)
 
 #### Use the Breakdown tab
 
@@ -263,12 +263,15 @@ You can change the **Scope** to show **Resource** or **Span**.
 Using the **Group by** selector, you can group the selected metric by different attributes.
 For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
 
+![Errors metric showing the **Breakdown** tab without filters](/media/docs/explore-traces/explore-traces-breakdown-errors-v0.9.png)
+
 The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
-However, in the drop-down list, you can choose any resource level attribute to group by.
+In the drop-down list, you can choose any resource level attribute to group by.
 
 #### Modify a filter
 
-Selecting an option for a filter automatically updates the displayed data. If there are no matches, the app displays a “No data for selected query” message.
+Selecting an option for a filter automatically updates the displayed data.
+If there are no matches, the app displays a “No data for selected query” message.
 
 To modify an applied filter:
 
@@ -304,6 +307,8 @@ The behavior of the comparison also differs depending upon the RED metric you've
 For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
 However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
 
+![Comparison view](/media/docs/explore-traces/explore-traces-rate-comparison.png)
+
 #### Structure
 
 The structural tab lets you extract and view aggregate data from your traces.
@@ -315,13 +320,17 @@ The structural tab lets you extract and view aggregate data from your traces.
 For **Rate**, the **Service structure** tab shows you how your applications "talk" to each other to fulfill requests.
 Using this tab helps you analyze the service structure of the traces that match the current filters.
 
+![Service structure tab](/media/docs/explore-traces/explore-traces-rate-service-structure-v0.9.png)
+
 For **Errors**, the **Root cause errors** tab shows structure of errors beneath your selected filters. You can use this tab to immediately see the chain of errors that are causing issues higher up in traces.
 
-![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
+![Link to span data from Root cause errors](/media/docs/explore-traces/explore-traces-errors-root-cause-v0.9.png)
 
 When you select **Duration** metrics, the **Root cause latency** tab shows the structure of the longest running spans so you can analyze the structure of slow spans.
 
 The pictured spans are an aggregated view compiled using spans from multiple traces.
+
+![Duration metric showing root cause latency](/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
 
 #### Trace list
 
@@ -330,6 +339,8 @@ Each RED metric has a trace list:
 * **Rate** provides a tab that lists **Traces**
 * **Errors** provides a list of **Errored traces**
 * **Duration** lists **Slow traces**
+
+![Example trace list for Duration showing slow traces](/media/docs/explore-traces/explore-traces-duration-slow-traces-v0.9.png)
 
 ## Change selected time range
 
