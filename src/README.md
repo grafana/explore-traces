@@ -23,12 +23,12 @@ Using the app, you can:
 To use Explore Traces with Grafana Cloud, you need:
 
 - A Grafana Cloud account
-- A Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) recieving tracing data
+- A Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) receiving tracing data
 
 To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 
 - Your own Grafana instance
-- A configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/)
+- A configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/) receiving tracing data
 
 ## Getting started
 
