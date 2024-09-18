@@ -4,20 +4,32 @@ Remove any remaining comments before publishing as these may be displayed on Gra
 
 # Explore Traces
 
-Explore Traces offers a query-less experience for browsing Tempo trace data without the need for writing complex queries. Discover or narrow down your investigation using the interacting web-based interface. Quickly find relevant traces in the app with just a few clicks.
+Distributed traces provide a way to monitor applications by tracking requests across services.
+Traces record the details of a request to help understand why an issue is or was happening.
+Tracing is best used for analyzing the performance of your system, identifying bottlenecks, monitoring latency, and providing a complete picture of how requests are processed.
+
+Explore Traces helps you make sense of your tracing data so you can automatically visualize insights from your Tempo traces data.
+Using the app, you can:
+
+* Use Rate, Errors, and Duration (RED) metrics derived from traces to investigate issues
+* Uncover related issues and monitor changes over time
+* Browse automatic visualizations of your data based on its characteristics
+* Do all of this without writing TraceQL queries
+
+![Root cause latency using Duration metrics](/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
 
 ## Requirements
 
-Requires Grafana 11.0.0 or newer.
+Requires Grafana 11.2.0 or newer.
 
-## Getting Started
+## Getting started
 
-See the [getting started](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/logs/get-started/) for more info using Explore Logs.
-For instructions installing, see the [access and installation instructions](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/logs/access/)
+Refer to the [Explore Traces](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/) documentation. 
+For instructions installing, refer to the [access and installation instructions](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/).
 
-## Documentation
+## Resources
 
-- [DOCS](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/)
+- [Documentation](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/)
 - [CHANGELOG](https://github.com/grafana/explore-traces/releases)
 - [GITHUB](https://github.com/grafana/explore-traces/)
 
@@ -38,7 +50,7 @@ If your issue is a bug, please open one [here](https://github.com/grafana/explor
 ### Changes
 
 We do not have a formal proposal process for changes or feature requests. If you have a change you would like to see in
-Explore Logs, please [file an issue](https://github.com/grafana/explore-traces/issues/new) with the necessary details.
+Explore Traces, please [file an issue](https://github.com/grafana/explore-traces/issues/new) with the necessary details.
 
 
 <!-- To help maximize the impact of your README and improve usability for users, we propose the following loose structure:
