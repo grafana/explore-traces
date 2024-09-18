@@ -158,7 +158,7 @@ First, you select **Full traces** as the signal type and then choose the **Error
 Using **Full traces** provides insights into the errors in the root of your traces or at the edge of your application.
 For other investigations, you could use **Server spans** signal type if you're interested in any entrypoint to any service or **Database calls** if you're concerned about databases.
 
-To correlate attribute values with errors, you can use the **Comparison** tab.
+To correlate attribute values with errors, you can use the **Breakdown** tab.
 This tab surfaces attributes values that heavily correlate with erroring spans.
 The results are ordered by the difference in those attributes by the highest ones first which helps
 you see what's causing the errors immediately.
@@ -237,7 +237,8 @@ If no data or limited data appears, refresh the page. Verify that you have selec
 
 Next, refine your investigation by adding filters.
 
-Filters are available on the **Breakdown** and **Comparison** tabs. 
+Filters are available on the **Breakdown** and **Comparison** tabs.
+
 Each time you add a filter, the condition appears in the list of filters at the top of the page.
 The list of filters expands as you investigate and explore your tracing data using Explore Traces.
 
@@ -245,21 +246,11 @@ The list of filters expands as you investigate and explore your tracing data usi
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
 1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
 1. Choose filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters on the **Comparison** and **Breakdown** tabs in the following ways:
-    * Select **Add to filters**. 
+    * Select **Add to filters**.
     * Select **Inspect**.
     * Use the **Filter** bar near the top.
 
 ![Change filters for your investigation](explore-traces-filters.png)
-
-#### Group by attributes
-
-Using the **Group by** filter, you can group the selected metric by different attributes.
-For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
-
-The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
-However, in the drop-down list, you can choose any resource level attribute to group by.
-
-You can use **Other** attributes to select a different attribute.
 
 #### Use the Breakdown tab
 
@@ -269,6 +260,12 @@ When you select **Rate**, **Breakdown** orders attributes by their rate of reque
 
 You can change the **Scope** to show **Resource** or **Span**.
 
+Using the **Group by** selector, you can group the selected metric by different attributes.
+For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
+
+The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
+However, in the drop-down list, you can choose any resource level attribute to group by.
+
 #### Modify a filter
 
 Selecting an option for a filter automatically updates the displayed data. If there are no matches, the app displays a “No data for selected query” message.
@@ -276,10 +273,9 @@ Selecting an option for a filter automatically updates the displayed data. If th
 To modify an applied filter:
 
 1. Select the filter to modify in the Filter bar.
-1. Select a new option from the drop-down list.
-
- You can also click in the **Filter** bar to add filters using drop-down lists.
-  
+-1. Select a new option from the drop-down list.
+-
+- You can also click in the **Filter** bar to add filters using drop-down lists.
 
 #### Remove one or more filters
 
@@ -307,7 +303,6 @@ The **Comparison** tab highlights attributes that are correlated with the select
 The behavior of the comparison also differs depending upon the RED metric you've chosen.
 For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
 However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
-
 
 #### Structure
 
