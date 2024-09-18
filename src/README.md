@@ -18,9 +18,17 @@ Using the app, you can:
 
 ![Root cause latency using Duration metrics](/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
 
-## Requirements
+## Before you begin
 
-Requires Grafana 11.2.0 or newer.
+To use Explore Traces with Grafana Cloud, you need:
+
+- A Grafana Cloud account
+- A Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) recieving tracing data
+
+To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
+
+- Your own Grafana instance
+- A configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/)
 
 ## Getting started
 
