@@ -91,7 +91,7 @@ Explore Traces requires Tempo 2.6 or newer.
 To use Explore Traces, you need:
 
 - A Grafana Cloud account
-- A Grafana stack in Grafana Cloud with a configured [Tempo data source](ref:tmepo-data-source) receiving tracing data
+- A Grafana stack in Grafana Cloud with a configured [Tempo data source](ref:tempo-data-source) receiving tracing data
 
 To access Explore Traces:
 
