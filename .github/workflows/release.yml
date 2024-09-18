@@ -6,6 +6,28 @@ on:
   push:
     tags:
       - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+  workflow_dispatch:
+    # inputs:
+    #   target_dev:
+    #     description: "Publish to dev"
+    #     required: true
+    #     type: boolean
+    #     default: false
+    #   target_ops:
+    #     description: "Publish to ops"
+    #     required: true
+    #     type: boolean
+    #     default: false
+    #   target_prod:
+    #     description: "Publish to prod"
+    #     required: true
+    #     type: boolean
+    #     default: false
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - ".github/workflows/release.yml"
 
 permissions:
   contents: write
@@ -52,3 +74,48 @@ jobs:
           destination: 'integration-artifacts/grafana-exploretraces-app/'
           glob: '*.zip'
           parent: false
+
+  publish:
+    needs: [release]
+    strategy:
+      fail-fast: false
+      matrix:
+        # environment: ["dev", "ops", "prod"]
+        environment: ["dev"]
+        # exclude:
+        #   - environment: ${{ !inputs.target_dev && 'dev' }}
+        #   - environment: ${{ !inputs.target_ops && 'ops' }}
+        #   - environment: ${{ !inputs.target_prod && 'prod' }}
+    environment: ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    container:
+      image: grafana/integration-grafana-publisher:v11
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Auth with Google service account for bypassing IAP
+        uses: "google-github-actions/auth@v2"
+        id: gcloud-iap-auth
+        if: ${{ matrix.environment != 'prod' }}
+        with:
+          project_id: ${{ vars.GOOGLE_IAP_PROJECT_ID }}
+          token_format: id_token
+          workload_identity_provider: projects/304398677251/locations/global/workloadIdentityPools/github/providers/github-provider
+          service_account: ${{ vars.GOOGLE_IAP_SERVICE_ACCOUNT }}
+          id_token_audience: 194555723165-aftshfqa32nig79trcrh96ha94ta46jd.apps.googleusercontent.com
+          id_token_include_email: true
+          create_credentials_file: false
+          export_environment_variables: false
+      - name: Publish new plugin version on grafana.com
+        working-directory: plugins/grafana-exploretraces-app
+        shell: bash
+        env:
+          GCOM_API_PLUGINS: ${{ vars.GRAFANA_BASE_URL }}/api/plugins
+          GCOM_IAP_TOKEN: ${{ steps.gcloud-iap-auth.outputs.id_token }}
+          GCOM_PUBLISH_TOKEN: ${{ secrets.GRAFANA_PLUGINS_SIGN_AND_PUBLISH_TOKEN }}
+          GITHUB_TOKEN: $GITHUB_TOKEN
+        run: |
+          PLUGIN_ID=`jq -r .id src/plugin.json`
+          VERSION=`jq -r .version package.json`
+          GCLOUD_SERVICE_KEY=$(echo ${{ secrets.GCP_SERVICE_ACCOUNT_JSON_BASE64 }} | base64 -d) /root/app/bin/grafana-publisher.js --auto --dryrun publish-from-monorepo $PLUGIN_ID $VERSION ${{github.server_url}}/${{ github.repository }} ${{ github.sha }} ${{ matrix.environment == 'prod' && 'release' || format('release-{0}', matrix.environment) }}
+
