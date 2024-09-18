@@ -3,26 +3,26 @@
 name: Release
 
 on:
+  push:
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
   workflow_dispatch:
-    inputs:
-      target_dev:
-        description: "Publish to dev"
-        required: true
-        type: boolean
-        default: false
-      target_ops:
-        description: "Publish to ops"
-        required: true
-        type: boolean
-        default: false
-      target_prod:
-        description: "Publish to prod"
-        required: true
-        type: boolean
-        default: false
-  # push:
-  #   tags:
-  #     - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+    # inputs:
+    #   target_dev:
+    #     description: "Publish to dev"
+    #     required: true
+    #     type: boolean
+    #     default: false
+    #   target_ops:
+    #     description: "Publish to ops"
+    #     required: true
+    #     type: boolean
+    #     default: false
+    #   target_prod:
+    #     description: "Publish to prod"
+    #     required: true
+    #     type: boolean
+    #     default: false
   # pull_request:
   #   branches:
   #     - main
@@ -80,11 +80,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: ["dev", "ops", "prod"]
-        exclude:
-          - environment: ${{ !inputs.target_dev && 'dev' }}
-          - environment: ${{ !inputs.target_ops && 'ops' }}
-          - environment: ${{ !inputs.target_prod && 'prod' }}
+        # environment: ["dev", "ops", "prod"]
+        environment: ["dev"]
+        # exclude:
+        #   - environment: ${{ !inputs.target_dev && 'dev' }}
+        #   - environment: ${{ !inputs.target_ops && 'ops' }}
+        #   - environment: ${{ !inputs.target_prod && 'prod' }}
     environment: ${{ matrix.environment }}
     runs-on: ubuntu-latest
     container:
