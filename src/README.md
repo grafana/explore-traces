@@ -16,7 +16,7 @@ Using the app, you can:
 * Browse automatic visualizations of your data based on its characteristics
 * Do all of this without writing TraceQL queries
 
-![Root cause latency using Duration metrics](/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
+![Root cause latency using Duration metrics](https://grafana.com/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
 
 ## Before you begin
 
