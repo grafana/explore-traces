@@ -84,12 +84,14 @@ The easiest way to access Explore Traces is in Grafana Cloud. No setup or instal
 
 To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
 
+Explore Traces requires Tempo 2.6 or newer.
+
 ### Grafana Cloud
 
 To use Explore Traces, you need:
 
-* A Grafana Cloud account
-* A Grafana stack in Grafana Cloud with a configured Tempo data source receiving tracing data
+- A Grafana Cloud account
+- A Grafana stack in Grafana Cloud with a configured [Tempo data source](ref:tmepo-data-source) receiving tracing data
 
 To access Explore Traces:
 
@@ -100,8 +102,8 @@ To access Explore Traces:
 
 To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 
-- Your own Grafana instance
-- A configured [Tempo data source](ref:tempo-data-source)
+- Your own Grafana instance running version 11.2 or newer
+- A configured [Tempo data source](ref:tempo-data-source) receiving tracing data
 - The [Explore Traces plugin](https://grafana.com/grafana/plugins/explore-traces-app/)
 
 #### Install the Explore Traces plugin
