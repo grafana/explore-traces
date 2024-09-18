@@ -1,8 +1,5 @@
 ---
 cascade:
-  _build:
-    list: false
-  noindex: true
   FULL_PRODUCT_NAME: Grafana Explore Traces
   PRODUCT_NAME: Explore Traces
 description: Learn about traces and how you can use them to understand and troubleshoot
@@ -14,40 +11,40 @@ keywords:
 title: Explore Traces
 menuTitle: Explore Traces
 weight: 100
+refs:
+  tempo-data-source:
+    - pattern: /docs/grafana/
+      destination: /docs/grafana/<GRAFANA_VERSION>/datasources/tempo/
+    - pattern: /docs/grafana-cloud/
+      destination: /docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/
 ---
 
 # Explore Traces
 <!-- Use this for the product name {{< param "PRODUCT_NAME" >}} -->
 
-{{< docs/private-preview product="Explore Traces" >}}
+{{< docs/public-preview product="Explore Traces" >}}
 
-Distributed traces provide a way to monitor applications by tracking records across services.
-Traces make it possible to follow along with a request to understand why an issue is or was happening.
+Distributed traces provide a way to monitor applications by tracking requests across services.
+Traces record the details of a request to help understand why an issue is or was happening.
 
 Tracing is best used for analyzing the performance of your system, identifying bottlenecks, monitoring latency, and providing a complete picture of how requests are processed.
 
-Explore Traces helps you easily get started and make sense of your tracing data so you can automatically visualize insights from your Tempo and Hosted traces data.
+Explore Traces helps you make sense of your tracing data so you can automatically visualize insights from your Tempo traces data.
+Before this app, you would use [TraceQL](https://grafana.com/docs/tempo/<TEMPO_VERSION>/traceql/), the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
 
-Explore Traces lets you automatically visualize and explore your traces without having to write queries.
-Before this app, you would need to use TraceQL, the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
+<!-- need new video {{< youtube id="Yqx8yCMCvgQ" >}} -->
 
-{{< youtube id="Yqx8yCMCvgQ" >}}
-
-<!-- ![The Explore Traces app](explore-traces-homescreen.png) -->
+![The Explore Traces app](explore-traces-homescreen.png)
 
 Using the app, you can:
 
-* Use Rate, Errors, and Duration (RED) metrics to investigate issues
+* Use Rate, Errors, and Duration (RED) metrics derived from traces to investigate issues
 * Uncover related issues and monitor changes over time
-* Browse automatic visualizations of your data based on its characteristics.
-* Do all of this without writing TraceQL queries.
+* Browse automatic visualizations of your data based on its characteristics
+* Do all of this without writing TraceQL queries
 
-To explore tracing data, you need to:
-
-1. Determine the metric you want to use: rates, errors, or duration.
-1. Define filters to refine the view of your data.
-1. Investigate the data to compare a baseline and selected data.
-1. Inspect data to drill down to view a breakdown, structure of the span tree, or individual spans.
+<!-- make live when the app is available in play.grafana
+{{< docs/play title="the Grafana Play site" url="https://play.grafana.org/a/grafana-exploretraces-app/FIXME" >}} -->
 
 ## Concepts
 
@@ -57,7 +54,7 @@ This section provides an overview of some of these concepts and links to additio
 
 ### Rate, error, and duration metrics
 
-The Explore Traces app lets you explore Rate, errors, and duration (RED) metrics generated from your traces by Tempo.
+The Explore Traces app lets you explore rate, error, and duration (RED) metrics generated from your traces by Tempo.
 
 | Metric | Meaning | Useful for investigating |
 |---|---|---|
@@ -79,72 +76,112 @@ It frequently includes key/value attributes that are relevant to the span itself
 
 For more information, refer to [Use traces to find solutions](https://grafana.com/docs/tempo/latest/introduction/solutions-with-traces/) in the Tempo documentation.
 
-## Before you begin
+## Access or install Explore Traces
+
+You can access Explore Traces using Grafana Cloud or a self-managed OSS Grafana or Grafana Enterprise.
+
+The easiest way to access Explore Traces is in Grafana Cloud. No setup or installation is required.
+
+To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
+
+### Grafana Cloud
 
 To use Explore Traces, you need:
 
 * A Grafana Cloud account
-* A Grafana stack in Grafana Cloud with a configured Hosted Traces or Tempo data source
+* A Grafana stack in Grafana Cloud with a configured Tempo data source receiving tracing data
+
+To access Explore Traces:
+
+1. Open your Grafana stack in a web browser.
+1. In the main menu, select **Explore** > **Traces**.
+
+### Grafana
+
+To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
+
+- Your own Grafana instance
+- A configured [Tempo data source](ref:tempo-data-source)
+- The [Explore Traces plugin](https://grafana.com/grafana/plugins/explore-traces-app/)
+
+#### Install the Explore Traces plugin
+
+Explore Traces is distributed as a Grafana Plugin.
+You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-exploretraces-app/).
+
+{{< admonition type="note" >}}
+All Grafana Cloud instances come with the Explore Traces plugin preinstalled.
+{{< /admonition >}}
+
+#### Install in your Grafana instance
+
+You can install Explore Traces in your own Grafana instance using `grafana cli`:
+
+```shell
+grafana cli --pluginUrl=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip plugins install grafana-traces-app
+```
+
+Alternatively, follow these steps to install Explore Traces in Grafana:
+
+1. In Grafana, go to **Administration** > **Plugins and data** > **Plugins**.
+2. Search for "Explore Traces".
+3. Select Explore Traces.
+4. Click **Install**.
+
+The plugin is automatically activated after installation.
+
+#### Install for a Docker container
+
+If you want to install the app in a Docker container, you need to configure the following environment variable:
+
+```shell
+GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
+```
 
 ## Investigate tracing data
 
-Traces can help you locate errors in your apps and services.
-When you first view Explore Traces, the default search shows the **Rate** of **Full traces**.
+Most investigations follow these steps:
 
-Your investigations follow two phases.
-In the first phase, you narrow down the process level that's having the issue.
-This includes filters like cluster, namespace, environment, region, or process.
+1. Select the primary signal.
+1. Choose the metric you want to use: rates, errors, or duration.
+1. Define filters to refine the view of your data.
+1. Use the structural or trace list to drill down into the issue.
 
-After you’ve identified the problem process, you can filter and explore using process internals.
-This includes filters like http.path, db.statement, or span name.
-This identifies activities conducted by the resource.
+### Example
 
-When you use Explore Traces, your investigations follow these general steps:
+For example, say that you want to figure out the source of errors in your spans.
 
-1. Choose or verify your data source.
-1. Optional: Select the signal you want to observe. **Full traces** are the default selection.
-1. Click a graph to select a **Rate**, **Error**, or **Duration** metric type. Notice that your selection adds to the filter bar.
-1. Look for spikes or trends in the data to help identify issues.
-1. Refine your investigation by adding filters or select **Analyze the current selection**.
-    1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
-    1. Optional: Select **Add to filters** or **Analyze Traces** to drill-down into the data.
-1. Select **Analyze Traces** to focus the displayed data into your filtered view.
-1. Select filters to hone in on the problem areas. Each filter that select adds to the Filter statement at the top of the page. You can select filters in the following ways:
-    1. Select **Inspect**.
-    1. Use the **Search** field.
-1. Use **Breakdown**, **Structure**, and **Spans** tabs to view a summary, trace structure, or a list of spans matching your filter criteria.
-1. Optional: Add, remove, or modify filters.
-1. Select **Investigate** to view the next level of data.
+You'll need to compare the errors in the traces to locate the problem trace.
+Here's how this works.
 
-{{< admonition type="tip" >}}
-If no data or limited data appears, refresh the page. Verify that you have selected the correct data source in the Data source drop-down.
-{{< /admonition >}}
+First, you select **Full traces** as the signal type and then choose the **Errors** metric.
+Using **Full traces** provides insights into the errors in the root of your traces or at the edge of your application.
+For other investigations, you could use **Server spans** signal type if you're interested in any entrypoint to any service or **Database calls** if you're concerned about databases.
 
-### Compare tracing data
+To correlate attribute values with errors, you can use the **Breakdown** tab.
+This tab surfaces attributes values that heavily correlate with erroring spans.
+The results are ordered by the difference in those attributes by the highest ones first which helps
+you see what's causing the errors immediately.
+You can see here that 99.34% of the time the span name was equal to `HTTP GET /api/datasources/proxy/uid/:uid/*` the span was also erroring.
 
-After you select **Analyze Traces**, you can compare the tracing data you’ve filtered with additional selections. Your original selection becomes the baseline data.
-You can make additional selections to compare with the baseline.
+![Errors are immediately visible by the large red bars](images/explore-traces-errors-metric-flow.png)
 
-The **Breakdown** view shows the comparison results.
+To dig deeper into this issue, select **Inspect** to focus in on the problem.
+It's easy to spot the problem: the tall, red bar indicates that the problems are happening with  `HTTP GET /api/datasources/proxy/uid/:uid/*`.
+Next, use **Add to filters** to focus just on the erroring API call.
 
-To compare tracing data after selecting Analyze Traces, select Investigate errors.
+![Add to filters to focus on the API call](images/explore-traces-errors-add-filters-flow.png)
 
-1. For Rate and Error investigations, select **Investigate errors**. For Duration investigations, select an area of the histogram to start an investigation.
-1. Optional: Click and drag on the top graph or histogram to focus on a specific time frame or data range.
-1. Optional: Add additional filters or change how the data displays by selecting a different attribute to search by.
+Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in them.
+To view additional details, you right-click on a line and select **HTTP Outgoing Request**.
 
-If you use the Structure or Spans view, you can return to the comparison by selecting **Breakdown**.
+![Contextual menu available in the Root cause errors tab](images/explore-traces-errors-rcause-menu.png)
 
-Use the **Structure** view to see a list of the traces and spans that match the filters.
-You can modify the structure to show available attributes, for example, errors, services, and databases.
+Clicking on an entry opens up one of the individual traces used to construct that aggregate view so you can deep dive into a single example transaction.
 
-![Using the Duration histogram and Structure view](explore-traces-histogram-structure.png)
+![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
 
-Use the **Spans** view to see a list of all spans that match the filter criteria. You can expand the details contained in a span to locate specific errors.
-
-![Identifying the error in the span](explore-traces-error-spans.png)
-
-## Change the signal type to observe
+### Change the primary signal type to observe
 
 Tracing data is highly structured and annotated and reflects events that happen in your services.
 You can choose the type of services you want to observe and think about.
@@ -155,51 +192,151 @@ By default, Explore Traces displays information about full traces. You can chang
 
 ![Selecting a signal type](explore-traces-select-signal.png)
 
-## Change selected time range
+You can use any one of these primary signal types.
 
-Use the time picker at the top right to modify the data shown in Explore Traces.
+Full traces
+: Inspect full journeys of requests across services
 
-You can view data for up to the last three hours. This is a limitation of TraceQL metrics.
+Server spans
+: Explore service-specific segments of traces
 
-For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).
+Consumer spans
+: Analyze how queues are consumed. A consumer span indicates an asynchronous handoff between services. These handoffs are almost always uses a queue.
 
-## Group by attributes
+Database calls
+: Evaluate performance issues in database interactions
 
-Using the Group by filter, you can group the selected metric by different attributes.
-For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
+All spans
+: View and analyze raw span data
 
-The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
-However, in the drop-down, you can choose any resource level attribute to group by.
+### Choose a RED metric
 
-You can use **Other** attributes to select a different attribute.
+Explore Traces uses RED metrics generated from your tracing data to guide your investigation.
+In this context, RED metrics mean:
 
-## Add, modify, or remove filters
+* **Rates** show the rate of incoming spans per second.
+* **Errors** show spans that are failing.
+* **Duration** displays the amount of time those spans take; represented as a heat map that shows response time and latency.
 
-The Filter bar at the top of the page shows all filters that apply to your current search. You can use this filter bar to modify or delete filters.
+When you select a RED metric, the tabs underneath the metrics selection changes match the context.
+For example, selecting **Duration** displays **Root cause latency** and **Slow traces tabs**.
+Choosing **Errors** changes the tabs to **Root cause errors** and **Errored traces**. Rate provides **Service structure**, and **Traces** tabs.
+These tabs are used when you [analyze tracing data](#analyze-tracing-data).
+
+To choose a RED metric:
+
+1. Select a metric type a graph to select a **Rate**, **Errors**, or **Duration** metric type. Notice that your selection changes the first drop-down list on the filter bar.
+1. Optional: Select the signal you want to observe. **Full traces** are the default selection.
+1. Look for spikes or trends in the data to help identify issues.
+
+{{< admonition type="tip" >}}
+If no data or limited data appears, refresh the page. Verify that you have selected the correct data source in the Data source drop-down as well as a valid time range.
+{{< /admonition >}}
+
+### Define filters
+
+Next, refine your investigation by adding filters.
+
+Filters are available on the **Breakdown** and **Comparison** tabs.
+
+Each time you add a filter, the condition appears in the list of filters at the top of the page.
+The list of filters expands as you investigate and explore your tracing data using Explore Traces.
+
+1. Refine your investigation by adding filters.
+1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
+1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
+1. Choose filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters on the **Comparison** and **Breakdown** tabs in the following ways:
+    * Select **Add to filters**.
+    * Select **Inspect**.
+    * Use the **Filter** bar near the top.
 
 ![Change filters for your investigation](explore-traces-filters.png)
 
-### Add a filter
+#### Use the Breakdown tab
 
-Each time you add a filter, the condition appears in the list of filters.
-The list of filters expands as you investigate and explore your tracing data using Explore Traces.
+The **Breakdown** tab highlights attributes that are correlated with the selected metric.
+When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
+When you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
 
-### Modify a filter
+You can change the **Scope** to show **Resource** or **Span**.
+
+Using the **Group by** selector, you can group the selected metric by different attributes.
+For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
+
+The app defaults to `service.name` and displays other commonly used resource level attributes such as `cluster`, `environment`, and `namespace`.
+However, in the drop-down list, you can choose any resource level attribute to group by.
+
+#### Modify a filter
 
 Selecting an option for a filter automatically updates the displayed data. If there are no matches, the app displays a “No data for selected query” message.
 
 To modify an applied filter:
 
 1. Select the filter to modify in the Filter bar.
-1. Select a filter from the drop-down menu.
+1. Select an option from the drop-down list.
 
-### Remove one or more filters
+You can also click in the **Filter** bar to add filters using drop-down lists.
+
+#### Remove one or more filters
 
 You can remove all or individual filters.
 
 To remove a filter, select **Remove filter** (**X**) at the end of the filter you want to remove.
 
-To remove all filters, select **Clear filters** from the right side of the Filter bar.
+To remove all filters, select **Clear filters** (**X**) from the right side of the Filter bar.
 
 Selecting **Clear filters** resets your investigation back to the first metric you selected.
 For example, if you selected Errors metrics and **Group by** the `host` service.name, selecting **Clear filters** resets the search back to just **Errors** selected as the metric type.
+
+### Analyze tracing data
+
+You can further analyze the filtered spans using the dynamically changing tabs, **Comparison**, **Structure** and **Trace list**.
+
+When you select a RED metric, the tabs underneath the metrics selection changes match the context.
+
+Each tab provides a brief explanation about the information provided.
+
+#### Comparison
+
+The **Comparison** tab highlights attributes that are correlated with the selected metric.
+
+The behavior of the comparison also differs depending upon the RED metric you've chosen.
+For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
+However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
+
+#### Structure
+
+The structural tab lets you extract and view aggregate data from your traces.
+
+* Rate provides **Service structure**
+* Errors provides **Root cause errors**
+* Duration metrics provides **Root cause latency**
+
+For **Rate**, the **Service structure** tab shows you how your applications "talk" to each other to fulfill requests.
+Using this tab helps you analyze the service structure of the traces that match the current filters.
+
+For **Errors**, the **Root cause errors** tab shows structure of errors beneath your selected filters. You can use this tab to immediately see the chain of errors that are causing issues higher up in traces.
+
+![Link to span data from Root cause errors](images/explore-traces-errors-root-cause.png)
+
+When you select **Duration** metrics, the **Root cause latency** tab shows the structure of the longest running spans so you can analyze the structure of slow spans.
+
+The pictured spans are an aggregated view compiled using spans from multiple traces.
+
+#### Trace list
+
+Each RED metric has a trace list:
+
+* **Rate** provides a tab that lists **Traces**
+* **Errors** provides a list of **Errored traces**
+* **Duration** lists **Slow traces**
+
+## Change selected time range
+
+Use the time picker at the top right to modify the data shown in Explore Traces.
+
+You can select a time range of up to 24h hours in duration.
+This time range can be any 24h period in your configured trace data retention period.
+The default is 30 days.
+
+For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).
