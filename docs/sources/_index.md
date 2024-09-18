@@ -237,15 +237,17 @@ If no data or limited data appears, refresh the page. Verify that you have selec
 
 Next, refine your investigation by adding filters.
 
+Filters are available on the **Breakdown** and **Comparison** tabs. 
 Each time you add a filter, the condition appears in the list of filters at the top of the page.
 The list of filters expands as you investigate and explore your tracing data using Explore Traces.
 
 1. Refine your investigation by adding filters.
 1. Optional: Choose one of the attributes to group by or use **Search** to locate the service.
 1. Optional: Use the tabs underneath the metrics selection to provide insights into breakdowns, comparisons, latency, and other explorations.
-1. Select filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters in the following ways:
-    1. Select **Inspect**.
-    1. Use the **Search** field.
+1. Choose filters to hone in on the problem areas. Each filter that you select adds to the **Filter** statement at the top of the page. You can select filters on the **Comparison** and **Breakdown** tabs in the following ways:
+    * Select **Add to filters**. 
+    * Select **Inspect**.
+    * Use the **Filter** bar near the top.
 
 ![Change filters for your investigation](explore-traces-filters.png)
 
@@ -274,7 +276,10 @@ Selecting an option for a filter automatically updates the displayed data. If th
 To modify an applied filter:
 
 1. Select the filter to modify in the Filter bar.
-1. Select the value you want to filter by from the drop-down menu the opens up.
+1. Select a new option from the drop-down list.
+
+ You can also click in the **Filter** bar to add filters using drop-down lists.
+  
 
 #### Remove one or more filters
 
