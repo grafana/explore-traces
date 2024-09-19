@@ -117,9 +117,9 @@ jobs:
           GCOM_API_PLUGINS: ${{ vars.GRAFANA_BASE_URL }}/api/plugins
 #          GCOM_IAP_TOKEN: ${{ steps.gcloud-iap-auth.outputs.id_token }}
           GCOM_PUBLISH_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
+          GCLOUD_SERVICE_KEY: ${{ env.GCP_UPLOAD_ARTIFACTS_KEY }}
           GITHUB_TOKEN: $GITHUB_TOKEN
         run: |
           PLUGIN_ID=`jq -r .id src/plugin.json`
-          VERSION=`jq -r .version package.json`
-          GCLOUD_SERVICE_KEY='${{ env.GCP_UPLOAD_ARTIFACTS_KEY }}' /root/app/bin/grafana-publisher.js --auto --dryrun publish-from-monorepo $PLUGIN_ID $VERSION ${{github.server_url}}/${{ github.repository }} ${{ github.sha }} ${{ matrix.environment == 'prod' && 'release' || format('release-{0}', matrix.environment) }}
+          VERSION=`jq -r .version package.json` /root/app/bin/grafana-publisher.js --auto --dryrun publish-from-monorepo $PLUGIN_ID $VERSION ${{github.server_url}}/${{ github.repository }} ${{ github.sha }} ${{ matrix.environment == 'prod' && 'release' || format('release-{0}', matrix.environment) }}
 
