@@ -4,8 +4,8 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+    branches:
+      - ifrost/test-a-tag
   workflow_dispatch:
     # inputs:
     #   target_dev:
@@ -122,5 +122,5 @@ jobs:
         run: |
           PLUGIN_ID=`jq -r .id src/plugin.json`
           VERSION=`jq -r .version package.json` 
-          /root/app/bin/grafana-publisher.js --auto --dryrun publishremote $PLUGIN_ID $VERSION explore-traces
+          /root/app/bin/grafana-publisher.js --auto --dryrun publishremote $PLUGIN_ID 0.0.20-test explore-traces
 
