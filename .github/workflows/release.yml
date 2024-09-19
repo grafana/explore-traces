@@ -112,7 +112,6 @@ jobs:
           common_secrets: |
             GCP_UPLOAD_ARTIFACTS_KEY=grafana/integration-artifacts-uploader-service-account:'credentials.json'
       - name: Publish new plugin version on grafana.com
-        working-directory: plugins/grafana-exploretraces-app
         shell: bash
         env:
           GCOM_API_PLUGINS: ${{ vars.GRAFANA_BASE_URL }}/api/plugins
