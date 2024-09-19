@@ -16,6 +16,9 @@ Using the app, you can:
 * Browse automatic visualizations of your data based on its characteristics
 * Do all of this without writing TraceQL queries
 
+> [!IMPORTANT]
+> Explore Traces is presently undergoing active development and is offered in a preview state. Subsequent updates are likely to incorporate significant changes that may impact existing functionality.
+
 ![Root cause latency using Duration metrics](https://grafana.com/media/docs/explore-traces/explore-traces-duration-root-cause-latency.png)
 
 ## Before you begin
@@ -33,7 +36,7 @@ To use Explore Traces with self-hosted Grafana open source or Grafana Enterprise
 
 ## Getting started
 
-Refer to the [Explore Traces](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/) documentation. 
+Refer to the [Explore Traces](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/) documentation.
 For instructions installing, refer to the [access and installation instructions](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/).
 
 ## Resources
