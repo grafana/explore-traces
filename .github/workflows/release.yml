@@ -93,25 +93,25 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Auth with Google service account for bypassing IAP
-        uses: "google-github-actions/auth@v2"
-        id: gcloud-iap-auth
-        if: ${{ matrix.environment != 'prod' }}
-        with:
-          project_id: ${{ vars.GOOGLE_IAP_PROJECT_ID }}
-          token_format: id_token
-          workload_identity_provider: projects/304398677251/locations/global/workloadIdentityPools/github/providers/github-provider
-          service_account: ${{ vars.GOOGLE_IAP_SERVICE_ACCOUNT }}
-          id_token_audience: 194555723165-aftshfqa32nig79trcrh96ha94ta46jd.apps.googleusercontent.com
-          id_token_include_email: true
-          create_credentials_file: false
-          export_environment_variables: false
+#      - name: Auth with Google service account for bypassing IAP
+#        uses: "google-github-actions/auth@v2"
+#        id: gcloud-iap-auth
+#        if: ${{ matrix.environment != 'prod' }}
+#        with:
+#          project_id: ${{ vars.GOOGLE_IAP_PROJECT_ID }}
+#          token_format: id_token
+#          workload_identity_provider: projects/304398677251/locations/global/workloadIdentityPools/github/providers/github-provider
+#          service_account: ${{ vars.GOOGLE_IAP_SERVICE_ACCOUNT }}
+#          id_token_audience: 194555723165-aftshfqa32nig79trcrh96ha94ta46jd.apps.googleusercontent.com
+#          id_token_include_email: true
+#          create_credentials_file: false
+#          export_environment_variables: false
       - name: Publish new plugin version on grafana.com
         working-directory: plugins/grafana-exploretraces-app
         shell: bash
         env:
           GCOM_API_PLUGINS: ${{ vars.GRAFANA_BASE_URL }}/api/plugins
-          GCOM_IAP_TOKEN: ${{ steps.gcloud-iap-auth.outputs.id_token }}
+#          GCOM_IAP_TOKEN: ${{ steps.gcloud-iap-auth.outputs.id_token }}
           GCOM_PUBLISH_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
           GITHUB_TOKEN: $GITHUB_TOKEN
         run: |
