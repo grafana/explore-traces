@@ -8,7 +8,8 @@ Tracing is best used for analyzing the performance of your system, identifying b
 Explore Traces helps you make sense of your tracing data so you can automatically visualize insights from your Tempo traces data.
 Before this app, you would use [TraceQL](https://grafana.com/docs/tempo/latest/traceql/), the query language for tracing, to [construct a query](https://grafana.com/docs/grafana-cloud/send-data/traces/traces-query-editor/) in Grafana.
 
-> \***\*NOTE:\*\*** Explore Traces is presently undergoing active development and is offered in a preview state. Subsequent updates are likely to incorporate significant changes that may impact existing functionality.
+> [!IMPORTANT]
+> Explore Traces is presently undergoing active development and is offered in a preview state. Subsequent updates are likely to incorporate significant changes that may impact existing functionality.
 
 ![Explore Traces](docs/sources/explore-traces-homescreen.png)
 
