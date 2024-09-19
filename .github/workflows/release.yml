@@ -122,5 +122,5 @@ jobs:
         run: |
           PLUGIN_ID=`jq -r .id src/plugin.json`
           VERSION=`jq -r .version package.json` 
-          /root/app/bin/grafana-publisher.js --auto --dryrun publish $PLUGIN_ID $VERSION 
+          /root/app/bin/grafana-publisher.js --auto --dryrun publishremote $PLUGIN_ID $VERSION explore-traces
 
