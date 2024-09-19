@@ -121,5 +121,6 @@ jobs:
           GITHUB_TOKEN: $GITHUB_TOKEN
         run: |
           PLUGIN_ID=`jq -r .id src/plugin.json`
-          VERSION=`jq -r .version package.json` /root/app/bin/grafana-publisher.js --auto --dryrun publish-from-monorepo $PLUGIN_ID $VERSION ${{github.server_url}}/${{ github.repository }} ${{ github.sha }} ${{ matrix.environment == 'prod' && 'release' || format('release-{0}', matrix.environment) }}
+          VERSION=`jq -r .version package.json` 
+          /root/app/bin/grafana-publisher.js --auto --dryrun publish $PLUGIN_ID $VERSION 
 
