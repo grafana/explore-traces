@@ -33,7 +33,7 @@ You can use the full trace (trace roots), or you can select a more specific type
 
 By default, Explore Traces displays information about full traces. You can change this by using the selector in the Filter bar.
 
-![Selecting a signal type](images/explore-traces-select-signal.png)
+![Selecting a signal type](../images/explore-traces-select-signal.png)
 
 You can use any one of these primary signal types.
 
@@ -93,7 +93,7 @@ The list of filters expands as you investigate and explore your tracing data usi
     * Select **Inspect**.
     * Use the **Filter** bar near the top.
 
-![Change filters for your investigation](images/explore-traces-filters.png)
+![Change filters for your investigation](../images/explore-traces-filters.png)
 
 ### Use the Breakdown tab
 
