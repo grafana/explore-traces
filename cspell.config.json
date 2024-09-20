@@ -1,0 +1,14 @@
+{
+  "ignorePaths": [
+    "src",
+    "provisioning",
+    "node_modules",
+    "dist",
+    "CHANGELOG.md",
+    "package.json",
+    "*.test.*",
+    "*.yaml"
+  ],
+  "ignoreRegExpList": [],
+  "words": []
+}
