@@ -1,0 +1,11 @@
+{
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "CHANGELOG.md",
+    "package.json",
+    "*.test.*"
+  ],
+  "ignoreRegExpList": [],
+  "words": []
+}
