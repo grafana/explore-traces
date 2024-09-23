@@ -18,15 +18,22 @@ Tracing is best used for analyzing the performance of your system, identifying b
 
 To use the Explore Traces app, you should understand these concepts:
 
-- [Rate, error, and duration (RED) metrics](#rate-error-and-duration-metrics)
-- [Traces and spans}(#traces-and-spans)
-- [Trace structure](#trace-structure)
+- [Concepts](#concepts)
+  - [Rate, error, and duration metrics](#rate-error-and-duration-metrics)
+  - [Traces and spans](#traces-and-spans)
+  - [Trace structure](#trace-structure)
 
 {{< docs/public-preview product="Explore Traces" >}}
 
 ## Rate, error, and duration metrics
 
 The Explore Traces app lets you explore rate, error, and duration (RED) metrics generated from your traces by Tempo.
+
+| Useful for investigating | Metric | Meaning |
+|---|---|---|
+| Unusual spikes in activity | Rate | Number of requests per second |
+| Overall issues in your tracing ecosystem | Error | Number of those requests that are failing |
+| Response times and latency issues | Duration | Amount of time those requests take, represented as a histogram |
 
 | Metric | Meaning | Useful for investigating |
 |---|---|---|
