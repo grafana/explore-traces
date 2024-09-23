@@ -35,12 +35,6 @@ The Explore Traces app lets you explore rate, error, and duration (RED) metrics 
 | Overall issues in your tracing ecosystem | Error | Number of those requests that are failing |
 | Response times and latency issues | Duration | Amount of time those requests take, represented as a histogram |
 
-| Metric | Meaning | Useful for investigating |
-|---|---|---|
-| Rate | Number of requests per second | Unusual spikes in activity |
-| Error | Number of those requests that are failing | Overall issues in your tracing ecosystem |
-| Duration | Amount of time those requests take, represented as a histogram | Response times and latency issues |
-
 For more information about the RED method, refer to [The RED Method: how to instrument your services](https://grafana.com/blog/2018/08/02/the-red-method-how-to-instrument-your-services/).
 
 ## Traces and spans
