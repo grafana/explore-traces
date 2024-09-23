@@ -39,7 +39,7 @@ To use Explore Traces with Grafana open source or Grafana Enterprise, you need:
 
 - Your own Grafana instance
 - A configured [Tempo data source](ref:tempo-data-source)
-- The [Explore Traces plugin](https://grafana.com/grafana/plugins/explore-traces-app/)
+- The [Explore Traces plugin](https://grafana.com/grafana/plugins/grafana-exploretraces-app/)
 
 #### Install the Explore Traces plugin
 
