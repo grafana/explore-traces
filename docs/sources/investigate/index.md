@@ -98,13 +98,13 @@ The list of filters expands as you investigate and explore your tracing data usi
 ### Use the Breakdown tab
 
 The **Breakdown** tab highlights attributes that are correlated with the selected metric.
-When you're using **Duration** metrics, **Breakdown** orders attributes by their average duration.
-When you select **Rate**, **Breakdown** orders attributes by their rate of requests per second, with errors colored red.
+When you're using **Duration** metrics, **Breakdown** orders the sequence of attributes by their average duration.
+When you select **Rate**, **Breakdown** orders the sequence of attributes by their rate of requests per second, with errors colored red.
 
 You can change the **Scope** to show **Resource** or **Span**.
 
 Using the **Group by** selector, you can group the selected metric by different attributes.
-For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, then the displayed results show the number of errors sorted by the `service.name` with the most matches.
+For example, if you have selected **Errors** as a metric type and then choose the `service.name` attribute, the displayed results show the number of errors sorted by the `service.name` with the most matches.
 
 ![Errors metric showing the **Breakdown** tab without filters](/media/docs/explore-traces/explore-traces-breakdown-errors-v0.9.png)
 
@@ -136,7 +136,7 @@ For example, if you selected Errors metrics and **Group by** the `host` service.
 
 ## Analyze tracing data
 
-You can further analyze the filtered spans using the dynamically changing tabs, **Comparison**, **Structure** and **Trace list**.
+To further analyze the filtered spans, use the dynamically changing tabs, **Comparison**, **Structure** and **Trace list**.
 
 When you select a RED metric, the tabs underneath the metrics selection changes match the context.
 
@@ -147,8 +147,8 @@ Each tab provides a brief explanation about the information provided.
 The **Comparison** tab highlights attributes that are correlated with the selected metric.
 
 The behavior of the comparison also differs depending upon the RED metric you've chosen.
-For example, if you're viewing **Error** metrics, then the comparison shows the attribute values that correlate with errors.
-However, if you're viewing **Duration** metrics, then the comparison shows the attributes that correlate with high latency.
+For example, if you're viewing **Error** metrics, the comparison shows the attribute values that correlate with errors.
+However, if you're viewing **Duration** metrics, the comparison shows the attributes that correlate with high latency.
 
 ![Comparison view](/media/docs/explore-traces/explore-traces-rate-comparison.png)
 
@@ -161,11 +161,11 @@ The structural tab lets you extract and view aggregate data from your traces.
 * Duration metrics provides **Root cause latency**
 
 For **Rate**, the **Service structure** tab shows you how your applications "talk" to each other to fulfill requests.
-Using this tab helps you analyze the service structure of the traces that match the current filters.
+Use this tab to analyze the service structure of the traces that match the current filters.
 
 ![Service structure tab](/media/docs/explore-traces/explore-traces-rate-service-structure-v0.9.png)
 
-For **Errors**, the **Root cause errors** tab shows structure of errors beneath your selected filters. You can use this tab to immediately see the chain of errors that are causing issues higher up in traces.
+For **Errors**, the **Root cause errors** tab shows structure of errors beneath your selected filters. Use this tab to immediately see the chain of errors that are causing issues higher up in traces.
 
 ![Link to span data from Root cause errors](/media/docs/explore-traces/explore-traces-errors-root-cause-v0.9.png)
 

@@ -16,7 +16,7 @@ draft: true
 
 {{< docs/public-preview product="Explore Traces" >}}
 
-When you start investigating, you may either know what's wrong (for example, you know the affected service or that there’s too much CPU usage), or you may want identify resource hotspots so you can address them.
+At the beginning of your investigation, you may either know what's wrong (for example, you know the affected service or that there’s too much CPU usage), or you may want identify resource hotspots so you can address them.
 
 This can lead you to two different starting points:
 
@@ -27,9 +27,9 @@ Your use case determines what’s most important.
 For example, in use case 1, if a service is misbehaving, then you might want to see the profile types so you can see the CPU and memory profiles alongside each other.
 
 For either use case, the first step is to identify areas of interest by reviewing profiles or a single service.
-Selecting different profile types lets you focus on memory allocation, CPU processes, allocation sizes, blocks, or mutually exclusive (mutex).
+Select different profile types to focus on memory allocation, CPU processes, allocation sizes, blocks, or mutually exclusive (mutex).
 
-The profile types available depend on how you've instrumented you app to generate your profiling data.
+The profile types available depend on how you've instrumented your app to generate your profiling data.
 For more information, refer to [Profiling types](../concepts/#profile-types/) for help selecting a profile type to match your use case.
 Refer to [Understand profile types](https://grafana.com/docs/pyroscope/latest/view-and-analyze-profile-data/profiling-types/) to learn about profile types and instrumentation methods.
 
@@ -44,22 +44,21 @@ Explore Profiles lets you quickly drill into a service and identify the performa
 
 ### Example: Know the problem service, not the cause
 
-If you know the affected service, your investigation starts by viewing that service and then reviewing the profiles for that service.
+If you know the affected service, start by viewing that service and then reviewing the profiles for that service.
 In this example, you may have identified that the `checkoutservice` has an issue.
-You can use **Search services** to locate `checkoutservice` and then use the **Profile types** view to examine all profiles for that service.
+Use **Search services** to locate `checkoutservice`, and then use the **Profile types** view to examine all profiles for that service.
 
-Alternatively, you can select the **Profile types** view and then choose the `checkoutservice` from the **Service** drop-down list.
+Alternatively, select the **Profile types** view, and then choose the `checkoutservice` from the **Service** drop-down list.
 
 ### Example: Know there is an issue, need to investigate
 
-If you only know there is an issue and have to investigate, then your investigation starts by using the **All services** view.
-Using the **Profile type** selector, you can check the services’ CPU processes, memory allocation, blocks, locks, exceptions, and other available profile types.
+If you only know there is an issue and have to investigate, go to the **All services** view.
+With the **Profile type** selector, check the services' CPU processes, memory allocation, blocks, locks, exceptions, and other available profile types.
 
 After you locate the profile with a spike, select either **Profile types** view to examine all profile types for that service, or select **Labels** to view the labels (such as `hostname` or `span_name`) for that service.
 
 ## Use case 2: Research performance and resource bottlenecks
 
-Illuminate performance issues across a number of dimensions when you are doing a proactive analysis.
-This could be a cost-cutting exercise or attempt to improve latency or memory usage in a non-incident scenario. This exercise could be across multiple services or within a service across profile types, labels, or a combination of the two.
+Uncover performance issues during a proactive analysis, such as a cost-cutting exercise or an attempt to improve latency or memory usage. This can occur be across multiple services or within a service across profile types, labels, or a combination of the two.
 
 **Next step: [Investigate and identify issues](../investigate/)**

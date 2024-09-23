@@ -18,9 +18,9 @@ Tracing is best used for analyzing the performance of your system, identifying b
 
 To use the Explore Traces app, you should understand these concepts:
 
-- Rate, error, and duration (RED) metrics
-- Traces and spans
-- Trace structure
+- [Rate, error, and duration (RED) metrics](#rate-error-and-duration-metrics)
+- [Traces and spans}(#traces-and-spans)
+- [Trace structure](#trace-structure)
 
 {{< docs/public-preview product="Explore Traces" >}}
 

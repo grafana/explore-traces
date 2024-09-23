@@ -19,11 +19,10 @@ refs:
 
 {{< docs/public-preview product="Explore Traces" >}}
 
-You can access Explore Traces using Grafana Cloud or a self-managed OSS Grafana or Grafana Enterprise.
+You can access Explore Traces using any of these:
 
-The easiest way to access Explore Traces is in Grafana Cloud. No setup or installation is required.
-
-To use Explore Traces with self-managed Grafana, you need to install the Explore Traces plugin.
+ - [Grafana Cloud](access-in-grafana-cloud): The easiest method, since no setup or installation is required
+ -  Self-managed [Grafana](#access-in-self-managed-grafana) open source or Enterprise: You must install the Explore Traces plugin.
 
 Explore Traces requires Tempo 2.6 or newer.
 
@@ -80,7 +79,7 @@ The plugin is automatically activated after installation.
 
 ### Install for a Docker container
 
-If you want to install the app in a Docker container, you need to configure the following environment variable:
+If you want to install the app in a Docker container, configure the following environment variable:
 
 ```shell
 GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app

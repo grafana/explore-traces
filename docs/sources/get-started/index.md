@@ -13,10 +13,9 @@ weight: 300
 
 {{< docs/public-preview product="Explore Traces" >}}
 
-Traces can help you identify errors in your apps and services.
-Using this information, you can optimize and streamline your apps.
+You can use traces to identify errors in your apps and services, and then optimize and streamline them.
 
-Your investigation begins with the big picture and then drills down using primary signals, RED metrics, filters, and structural or trace list tabs to explore your data. To learn more, refer to [Concepts](../concepts/).
+When working with traces, start with the big picture. Then drills down using primary signals, RED metrics, filters, and structural or trace list tabs to explore your data. To learn more, refer to [Concepts](../concepts/).
 
 <!--Update with Explore Traces blog post - To learn more about Explore Traces, read [The new, queryless UI for Grafana Pyroscope: Introducing Explore Profiles](https://grafana.com/blog/2024/07/18/the-new-queryless-ui-for-grafana-pyroscope-introducing-explore-profiles/). -->
 
@@ -53,24 +52,23 @@ Most investigations follow these steps:
 
 ## Example: Investigate source of errors
 
-For example, say that you want to figure out the source of errors in your spans.
-
-You'll need to compare the errors in the traces to locate the problem trace.
+As an example, you want to uncover the source of errors in your spans.
+For this, you need to compare the errors in the traces to locate the problem trace.
 Here's how this works.
 
 ### Choose a signal type and metric
 
-First, you select **Full traces** as the signal type and then choose the **Errors** metric.
-Using **Full traces** provides insights into the errors in the root of your traces or at the edge of your application.
-For other investigations, you could use **Server spans** signal type if you're interested in any entrypoint to any service or **Database calls** if you're concerned about databases.
+First, you select **Full traces** as the signal type, then choose the **Errors** metric.
+Use **Full traces** to gain insight into the errors in the root of your traces or at the edge of your application.
+If you're interested in any entrypoint to any service or **Database calls** (if you're concerned about databases), use the **Server spans** signal type.
 
 ![Select the signal type and metric type](../images/explore-traces-select-signal-errors.gif)
 
 ### Correlate attributes
 
-To correlate attribute values with errors, you can use the **Breakdown** tab.
+To correlate attribute values with errors, use the **Breakdown** tab.
 This tab surfaces attributes values that heavily correlate with erroring spans.
-The results are ordered by the difference in those attributes by the highest ones first which helps
+The results are ordered by the difference in those attributes by the highest ones first. This helps
 you see what's causing the errors immediately.
 You can see here that 99.34% of the time the span name was equal to `HTTP GET /api/datasources/proxy/uid/:uid/*` the span was also erroring.
 
@@ -78,7 +76,7 @@ You can see here that 99.34% of the time the span name was equal to `HTTP GET /a
 
 ### Inspect the problem
 
-To dig deeper into this issue, select **Inspect** to focus in on the problem.
+To dig deeper, select **Inspect** to focus in on the problem.
 It's easy to spot the problem: the tall, red bar indicates that the problems are happening with  `HTTP GET /api/datasources/proxy/uid/:uid/*`.
 Next, use **Add to filters** to focus just on the erroring API call.
 
@@ -86,11 +84,11 @@ Next, use **Add to filters** to focus just on the erroring API call.
 
 ### Use Root cause errors
 
-Selecting the **Root cause errors** tab shows an aggregated view of all of the traces that have errors in them.
-To view additional details, you right-click on a line and select **HTTP Outgoing Request**.
+Select the **Root cause errors** tab for an aggregated view of all of the traces that have errors in them.
+To view additional details, right-click on a line and select **HTTP Outgoing Request**.
 
 ![Contextual menu available in the Root cause errors tab](../images/explore-traces-errors-rcause-menu.png)
 
-Clicking on an entry opens up one of the individual traces used to construct that aggregate view so you can deep dive into a single example transaction.
+To examine a single example transaction, click on an entry to open one of the individual traces used to construct that aggregate view.
 
 ![Link to span data from Root cause errors](../images/explore-traces-errors-root-cause.png)
