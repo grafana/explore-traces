@@ -68,8 +68,6 @@ Using the app, you can:
 
 ![The Explore Traces app](explore-traces-homescreen.png)
 
-
-
 ## Explore
 
 {{< card-grid key="cards" type="simple" >}}
