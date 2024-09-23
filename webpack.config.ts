@@ -1,5 +1,6 @@
 import { Configuration, DefinePlugin } from 'webpack';
 import { merge } from 'webpack-merge';
+import packageJson from './package.json';
 // @ts-ignore
 import grafanaConfig from './.config/webpack/webpack.config';
 
@@ -13,7 +14,7 @@ const config = async (env): Promise<Configuration> => {
   return merge(baseConfig, {
     plugins: [
       new DefinePlugin({
-        'process.env.VERSION': JSON.stringify(process.env.npm_package_version),
+        'process.env.VERSION': JSON.stringify(packageJson.version),
         'process.env.BUILD_TIME': JSON.stringify(new Date().toISOString()),
         'process.env.COMMIT_SHA': JSON.stringify(commitHash || 'local'),
       }),
