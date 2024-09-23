@@ -10,7 +10,9 @@ export function syncYAxis() {
       const series = event.payload.series;
 
       series?.forEach((s) => {
-        maxima.set(s.refId as string, Math.max(...s.fields[1].values.filter((v) => v)));
+        s.fields.slice(1).forEach((f) => {
+          maxima.set(s.refId as string, Math.max(...f.values.filter((v) => v)));
+        })
       });
 
       updateTimeseriesAxis(vizPanel, Math.max(...maxima.values()));
