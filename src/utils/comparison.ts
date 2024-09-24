@@ -23,5 +23,5 @@ export const getDefaultSelectionForMetric = (metric: MetricFunction): Comparison
   if (metric === 'duration') {
     return undefined;
   }
-  return { query: 'status = error' };
+  return { query: 'status = error', type: 'auto' };
 };

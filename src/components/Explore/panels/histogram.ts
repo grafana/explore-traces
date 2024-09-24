@@ -21,7 +21,7 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         }
         const rawSelection = args[0];
         // @ts-ignore
-        const newSelection: ComparisonSelection = { raw: rawSelection };
+        const newSelection: ComparisonSelection = { type: 'manual', raw: rawSelection };
 
         newSelection.timeRange = {
           from: Math.round((rawSelection.x?.from || 0) / 1000),
@@ -32,7 +32,7 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         const yTo = yBucketToDuration(args[0].y?.to || 0, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };
 
-        parent.setState({ selection: newSelection });
+        parent.setState({ selection: newSelection, actionView: 'comparison' });
 
         reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.start_investigation, {
           selection: newSelection,
