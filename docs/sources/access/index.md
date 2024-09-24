@@ -22,7 +22,7 @@ refs:
 You can access Explore Traces using any of these:
 
  - [Grafana Cloud](access-in-grafana-cloud): The easiest method, since no setup or installation is required.
- -  Self-managed [Grafana](#access-in-self-managed-grafana) open source or Enterprise: You must install the Explore Traces plugin.
+ - Self-managed [Grafana](#access-in-self-managed-grafana) open source or Enterprise: You must install the Explore Traces plugin.
 
 Explore Traces requires Tempo 2.6 or later.
 
@@ -30,8 +30,8 @@ Explore Traces requires Tempo 2.6 or later.
 
 To use Explore Traces with Grafana Cloud, you need the following:
 
-- A Grafana Cloud account
-- A Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) receiving tracing data
+- Grafana Cloud account
+- Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) receiving tracing data
 
 ## Set up in self-managed Grafana
 
@@ -39,7 +39,7 @@ To use Explore Traces with self-managed Grafana open source or Grafana Enterpris
 
 - Your own Grafana instance running 11.2 or later
 - Tempo 2.6 or newer
-- A configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/) receiving tracing data
+- Configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/) receiving tracing data
 
 Next, [access Explore Traces](#access-explore-traces).
 
@@ -47,7 +47,6 @@ Next, [access Explore Traces](#access-explore-traces).
 
 Explore Traces is distributed as a Grafana Plugin.
 You can find it in the official [Grafana Plugin Directory](https://grafana.com/grafana/plugins/grafana-exploretraces-app/).
-
 
 ### Install in your Grafana instance
 
@@ -76,7 +75,7 @@ GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-
 
 ## Access Explore Traces
 
-To access Explore Traces:
+To access Explore Traces, use the following steps:
 
 1. Open your Grafana stack in a web browser.
 1. In the main menu, select **Explore** > **Traces**.

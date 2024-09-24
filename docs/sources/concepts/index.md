@@ -52,7 +52,7 @@ For more information, refer to [Use traces to find solutions](https://grafana.co
 
 Traces are telemetry data structured as trees.
 Traces are made of spans (for example, a span tree); there is a root span that can have zero to multiple branches that are called child spans.
-Each child span can itself be a parent span of one or multiple child spans, and so on so forth.
+Each child span can also be a parent span of one or multiple additional child spans.
 
 ![Trace_and_spans_in_tree_structure](/media/docs/tempo/traceql/trace-tree-structures-and-spans.png)
 
