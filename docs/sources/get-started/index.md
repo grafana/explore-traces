@@ -13,9 +13,9 @@ weight: 300
 
 {{< docs/public-preview product="Explore Traces" >}}
 
-You can use traces to identify errors in your apps and services, and then optimize and streamline them.
+You can use traces to identify errors in your apps and services and then to optimize and streamline them.
 
-When working with traces, start with the big picture. Then drills down using primary signals, RED metrics, filters, and structural or trace list tabs to explore your data. To learn more, refer to [Concepts](../concepts/).
+When working with traces, start with the big picture. Then drill down using primary signals, RED metrics, filters, and structural or trace list tabs to explore your data. To learn more, refer to [Concepts](../concepts/).
 
 <!--Update with Explore Traces blog post - To learn more about Explore Traces, read [The new, queryless UI for Grafana Pyroscope: Introducing Explore Profiles](https://grafana.com/blog/2024/07/18/the-new-queryless-ui-for-grafana-pyroscope-introducing-explore-profiles/). -->
 

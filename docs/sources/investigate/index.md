@@ -31,7 +31,7 @@ You can choose the type of services you want to observe and think about.
 
 You can use the full trace (trace roots), or you can select a more specific type, such as service or database calls.
 
-By default, Explore Traces displays information about full traces. You can change this by using the selector in the Filter bar.
+By default, Explore Traces displays information about full traces. You can change this by using the selector in the filter bar.
 
 ![Selecting a signal type](../images/explore-traces-select-signal.png)
 
@@ -68,7 +68,7 @@ These tabs are used when you [analyze tracing data](#analyze-tracing-data).
 
 To choose a RED metric:
 
-1. Select a metric type a graph to select a **Rate**, **Errors**, or **Duration** metric type. Notice that your selection changes the first drop-down list on the filter bar.
+1. Select a graph to select a **Rate**, **Errors**, or **Duration** metric type. Notice that your selection changes the first drop-down list on the filter bar.
 1. Optional: Select the signal you want to observe. **Full traces** are the default selection.
 1. Look for spikes or trends in the data to help identify issues.
 
@@ -118,18 +118,18 @@ If there are no matches, the app displays a “No data for selected query” mes
 
 To modify an applied filter:
 
-1. Select the filter to modify in the Filter bar.
+1. Select the filter to modify in the filter bar.
 1. Select an option from the drop-down list.
 
 You can also click in the **Filter** bar to add filters using drop-down lists.
 
-### Remove one or more filters
+### Remove filters
 
 You can remove all or individual filters.
 
 To remove a filter, select **Remove filter** (**X**) at the end of the filter you want to remove.
 
-To remove all filters, select **Clear filters** (**X**) from the right side of the Filter bar.
+To remove all filters, select **Clear filters** (**X**) from the right side of the filter bar.
 
 Selecting **Clear filters** resets your investigation back to the first metric you selected.
 For example, if you selected Errors metrics and **Group by** the `host` service.name, selecting **Clear filters** resets the search back to just **Errors** selected as the metric type.
@@ -179,9 +179,9 @@ The pictured spans are an aggregated view compiled using spans from multiple tra
 
 Each RED metric has a trace list:
 
-* **Rate** provides a tab that lists **Traces**
-* **Errors** provides a list of **Errored traces**
-* **Duration** lists **Slow traces**
+* **Rate** provides a tab that lists **Traces**.
+* **Errors** provides a list of **Errored traces**.
+* **Duration** lists **Slow traces**.
 
 ![Example trace list for Duration showing slow traces](/media/docs/explore-traces/explore-traces-duration-slow-traces-v0.9.png)
 
@@ -189,8 +189,8 @@ Each RED metric has a trace list:
 
 Use the time picker at the top right to modify the data shown in Explore Traces.
 
-You can select a time range of up to 24h hours in duration.
-This time range can be any 24h period in your configured trace data retention period.
+You can select a time range of up to 24 hours in duration.
+This time range can be any 24-hour period in your configured trace data retention period.
 The default is 30 days.
 
 For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).

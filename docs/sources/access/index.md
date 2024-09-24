@@ -24,11 +24,11 @@ You can access Explore Traces using any of these:
  - [Grafana Cloud](access-in-grafana-cloud): The easiest method, since no setup or installation is required.
  -  Self-managed [Grafana](#access-in-self-managed-grafana) open source or Enterprise: You must install the Explore Traces plugin.
 
-Explore Traces requires Tempo 2.6 or newer.
+Explore Traces requires Tempo 2.6 or later.
 
 ## Set up in Grafana Cloud
 
-To use Explore Traces with Grafana Cloud, you need:
+To use Explore Traces with Grafana Cloud, you need the following:
 
 - A Grafana Cloud account
 - A Grafana stack in Grafana Cloud with a configured [Tempo data source](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/data-sources/tempo/configure-tempo-data-source/) receiving tracing data
@@ -37,7 +37,7 @@ To use Explore Traces with Grafana Cloud, you need:
 
 To use Explore Traces with self-managed Grafana open source or Grafana Enterprise, you need:
 
-- Your own Grafana instance running 11.2 or newer
+- Your own Grafana instance running 11.2 or later
 - Tempo 2.6 or newer
 - A configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/) receiving tracing data
 
@@ -51,7 +51,7 @@ You can find it in the official [Grafana Plugin Directory](https://grafana.com/g
 
 ### Install in your Grafana instance
 
-You can install Explore Traces in your own Grafana instance using `grafana cli`:
+You can install Explore Traces in your Grafana instance using `grafana cli`:
 
 ```shell
 grafana cli --pluginUrl=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip plugins install grafana-traces-app
@@ -66,9 +66,9 @@ Alternatively, follow these steps to install Explore Traces in Grafana:
 
 The plugin is automatically activated after installation.
 
-### Install for a Docker container
+### Install in a Docker container
 
-If you want to install the app in a Docker container, configure the following environment variable:
+To install the app in a Docker container, configure the following environment variable:
 
 ```shell
 GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
