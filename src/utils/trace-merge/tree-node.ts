@@ -3,19 +3,41 @@ import { nestedSetLeft, nestedSetRight } from './utils';
 
 export class TreeNode {
   name: string;
+  serviceName: string;
+  operationName: string;
   spans: Span[];
   left: number;
   right: number;
   children: TreeNode[];
   parent: TreeNode | null;
+  traceID: string;
 
-  constructor({ name, spans, left, right }: { name: string; spans: Span[]; left: number; right: number }) {
+  constructor({
+    name,
+    serviceName,
+    operationName,
+    spans,
+    left,
+    right,
+    traceID,
+  }: {
+    name: string;
+    serviceName: string;
+    operationName: string;
+    spans: Span[];
+    left: number;
+    right: number;
+    traceID: string;
+  }) {
     this.name = name;
+    this.serviceName = serviceName;
+    this.operationName = operationName;
     this.spans = spans;
     this.left = left;
     this.right = right;
     this.children = [];
     this.parent = null;
+    this.traceID = traceID;
   }
 
   addSpan(span: Span) {
@@ -48,11 +70,15 @@ export class TreeNode {
 }
 
 export function createNode(s: Span): TreeNode {
+  const serviceNameAttr = s.attributes?.find((a) => a.key === 'service.name');
   return new TreeNode({
     left: nestedSetLeft(s),
     right: nestedSetRight(s),
     name: nodeName(s),
+    serviceName: serviceNameAttr?.value.stringValue ?? serviceNameAttr?.value?.Value?.string_value ?? '',
+    operationName: s.name ?? '',
     spans: [s],
+    traceID: s.traceId ?? '',
   });
 }
 

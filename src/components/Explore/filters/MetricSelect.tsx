@@ -7,6 +7,7 @@ import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 import { FilterByVariable } from './FilterByVariable';
 import { getTraceExplorationScene } from '../../../utils/utils';
 import { MetricFunction } from '../../../utils/shared';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
 interface Props {
   model: FilterByVariable;
@@ -24,7 +25,14 @@ export function MetricSelect({ model }: Props) {
         { label: 'Errors', value: 'errors' },
         { label: 'Duration', value: 'duration' },
       ]}
-      onChange={(v) => v.value && exploration.onChangeMetricFunction(v.value)}
+      onChange={(v) => {
+        v.value && exploration.onChangeMetricFunction(v.value);
+      
+        reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_changed, {
+          metric: v.value,
+          location: 'filter',
+        });
+      }}
     />
   );
 }
@@ -36,10 +44,6 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
       width="auto"
       {...props}
       className={css(styles.control, props.className)}
-      components={{
-        IndicatorsContainer: () => null,
-        IndicatorSeparator: () => null,
-      }}
     />
   );
 };
@@ -62,9 +66,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
     boxSizing: 'border-box',
     boxShadow: 'none',
 
-    '& > div': {
-      paddingLeft: '8px',
-      paddingRight: '8px',
+    'svg': {
+      marginRight: '-4px',
     },
   }),
 });

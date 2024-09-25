@@ -15,11 +15,11 @@ import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
-import { GRID_TEMPLATE_COLUMNS } from 'pages/Explore/SelectStartingPointScene';
 import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 import { debounce } from 'lodash';
-import { Search } from 'pages/Explore/Search';
+import { Search } from './Search';
 import { getGroupByVariable } from 'utils/utils';
+import { EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -46,12 +46,14 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                   new SceneFlexItem({
                     body: new EmptyStateScene({
                       message: 'No data for selected query',
+                      padding: '48px',
                     }),
                   }),
                 ],
               });
             } else {
               this.performRepeat(data.data);
+              this.publishEvent(new EventTimeseriesDataReceived({ series: data.data.series }), true);
             }
           } else if (data.data?.state === LoadingState.Error) {
             this.state.body.setState({
@@ -141,7 +143,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
       acc[key].push(series);
       return acc;
     }, {} as Record<string, DataFrame[]>);
-  
+
     const newSeries = [];
     for (const key in groupedData) {
       const frames = groupedData[key].sort((a, b) => a.name?.localeCompare(b.name!) || 0);
@@ -151,7 +153,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     }
     return newSeries;
   }
-  
+
   private performRepeat(data: PanelData) {
     const newChildren: SceneFlexItem[] = [];
     let frames = data.series;

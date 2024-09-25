@@ -5,15 +5,20 @@ import { nestedSetLeft } from './utils';
 export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
   const tree = new TreeNode({
     name: 'root',
+    serviceName: '',
+    operationName: '',
     left: Number.MIN_SAFE_INTEGER,
     right: Number.MAX_SAFE_INTEGER,
     spans: [],
+    traceID: '',
   });
 
   for (const trace of traces) {
     if (trace.spanSets?.length !== 1) {
       throw new Error('there should be only 1 spanset!');
     }
+
+    const traceStartTime = parseInt(trace.startTimeUnixNano || '0', 10);
 
     const ss = trace.spanSets[0];
     // sort by nestedSetLeft
@@ -24,6 +29,10 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
     // left/right is only valid w/i a trace, so reset it each loop
     resetLeftRight(tree);
     for (const span of ss.spans) {
+      // force traceID to be the same for all spans in a trace
+      span.traceId = trace.traceID;
+      span.startTimeUnixNano = `${parseInt(span.startTimeUnixNano, 10) - traceStartTime}`;
+
       // walk up the tree until we find a node that is a parent of this span
       while (curNode.parent !== null) {
         if (curNode.isChild(span)) {
@@ -43,12 +52,11 @@ export function mergeTraces(traces: TraceSearchMetadata[]): TreeNode {
 
       // if not, create a new child node and make it the cur node
       const newNode = createNode(span);
+      newNode.traceID = trace.traceID;
       curNode.addChild(newNode);
       curNode = newNode;
     }
   }
-
-  // console.log(dumpTree(tree, 0));
 
   return tree;
 }

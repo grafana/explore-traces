@@ -13,10 +13,10 @@ import {
   SceneQueryRunner,
   VariableDependencyConfig,
 } from '@grafana/scenes';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { getTheme, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
-import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL } from '../../../../../utils/shared';
+import { VAR_FILTERS, explorationDS, VAR_FILTERS_EXPR, ALL, radioAttributesSpan } from '../../../../../utils/shared';
 
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
@@ -26,9 +26,17 @@ import { BaselineColor, buildAllComparisonLayout, SelectionColor } from '../../.
 import { duration } from 'moment';
 import { comparisonQuery } from '../../../queries/comparisonQuery';
 import { buildAttributeComparison } from '../../../layouts/attributeComparison';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import {
+  getAttributesAsOptions,
+  getGroupByVariable,
+  getTraceByServiceScene,
+  getTraceExplorationScene,
+} from 'utils/utils';
 import { InspectAttributeAction } from 'components/Explore/actions/InspectAttributeAction';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
+import { computeHighestDifference } from '../../../../../utils/comparison';
+import { AttributesDescription } from '../Breakdown/AttributesDescription';
+import { isEqual } from 'lodash';
 
 export interface AttributesComparisonSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -51,14 +59,21 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   private _onActivate() {
     const variable = getGroupByVariable(this);
 
+    variable.changeValueTo(ALL);
+
     this.updateData();
 
-    variable.subscribeToState(() => {
-      this.setBody(variable);
+    variable.subscribeToState((newState, prevState) => {
+      if (newState.value !== prevState.value) {
+        this.setBody(variable);
+      }
     });
 
-    getTraceByServiceScene(this).subscribeToState(() => {
-      this.setBody(variable);
+    getTraceByServiceScene(this).subscribeToState((newState, prevState) => {
+      if (!isEqual(newState.selection, prevState.selection)) {
+        this.updateData();
+        this.setBody(variable);
+      }
     });
 
     sceneGraph.getTimeRange(this).subscribeToState(() => {
@@ -88,13 +103,9 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 return Object.entries(groupedFrames)
                   .map(([attribute, frames]) => frameGroupToDataframe(attribute, frames))
                   .sort((a, b) => {
-                    const aCompare = a.fields[1].values
-                      .map((val, i) => (val || 0) - (a.fields[2].values[i] || 0))
-                      .reduce((acc, val) => acc + val, 0);
-                    const bCompare = b.fields[1].values
-                      .map((val, i) => (val || 0) - (b.fields[2].values[i] || 0))
-                      .reduce((acc, val) => acc + val, 0);
-                    return aCompare - bCompare;
+                    const aCompare = computeHighestDifference(a);
+                    const bCompare = computeHighestDifference(b);
+                    return bCompare.maxDifference - aCompare.maxDifference;
                   });
               })
             );
@@ -119,6 +130,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   }
 
   private setBody = (variable: CustomVariable) => {
+    const traceExploration = getTraceExplorationScene(this);
     this.setState({
       body:
         variable.hasAllValue() || variable.getValue() === ALL
@@ -127,15 +139,21 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
                 new InspectAttributeAction({
                   attribute: frame.name,
                   onClick: () => this.onChange(frame.name || ''),
-                })
+                }),
+              traceExploration.getMetricFunction()
             )
-          : buildAttributeComparison(this, variable, (frame: DataFrame) => [
-              new AddToFiltersAction({
-                frame,
-                labelKey: variable.getValueText(),
-                onClick: this.onAddToFiltersClick,
-              }),
-            ]),
+          : buildAttributeComparison(
+              this,
+              variable,
+              (frame: DataFrame) => [
+                new AddToFiltersAction({
+                  frame,
+                  labelKey: variable.getValueText(),
+                  onClick: this.onAddToFiltersClick,
+                }),
+              ],
+              traceExploration.getMetricFunction()
+            ),
     });
   };
 
@@ -153,21 +171,42 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
   public static Component = ({ model }: SceneComponentProps<AttributesComparisonScene>) => {
     const { body } = model.useState();
     const variable = getGroupByVariable(model);
+    const traceExploration = getTraceExplorationScene(model);
     const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
-    const radioAttributes = ['name', 'rootName', 'rootServiceName', 'status', 'span.http.status_code'];
 
     return (
       <div className={styles.container}>
+        <AttributesDescription
+          desctiption="Attributes are ordered by the difference between the baseline and selection values for each value."
+          tags={[
+            {
+              label: 'Baseline',
+              color:
+                traceExploration.getMetricFunction() === 'duration'
+                  ? BaselineColor
+                  : getTheme().visualization.getColorByName('semi-dark-green'),
+            },
+            {
+              label: 'Selection',
+              color:
+                traceExploration.getMetricFunction() === 'duration'
+                  ? SelectionColor
+                  : getTheme().visualization.getColorByName('semi-dark-red'),
+            },
+          ]}
+        />
+
         <div className={styles.controls}>
           {attributes?.length && (
             <div className={styles.controlsLeft}>
               <GroupBySelector
                 options={getAttributesAsOptions(attributes)}
-                radioAttributes={radioAttributes}
+                radioAttributes={radioAttributesSpan}
                 value={variable.getValueText()}
                 onChange={model.onChange}
                 showAll={true}
+                model={model}
               />
             </div>
           )}
@@ -176,22 +215,6 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
               <body.Selector model={body} />
             </div>
           )}
-        </div>
-        <div className={styles.infoFlex}>
-          <div className={styles.tagsFlex}>
-            <Icon name={'info-circle'} />
-            <div>
-              Attributes are ordered by the difference between the baseline and selection values for each value.
-            </div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.baselineTag} />
-            <div>Baseline</div>
-          </div>
-          <div className={styles.tagsFlex}>
-            <div className={styles.selectionTag} />
-            <div>Selection</div>
-          </div>
         </div>
         <div className={styles.content}>{body && <body.Component model={body} />}</div>
       </div>
@@ -320,31 +343,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyItems: 'left',
       width: '100%',
       flexDirection: 'column',
-    }),
-    baselineTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: BaselineColor,
-    }),
-    selectionTag: css({
-      display: 'inline-block',
-      width: '16px',
-      height: '4px',
-      borderRadius: '4px',
-      backgroundColor: SelectionColor,
-    }),
-    infoFlex: css({
-      display: 'flex',
-      gap: '16px',
-      alignItems: 'center',
-      padding: '8px',
-    }),
-    tagsFlex: css({
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center',
     }),
   };
 }

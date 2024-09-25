@@ -9,15 +9,16 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, FieldType, LoadingState, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { getPanelConfig } from './allComparison';
+import { GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 
 export function buildAttributeComparison(
   scene: SceneObject,
   variable: CustomVariable,
-  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions'],
+  metric: MetricFunction
 ) {
   const timeRange = sceneGraph.getTimeRange(scene);
   const data = sceneGraph.getData(scene);
@@ -88,9 +89,10 @@ export function buildAttributeComparison(
     body: new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
       autoRows: '200px',
+      isLazy: true,
       children: [],
     }),
-    getLayoutChild: getLayoutChild(getLabel, actionsFn),
+    getLayoutChild: getLayoutChild(getLabel, actionsFn, metric),
   });
 }
 
@@ -100,10 +102,11 @@ const getLabel = (df: DataFrame) => {
 
 function getLayoutChild(
   getTitle: (df: DataFrame) => string,
-  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions'],
+  metric: MetricFunction
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = getPanelConfig()
+    const panel = getPanelConfig(metric)
       .setTitle(getTitle(frame))
       .setData(
         new SceneDataNode({

@@ -1,22 +1,25 @@
 import { PanelBuilders, SceneCSSGridItem, SceneCSSGridLayout, SceneDataNode, VizPanelState } from '@grafana/scenes';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { DataFrame, PanelData } from '@grafana/data';
 import { AxisPlacement } from '@grafana/ui';
 import { TooltipDisplayMode } from '@grafana/schema';
 import { HighestDifferencePanel } from './HighestDifferencePanel';
+import { GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 
 export const BaselineColor = '#5794F299';
 export const SelectionColor = '#FF9930';
 
-export function buildAllComparisonLayout(actionsFn: (df: DataFrame) => VizPanelState['headerActions']) {
+export function buildAllComparisonLayout(
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions'],
+  metric: MetricFunction
+) {
   return new ByFrameRepeater({
     body: new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: '300px',
+      autoRows: '320px',
       children: [],
     }),
-    getLayoutChild: getLayoutChild(getFrameName, actionsFn),
+    getLayoutChild: getLayoutChild(getFrameName, actionsFn, metric),
   });
 }
 
@@ -26,10 +29,11 @@ const getFrameName = (df: DataFrame) => {
 
 function getLayoutChild(
   getTitle: (df: DataFrame) => string,
-  actionsFn: (df: DataFrame) => VizPanelState['headerActions']
+  actionsFn: (df: DataFrame) => VizPanelState['headerActions'],
+  metric: MetricFunction
 ) {
   return (data: PanelData, frame: DataFrame) => {
-    const panel = getPanelConfig()
+    const panel = getPanelConfig(metric)
       .setTitle(getTitle(frame))
       .setData(
         new SceneDataNode({
@@ -54,7 +58,7 @@ function getLayoutChild(
   };
 }
 
-export function getPanelConfig() {
+export function getPanelConfig(metric: MetricFunction) {
   return PanelBuilders.barchart()
     .setOption('legend', { showLegend: false })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi })
@@ -65,14 +69,14 @@ export function getPanelConfig() {
         .matchFieldsWithName('Baseline')
         .overrideColor({
           mode: 'fixed',
-          fixedColor: BaselineColor,
+          fixedColor: metric === 'duration' ? BaselineColor : 'semi-dark-green',
         })
         .overrideUnit('percentunit');
       overrides
         .matchFieldsWithName('Selection')
         .overrideColor({
           mode: 'fixed',
-          fixedColor: SelectionColor,
+          fixedColor: metric === 'duration' ? SelectionColor : 'semi-dark-red',
         })
         .overrideUnit('percentunit');
     });

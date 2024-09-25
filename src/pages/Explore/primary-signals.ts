@@ -1,5 +1,7 @@
 import { SelectableValue } from '@grafana/data';
 
+export const DATABASE_CALLS_KEY = 'span.db.name';
+
 export const primarySignalOptions: Array<SelectableValue<string>> = [
   {
     label: 'Full traces',
@@ -20,15 +22,9 @@ export const primarySignalOptions: Array<SelectableValue<string>> = [
     description: 'Analyze interactions initiated by consumer services',
   },
   {
-    label: 'HTTP endpoints',
-    value: 'http_endpoints',
-    filter: { key: 'span.http.path', operator: '!=', value: '""' },
-    description: 'Analyze activities at specific HTTP service points',
-  },
-  {
     label: 'Database calls',
     value: 'database_calls',
-    filter: { key: 'span.db.name', operator: '!=', value: '""' },
+    filter: { key: DATABASE_CALLS_KEY, operator: '!=', value: '""' },
     description: 'Evaluate the performance issues in database interactions',
   },
   {

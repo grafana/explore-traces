@@ -14,6 +14,7 @@ import { Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 
 import { GroupBySelector } from '../../../GroupBySelector';
 import {
+  MetricFunction,
   RESOURCE,
   RESOURCE_ATTR,
   SPAN,
@@ -27,8 +28,14 @@ import {
 import { LayoutSwitcher } from '../../../LayoutSwitcher';
 import { AddToFiltersAction } from '../../../actions/AddToFiltersAction';
 import { buildNormalLayout } from '../../../layouts/attributeBreakdown';
-import { getAttributesAsOptions, getGroupByVariable, getTraceByServiceScene } from 'utils/utils';
+import {
+  getAttributesAsOptions,
+  getGroupByVariable,
+  getTraceByServiceScene,
+  getTraceExplorationScene,
+} from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
+import { AttributesDescription } from './AttributesDescription';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -86,33 +93,62 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
 
   public onChange = (value: string) => {
     const variable = getGroupByVariable(this);
-    variable.changeValueTo(value);
+    if (variable.getValueText() !== value) {
+      variable.changeValueTo(value);
 
-    reportAppInteraction(
-      USER_EVENTS_PAGES.analyse_traces,
-      USER_EVENTS_ACTIONS.analyse_traces.breakdown_group_by_changed,
-      {
-        groupBy: value,
-      }
-    );
+      reportAppInteraction(
+        USER_EVENTS_PAGES.analyse_traces,
+        USER_EVENTS_ACTIONS.analyse_traces.breakdown_group_by_changed,
+        {
+          groupBy: value,
+        }
+      );
+    }
   };
 
   public static Component = ({ model }: SceneComponentProps<AttributesBreakdownScene>) => {
     const [scope, setScope] = useState(RESOURCE);
     const { body } = model.useState();
     const variable = getGroupByVariable(model);
-    const { attributes } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
 
+    const { attributes } = getTraceByServiceScene(model).useState();
     const filterType = scope === RESOURCE ? RESOURCE_ATTR : SPAN_ATTR;
     let filteredAttributes = attributes?.filter((attr) => attr.includes(filterType));
-    filteredAttributes =
-      scope === RESOURCE
-        ? filteredAttributes?.concat(radioAttributesResource)
-        : filteredAttributes?.concat(radioAttributesSpan);
+    if (scope === SPAN) {
+      filteredAttributes = filteredAttributes?.concat(radioAttributesSpan);
+    }
+
+    const exploration = getTraceExplorationScene(model);
+    const { value: metric } = exploration.getMetricVariable().useState();
+    const getDescription = (metric: MetricFunction) => {
+      switch (metric) {
+        case 'rate':
+          return 'Attributes are ordered by their rate of requests per second.';
+        case 'errors':
+          return 'Attributes are ordered by their rate of errors per second.';
+        case 'duration':
+          return 'Attributes are ordered by their average duration.';
+        default:
+          throw new Error('Metric not supported');
+      }
+    };
+    const description = getDescription(metric as MetricFunction);
 
     return (
       <div className={styles.container}>
+        <AttributesDescription
+          desctiption={description}
+          tags={
+            metric === 'duration'
+              ? []
+              : [
+                  { label: 'Rate', color: 'green' },
+                  { label: 'Error', color: 'red' },
+                ]
+          }
+        />
+
         <div className={styles.controls}>
           {filteredAttributes?.length && (
             <div className={styles.controlsLeft}>
@@ -132,6 +168,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
                   radioAttributes={scope === RESOURCE ? radioAttributesResource : radioAttributesSpan}
                   value={variable.getValueText()}
                   onChange={model.onChange}
+                  model={model}
                 />
               </div>
             </div>

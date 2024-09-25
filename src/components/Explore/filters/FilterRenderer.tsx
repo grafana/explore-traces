@@ -2,10 +2,13 @@ import { css } from '@emotion/css';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { AdHocVariableFilter, GrafanaTheme2, SelectableValue, toOption } from '@grafana/data';
-import { Button, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
+import { Button, InputActionMeta, Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { ignoredAttributes, RESOURCE_ATTR, SPAN_ATTR } from 'utils/shared';
+import { getTraceExplorationScene } from 'utils/utils';
+import { VariableValue } from '@grafana/scenes';
+import { filteredOptions } from '../GroupBySelector';
 
 interface Props {
   filter: AdHocVariableFilter;
@@ -23,8 +26,13 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     isValuesLoading?: boolean;
   }>({});
 
+  const [keyQuery, setKeyQuery] = useState<string>('');
+  const [valueQuery, setValueQuery] = useState<string>('');
+
   const key = filter.key !== '' ? state?.keys?.find((key) => key.value === filter.key) ?? toOption(filter.key) : null;
   const value = filter.value !== '' ? toOption(filter.value) : null;
+  const exploration = getTraceExplorationScene(model);
+  const { value: metric } = exploration.getMetricVariable().useState();
 
   const operators = useMemo(() => {
     const operators = model._getOperators();
@@ -34,24 +42,66 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   useEffect(() => {
     async function updateKeys() {
       setState({ ...state, isKeysLoading: true });
-      const keys = formatKeys(await model._getKeys(filter.key));
+      const keys = formatKeys(await model._getKeys(filter.key), model.state.filters, metric);
       setState({ ...state, isKeysLoading: false, keys });
     }
 
     if (key && state.keys === undefined && !state.isKeysLoading) {
       updateKeys();
     }
-  }, [filter, key, model, state]);
+  }, [filter, key, metric, model, state]);
 
-  const formatKeys = (keys: Array<SelectableValue<string>>) => {
-    const filteredKeys = keys.filter((k) => ignoredAttributes.indexOf(k.value!) === -1);
+  const keyOptions = useMemo(() => {
+    if (!state.keys) {
+      return;
+    }
 
+    return filteredOptions(state.keys, keyQuery);
+  }, [keyQuery, state.keys]);
+
+  const valueOptions = useMemo(() => {
+    if (!state.values) {
+      return;
+    }
+
+    return filteredOptions(state.values, valueQuery);
+  }, [valueQuery, state.values]);
+
+  const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
     // Ensure we always have the same order of keys
-    const resourceAttributes = filteredKeys.filter((k) => k.value?.includes(RESOURCE_ATTR));
-    const spanAttributes = filteredKeys.filter((k) => k.value?.includes(SPAN_ATTR));
-    const intrinsicAttributes = filteredKeys.filter(
-      (k) => !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR)
-    );
+    const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
+    const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
+    const intrinsicAttributes = keys.filter((k) => {
+      let checks =
+        !k.value?.includes(RESOURCE_ATTR) &&
+        !k.value?.includes(SPAN_ATTR) &&
+        ignoredAttributes.indexOf(k.value!) === -1;
+
+      // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (filters.find((f) => f.key === 'kind')) {
+        checks = checks && k.value !== 'kind' && k.value !== 'span:kind';
+      }
+
+      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (filters.find((f) => f.key === 'nestedSetParent')) {
+        checks =
+          checks &&
+          k.value !== 'rootName' &&
+          k.value !== 'rootServiceName' &&
+          k.value !== 'trace:rootName' &&
+          k.value !== 'trace:rootService';
+      }
+
+      // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
+      // as you would overwrite it in the query if it's selected in the drop down
+      if (metric === 'rate' || metric === 'errors') {
+        checks = checks && k.value !== 'status' && k.value !== 'span:status';
+      }
+
+      return checks;
+    });
     return intrinsicAttributes
       ?.concat(resourceAttributes)
       .concat(spanAttributes)
@@ -77,16 +127,23 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     <BaseSelect
       value={key}
       placeholder={'Select attribute'}
-      options={state.keys}
-      onChange={(v) => model._updateFilter(filter, 'key', v.value)}
+      options={keyOptions}
+      onChange={(v) => model._updateFilter(filter, { key: v.value })}
       isLoading={state.isKeysLoading}
       autoFocus={keyAutoFocus}
       openMenuOnFocus={keyAutoFocus}
       onOpenMenu={async () => {
         setState({ ...state, isKeysLoading: true });
-        const keys = formatKeys(await model._getKeys(filter.key));
+        const keys = formatKeys(await model._getKeys(filter.key), model.state.filters, metric);
         setState({ ...state, isKeysLoading: false, keys });
       }}
+      onInputChange={(value: string, { action }: InputActionMeta) => {
+        if (action === 'input-change') {
+          setKeyQuery(value);
+        }
+      }}
+      onCloseMenu={() => setKeyQuery('')}
+      virtualized
     />
   );
 
@@ -95,8 +152,8 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     <BaseSelect
       value={value}
       placeholder={'value'}
-      options={state.values}
-      onChange={(v) => model._updateFilter(filter, 'value', v.value)}
+      options={valueOptions}
+      onChange={(v) => model._updateFilter(filter, { value: v.value })}
       isLoading={state.isValuesLoading}
       autoFocus={valueAutoFocus}
       openMenuOnFocus={valueAutoFocus}
@@ -105,6 +162,13 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         const values = sortValues(await model._getValuesFor(filter));
         setState({ ...state, isValuesLoading: false, values });
       }}
+      onInputChange={(value: string, { action }: InputActionMeta) => {
+        if (action === 'input-change') {
+          setValueQuery(value);
+        }
+      }}
+      onCloseMenu={() => setValueQuery('')}
+      virtualized
     />
   );
 
@@ -119,7 +183,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
         value={filter.operator}
         disabled={model.state.readOnly}
         options={operators}
-        onChange={(v) => model._updateFilter(filter, 'operator', v.value)}
+        onChange={(v) => model._updateFilter(filter, { operator: v.value })}
       />
       {valueSelect}
       {filter.value.length > 0 && (

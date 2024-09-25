@@ -7,137 +7,104 @@ import {
   PanelBuilders,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneQueryRunner,
   sceneGraph,
-  SceneDataTransformer,
 } from '@grafana/scenes';
-import { LoadingState, GrafanaTheme2, DataFrame } from '@grafana/data';
+import { LoadingState, GrafanaTheme2, PanelData } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { MakeOptional, MetricFunction, explorationDS } from 'utils/shared';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
-import { buildQuery } from '../../TracesByServiceScene';
-import { map, Observable } from 'rxjs';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  metric?: MetricFunction;
 }
 
 export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
-  constructor(state: MakeOptional<SpanListSceneState, 'metric'>) {
-    super({
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: explorationDS,
-          queries: [buildQuery(state.metric as MetricFunction)],
-        }),
-        transformations: [
-          () => (source: Observable<DataFrame[]>) => {
-            return source.pipe(
-              map((data: DataFrame[]) => {
-                return data.map((df) => ({
-                  ...df,
-                  fields: df.fields.filter((f) => !f.name.startsWith('nestedSet')),
-                }));
-              })
-            );
-          },
-          {
-            id: 'sortBy',
-            options: {
-              fields: {},
-              sort: [
-                {
-                  field: 'Duration',
-                  desc: true,
-                },
-              ],
-            },
-          },
-        ],
-      }),
-    });
+  constructor(state: SpanListSceneState) {
+    super(state);
 
     this.addActivationHandler(() => {
-      const data = sceneGraph.getData(this);
+      const sceneData = sceneGraph.getData(this);
 
+      this.updatePanel(sceneData.state.data);
       this._subs.add(
-        data.subscribeToState((data) => {
-          if (data.data?.state === LoadingState.Done) {
-            if (data.data.series.length === 0 || data.data.series[0].length === 0) {
-              this.setState({
-                panel: new SceneFlexLayout({
-                  children: [
-                    new SceneFlexItem({
-                      body: new EmptyStateScene({
-                        message: 'No data for selected query',
-                      }),
-                    }),
-                  ],
-                }),
-              });
-            } else {
-              this.setState({
-                panel: new SceneFlexLayout({
-                  direction: 'row',
-                  children: [
-                    new SceneFlexItem({
-                      body: PanelBuilders.table()
-                        .setHoverHeader(true)
-                        .setOverrides((builder) => {
-                          return builder
-                            .matchFieldsWithName('traceID')
-                            .overrideLinks([
-                              {
-                                title: 'Trace: ${__value.raw}',
-                                url: '',
-                                onClick: (data) => {
-                                  const traceID: string | undefined =
-                                    data.origin?.field?.values?.[data.origin?.rowIndex];
-                                  traceID && locationService.partial({ traceId: traceID });
-                                },
-                              },
-                            ])
-                            .matchFieldsWithName('spanID')
-                            .overrideLinks([
-                              {
-                                title: 'Span: ${__value.raw}',
-                                url: '',
-                                onClick: (data) => {
-                                  const traceID: string | undefined =
-                                    data?.origin?.field?.state?.scopedVars?.__dataContext?.value?.frame?.first?.[
-                                      data.origin?.rowIndex
-                                    ];
-                                  traceID && locationService.partial({ traceId: traceID });
-                                },
-                              },
-                            ]);
-                        })
-                        .build(),
-                    }),
-                  ],
-                }),
-              });
-            }
-          } else if (data.data?.state === LoadingState.Loading) {
-            this.setState({
-              panel: new SceneFlexLayout({
-                direction: 'row',
-                children: [
-                  new LoadingStateScene({
-                    component: SkeletonComponent,
-                  }),
-                ],
-              }),
-            });
-          }
+        sceneData.subscribeToState((data) => {
+          this.updatePanel(data.data);
         })
       );
     });
+  }
+
+  private updatePanel(data?: PanelData) {
+    if (data?.state === LoadingState.Done) {
+      if (data.series.length === 0 || data.series[0].length === 0) {
+        this.setState({
+          panel: new SceneFlexLayout({
+            children: [
+              new SceneFlexItem({
+                body: new EmptyStateScene({
+                  message: 'No data for selected query',
+                }),
+              }),
+            ],
+          }),
+        });
+      } else {
+        this.setState({
+          panel: new SceneFlexLayout({
+            direction: 'row',
+            children: [
+              new SceneFlexItem({
+                body: PanelBuilders.table()
+                  .setHoverHeader(true)
+                  .setOverrides((builder) => {
+                    return builder
+                      .matchFieldsWithName('spanID')
+                      .overrideLinks([
+                        {
+                          title: 'Span: ${__value.raw}',
+                          url: '',
+                          onClick: (clickEvent) => {
+                            const data = sceneGraph.getData(this);
+                            const firstSeries = data.state.data?.series[0];
+                            const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
+                            const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
+                            const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
+                            const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
+
+                            traceId &&
+                              locationService.partial({
+                                traceId,
+                                spanId,
+                              });
+                          },
+                        },
+                      ])
+                      .matchFieldsWithName('traceService')
+                      .overrideCustomFieldConfig('width', 350)
+                      .matchFieldsWithName('traceName')
+                      .overrideCustomFieldConfig('width', 350);
+                  })
+                  .build(),
+              }),
+            ],
+          }),
+        });
+      }
+    } else if (data?.state === LoadingState.Loading) {
+      this.setState({
+        panel: new SceneFlexLayout({
+          direction: 'row',
+          children: [
+            new LoadingStateScene({
+              component: SkeletonComponent,
+            }),
+          ],
+        }),
+      });
+    }
   }
 
   public static Component = ({ model }: SceneComponentProps<SpanListScene>) => {
@@ -152,7 +119,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 }
 
 const SkeletonComponent = () => {
-  const styles = useStyles2(getStyles);
+  const styles = useStyles2(getSkeletonStyles);
 
   return (
     <div className={styles.container}>
@@ -172,7 +139,7 @@ const SkeletonComponent = () => {
   );
 };
 
-function getStyles(theme: GrafanaTheme2) {
+function getSkeletonStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       height: '100%',

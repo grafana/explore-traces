@@ -4,65 +4,55 @@ import {
   SceneObjectState,
   SceneObjectBase,
   SceneComponentProps,
-  SceneObjectUrlSyncConfig,
-  SceneObjectUrlValues,
   SceneFlexItem,
   SceneFlexLayout,
 } from '@grafana/scenes';
-import { DetailsSceneUpdated } from '../../../utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { TraceViewPanelScene } from '../panels/TraceViewPanelScene';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
+import { getTraceExplorationScene } from '../../../utils/utils';
 
 export interface DetailsSceneState extends SceneObjectState {
-  traceId?: string;
-
   body: SceneFlexLayout;
 }
 
 export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['traceId'] });
-
   constructor(state: Partial<DetailsSceneState>) {
     super({
-      traceId: state.traceId ?? '',
       body: new SceneFlexLayout({ children: [] }),
+      ...state,
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
-    this.subscribeToState((newState, prevState) => {
-      if (newState.traceId !== prevState.traceId) {
-        this.updateBody();
-        reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.open_trace, {
-          traceId: newState.traceId,
-        });
-      }
-      this.publishEvent(new DetailsSceneUpdated({ showDetails: true }), true);
-    });
   }
 
   private _onActivate() {
     this.updateBody();
-  }
 
-  getUrlState() {
-    return { traceId: this.state.traceId };
-  }
+    const traceExploration = getTraceExplorationScene(this);
 
-  updateFromUrl(values: SceneObjectUrlValues) {
-    const stateUpdate: Partial<DetailsSceneState> = {};
-
-    if (typeof values.traceId === 'string' && values.traceId !== this.state.traceId) {
-      stateUpdate.traceId = values.traceId;
-    }
-
-    this.setState(stateUpdate);
+    traceExploration.subscribeToState((newState, prevState) => {
+      if (newState.traceId !== prevState.traceId || newState.spanId !== prevState.spanId) {
+        this.updateBody();
+        reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.open_trace, {
+          traceId: newState.traceId,
+          spanId: newState.spanId,
+        });
+      }
+    });
   }
 
   private updateBody() {
-    if (this.state.traceId) {
+    const traceExploration = getTraceExplorationScene(this);
+
+    if (traceExploration.state.traceId) {
       this.state.body.setState({
-        children: [new TraceViewPanelScene({ traceId: this.state.traceId })],
+        children: [
+          new TraceViewPanelScene({
+            traceId: traceExploration.state.traceId,
+            spanId: traceExploration.state.spanId,
+          }),
+        ],
       });
     } else {
       this.state.body.setState({

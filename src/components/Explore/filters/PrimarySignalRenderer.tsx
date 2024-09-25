@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
-import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
+import { Select, SelectBaseProps, Text, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
 import { getTraceExplorationScene } from '../../../utils/utils';
@@ -15,11 +15,18 @@ interface Props {
 export function PrimarySignalRenderer({ model }: Props) {
   const exploration = getTraceExplorationScene(model);
   const { primarySignal } = exploration.useState();
+  const styles = useStyles2(getStyles);
 
   return (
     <BaseSelect
       value={primarySignal}
-      options={primarySignalOptions}
+      // Allows us to add a custom border to the bottom of the group heading
+      options={[{
+        options: primarySignalOptions,
+      }]}
+      components={{
+        GroupHeading: () => <div className={styles.heading}><Text weight="bold" variant="bodySmall" color="secondary">Primary signal</Text></div>,
+      }}
       onChange={(v) => v.value && exploration.onChangePrimarySignal(v.value)}
     />
   );
@@ -32,10 +39,6 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
       width="auto"
       {...props}
       className={css(styles.control, props.className)}
-      components={{
-        IndicatorsContainer: () => null,
-        IndicatorSeparator: () => null,
-      }}
     />
   );
 };
@@ -52,9 +55,13 @@ const getStyles = (theme: GrafanaTheme2) => ({
     boxSizing: 'border-box',
     boxShadow: 'none',
 
-    '& > div': {
-      paddingLeft: '8px',
-      paddingRight: '8px',
+    'svg': {
+      marginRight: '-4px',
     },
+  }),
+  heading: css({
+    padding: theme.spacing(1, 1, 0.75, 0.75),
+    borderLeft: '2px solid transparent',
+    borderBottom: `1px solid ${theme.colors.border.weak}`,
   }),
 });

@@ -10,16 +10,16 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS, MetricFunction } from '../../../utils/shared';
+import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
-import { GRID_TEMPLATE_COLUMNS } from '../../../pages/Explore/SelectStartingPointScene';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
+import { syncYAxis } from '../behaviors/syncYaxis';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -31,6 +31,7 @@ export function buildNormalLayout(
   const query = rateByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
+    $behaviors: [syncYAxis()],
     $data: new SceneDataTransformer({
       $data: new StepQueryRunner({
         maxDataPoints: 64,
@@ -70,6 +71,7 @@ export function buildNormalLayout(
         body: new SceneCSSGridLayout({
           templateColumns: GRID_TEMPLATE_COLUMNS,
           autoRows: '200px',
+          isLazy: true,
           children: [],
         }),
         groupBy: true,
@@ -79,6 +81,7 @@ export function buildNormalLayout(
         body: new SceneCSSGridLayout({
           templateColumns: '1fr',
           autoRows: '200px',
+          isLazy: true,
           children: [],
         }),
         groupBy: true,

@@ -5,6 +5,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { getFiltersVariable } from '../../../utils/utils';
 import { addToFilters } from '../actions/AddToFiltersAction';
+import { computeHighestDifference } from '../../../utils/comparison';
 
 export interface HighestDifferencePanelState extends SceneObjectState {
   frame: DataFrame;
@@ -24,17 +25,8 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
 
   private _onActivate() {
     const { frame } = this.state;
-    const baselineField = frame.fields.find((f) => f.name === 'Baseline');
-    const selectionField = frame.fields.find((f) => f.name === 'Selection');
-    for (let i = 0; i < (baselineField?.values?.length || 0); i++) {
-      const diff = (selectionField?.values[i] || 0) - (baselineField?.values[i] || 0);
-      if (Math.abs(diff) > Math.abs(this.state.maxDifference || 0)) {
-        this.setState({
-          maxDifference: diff,
-          maxDifferenceIndex: i,
-        });
-      }
-    }
+    const { maxDifference, maxDifferenceIndex } = computeHighestDifference(frame);
+    this.setState({ maxDifference, maxDifferenceIndex });
   }
 
   private getAttribute() {
@@ -71,12 +63,15 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
                 variant="primary"
                 icon={'search-plus'}
                 fill="text"
-                tooltip={'Add to filters'}
                 onClick={() => model.onAddToFilters()}
-              />
+              >
+                Add to filters
+              </Button>
             </Stack>
 
-            <div className={styles.differenceValue}>{(Math.abs(maxDifference) * 100).toFixed(2)}%</div>
+            <div className={styles.differenceValue}>
+              {(Math.abs(maxDifference) * 100).toFixed(maxDifference === 0 ? 0 : 2)}%
+            </div>
             <div className={styles.value}>{value}</div>
           </div>
         )}
@@ -100,6 +95,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: `1px solid ${theme.colors.secondary.border}`,
       background: theme.colors.background.primary,
       padding: '8px',
+      marginBottom: theme.spacing(2),
       fontSize: '12px',
     }),
     differenceValue: css({
