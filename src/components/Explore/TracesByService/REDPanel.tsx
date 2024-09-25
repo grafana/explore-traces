@@ -117,7 +117,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                       }),
                     ],
                   });
-                  if (!parent.state.selection?.duration) {
+                  if (!parent.state.selection?.duration || parent.state.selection.type === 'auto') {
                     parent.setState({ selection });
                   }
                 }
