@@ -123,3 +123,7 @@ export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
   }
   return variable;
 }
+
+export function shouldShowSelection(tab?: string): boolean {
+  return tab === 'comparison' || tab === 'traceList';
+}
