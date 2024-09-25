@@ -73,36 +73,42 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
 
     const exploration = getTraceExplorationScene(this);
     const metricVariable = exploration.getMetricVariable();
-    metricVariable.subscribeToState((newState, prevState) => {
-      if (newState.value !== prevState.value) {
-        const selection = getDefaultSelectionForMetric(newState.value as MetricFunction);
-        if (selection) {
-          this.setState({ selection });
+    this._subs.add(
+      metricVariable.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          const selection = getDefaultSelectionForMetric(newState.value as MetricFunction);
+          if (selection) {
+            this.setState({ selection });
+          }
+          this.updateQueryRunner(newState.value as MetricFunction);
+          this.updateBody();
         }
-        this.updateQueryRunner(newState.value as MetricFunction);
-        this.updateBody();
-      }
-    });
+      })
+    );
 
-    this.subscribeToState((newState, prevState) => {
-      const timeRange = sceneGraph.getTimeRange(this);
-      const selectionFrom = newState.selection?.timeRange?.from;
-      // clear selection if it's out of time range
-      if (selectionFrom && selectionFrom < timeRange.state.value.from.unix()) {
-        this.setState({ selection: undefined });
-      }
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        const timeRange = sceneGraph.getTimeRange(this);
+        const selectionFrom = newState.selection?.timeRange?.from;
+        // clear selection if it's out of time range
+        if (selectionFrom && selectionFrom < timeRange.state.value.from.unix()) {
+          this.setState({ selection: undefined });
+        }
 
-      // Set group by to All when starting a comparison
-      if (!isEqual(newState.selection, prevState.selection)) {
-        const groupByVar = getGroupByVariable(this);
-        groupByVar.changeValueTo(ALL);
-        this.updateQueryRunner(metricVariable.getValue() as MetricFunction);
-      }
-    });
+        // Set group by to All when starting a comparison
+        if (!isEqual(newState.selection, prevState.selection)) {
+          const groupByVar = getGroupByVariable(this);
+          groupByVar.changeValueTo(ALL);
+          this.updateQueryRunner(metricVariable.getValue() as MetricFunction);
+        }
+      })
+    );
 
-    getDatasourceVariable(this).subscribeToState(() => {
-      this.updateAttributes();
-    });
+    this._subs.add(
+      getDatasourceVariable(this).subscribeToState(() => {
+        this.updateAttributes();
+      })
+    );
 
     this.updateQueryRunner(metricVariable.getValue() as MetricFunction);
     this.updateAttributes();
@@ -258,7 +264,9 @@ const MetricTypeTooltip = () => {
           href={
             'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
           }
-          onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_docs_link_clicked)}
+          onClick={() =>
+            reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_docs_link_clicked)
+          }
         >
           Read documentation
         </LinkButton>
@@ -381,7 +389,7 @@ function buildGraphScene(metric: MetricFunction, children?: SceneObject[]) {
             minHeight: MAIN_PANEL_HEIGHT,
             maxHeight: MAIN_PANEL_HEIGHT,
             width: '60%',
-            body: new REDPanel({ metric }),
+            body: new REDPanel({}),
           }),
           new SceneFlexLayout({
             direction: 'column',

@@ -22,6 +22,7 @@ import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import {
   getLatencyPartialThresholdVariable,
   getLatencyThresholdVariable,
+  getMetricVariable,
   getTraceByServiceScene,
 } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
@@ -33,7 +34,6 @@ import { DurationComparisonControl } from './DurationComparisonControl';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  metric: MetricFunction;
   actions?: SceneObject[];
   yBuckets?: number[];
 }
@@ -126,7 +126,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
               // update panel
               this.setState({
                 yBuckets,
-                panel: this.getVizPanel(this.state.metric),
+                panel: this.getVizPanel(),
               });
             }
           } else if (newData.data?.state === LoadingState.Loading) {
@@ -163,26 +163,28 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   private isDuration() {
-    return this.state.metric === 'duration';
+    return getMetricVariable(this).state.value === 'duration';
   }
 
   private _onActivate() {
+    const metric = getMetricVariable(this).state.value as MetricFunction;
     this.setState({
       $data: new StepQueryRunner({
         maxDataPoints: this.isDuration() ? 24 : 64,
         datasource: explorationDS,
-        queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(this.state.metric)],
+        queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(metric)],
       }),
-      panel: this.getVizPanel(this.state.metric),
+      panel: this.getVizPanel(),
     });
   }
 
-  private getVizPanel(type: MetricFunction) {
+  private getVizPanel() {
+    const metric = getMetricVariable(this).state.value as MetricFunction;
     if (this.isDuration()) {
       return getHistogramVizPanel(this, this.state.yBuckets ?? []);
     }
 
-    return this.getRateOrErrorVizPanel(type);
+    return this.getRateOrErrorVizPanel(metric);
   }
 
   private getRateOrErrorVizPanel(type: MetricFunction) {
@@ -232,7 +234,8 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<REDPanel>) => {
-    const { panel, metric, actions } = model.useState();
+    const { panel, actions } = model.useState();
+    const { value: metric } = getMetricVariable(model).useState();
     const styles = useStyles2(getStyles);
 
     if (!panel) {
@@ -269,7 +272,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
           <div className={styles.titleContainer}>
             <div className={styles.titleRadioWrapper}>
               <RadioButtonList
-                name={`metric-${model.state.metric}`}
+                name={`metric-${metric}`}
                 options={[{ title: '', value: 'selected' }]}
                 value={'selected'}
               />
