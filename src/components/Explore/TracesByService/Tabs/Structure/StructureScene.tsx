@@ -339,12 +339,15 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
 function buildQuery(metric: MetricFunction) {
   let metricQuery;
+  let selectionQuery = '';
   switch (metric) {
     case 'errors':
       metricQuery = 'status = error';
+      selectionQuery = 'status = error';
       break;
     case 'duration':
       metricQuery = `duration > ${VAR_LATENCY_PARTIAL_THRESHOLD_EXPR}`;
+      selectionQuery = `duration > ${VAR_LATENCY_THRESHOLD_EXPR}`;
       break;
     default:
       metricQuery = 'kind = server';
@@ -354,7 +357,7 @@ function buildQuery(metric: MetricFunction) {
   return {
     refId: 'A',
     query: `{${VAR_FILTERS_EXPR} ${
-      metric === 'duration' ? `&& duration > ${VAR_LATENCY_THRESHOLD_EXPR}` : ''
+      selectionQuery.length ? `&& ${selectionQuery}` : ''
     }} &>> { ${metricQuery} } | select(status, resource.service.name, name, nestedSetParent, nestedSetLeft, nestedSetRight)`,
     queryType: 'traceql',
     tableType: 'raw',
