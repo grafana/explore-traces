@@ -17,13 +17,11 @@ You can use traces to identify errors in your apps and services and then to opti
 
 When working with traces, start with the big picture. Then drill down using primary signals, RED metrics, filters, and structural or trace list tabs to explore your data. To learn more, refer to [Concepts](../concepts/).
 
-<!--Update with Explore Traces blog post - To learn more about Explore Traces, read [The new, queryless UI for Grafana Pyroscope: Introducing Explore Profiles](https://grafana.com/blog/2024/07/18/the-new-queryless-ui-for-grafana-pyroscope-introducing-explore-profiles/). -->
-
-<!-- Needs to be updated - {{< youtube id="_8SbNN5DRmQ" >}} -->
-
 {{< admonition type="note" >}}
-Expand your observability journey and learn about [Explore Traces](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/).
+Expand your observability journey and learn about [the Explore apps suite](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/).
 {{< /admonition >}}
+
+{{< youtube id="a3uB1C2oHA4" >}}
 
 ## Before you begin
 
