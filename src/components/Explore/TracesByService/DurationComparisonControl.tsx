@@ -30,12 +30,6 @@ export class DurationComparisonControl extends SceneObjectBase<ComparisonControl
     });
   };
 
-  public stopInvestigation = () => {
-    const byServiceScene = getTraceByServiceScene(this);
-    byServiceScene.setState({ selection: undefined });
-    reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.stop_investigation);
-  };
-
   public static Component = ({ model }: SceneComponentProps<DurationComparisonControl>) => {
     const { selection } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
@@ -53,7 +47,7 @@ export class DurationComparisonControl extends SceneObjectBase<ComparisonControl
           fill="solid"
           disabled={isDisabled}
           icon={'bolt'}
-          onClick={selection ? model.stopInvestigation : model.startInvestigation}
+          onClick={model.startInvestigation}
           tooltip={tooltip}
         >
           {isDisabled ? 'Slowest traces selected' : 'Select slowest traces'}
