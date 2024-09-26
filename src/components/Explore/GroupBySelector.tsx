@@ -114,7 +114,9 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
       <div ref={controlsContainer} className={styles.container}>
         {useHorizontalLabelSelector ? (
           <>
-            <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
+            {radioOptions.length > 0 && (
+              <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
+            )}
             <Select
               value={value && getModifiedSelectOptions(otherAttrOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
               placeholder={'Other attributes'}
