@@ -50,7 +50,7 @@ import { map, Observable } from 'rxjs';
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
   metric?: MetricFunction;
-  actionView?: string;
+  actionView?: ActionViewType;
 
   attributes?: string[];
   selection?: ComparisonSelection;

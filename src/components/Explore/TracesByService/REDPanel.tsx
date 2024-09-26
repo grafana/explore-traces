@@ -24,6 +24,7 @@ import {
   getLatencyThresholdVariable,
   getMetricVariable,
   getTraceByServiceScene,
+  shouldShowSelection,
 } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
@@ -206,7 +207,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   private buildSelectionAnnotation(state: TraceSceneState) {
-    if (!state.actionView || !['traceList', 'comparison'].includes(state.actionView)) {
+    if (!shouldShowSelection(state.actionView)) {
       return undefined;
     }
 
