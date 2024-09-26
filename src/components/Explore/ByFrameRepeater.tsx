@@ -52,7 +52,13 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 ],
               });
             } else {
-              this.performRepeat(data.data);
+              const filtered = {
+                ...data.data,
+                series: data.data?.series.filter((frame) => {
+                  return frame.fields.some((f) => !f.labels ? false : Object.values(f.labels).find((label) => label.toLowerCase().includes(this.state.searchQuery ?? '')));
+                }),
+              };
+              this.renderFilteredData(filtered as PanelData);              
               this.publishEvent(new EventTimeseriesDataReceived({ series: data.data.series }), true);
             }
           } else if (data.data?.state === LoadingState.Error) {
@@ -101,21 +107,16 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
 
   private onSearchQueryChangeDebounced = debounce((searchQuery: string) => {
     const data = sceneGraph.getData(this);
-
     const filtered = {
       ...data.state.data,
       series: data.state.data?.series.filter((frame) => {
-        return frame.fields.some((field) => {
-          if (!field.labels) {
-            return false;
-          }
-
-          const matchFound = Object.values(field.labels).find((label) => label.toLowerCase().includes(searchQuery));
-          return matchFound ? true : false;
-        });
+        return frame.fields.some((f) => !f.labels ? false : Object.values(f.labels).find((label) => label.toLowerCase().includes(searchQuery)));
       }),
     };
+    this.renderFilteredData(filtered as PanelData);
+  }, 250);
 
+  private renderFilteredData(filtered: PanelData) {
     if (filtered.series && filtered.series.length > 0) {
       this.performRepeat(filtered as PanelData);
     } else {
@@ -129,7 +130,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
         ],
       });
     }
-  }, 250);
+  }
 
   private groupSeriesBy(data: PanelData, groupBy: string) {
     const groupedData = data.series.reduce((acc, series) => {
