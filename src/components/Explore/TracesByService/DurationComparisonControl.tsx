@@ -36,7 +36,7 @@ export class DurationComparisonControl extends SceneObjectBase<ComparisonControl
 
     const isDisabled = selection?.type === 'auto';
     const tooltip = isDisabled
-      ? 'Slowest traces are already selected, navigate to the Comparison or Slow Traces tab for more details.'
+      ? 'Slowest traces are selected, navigate to the Comparison or Slow Traces tab for more details.'
       : undefined;
 
     return (
