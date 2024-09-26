@@ -62,10 +62,8 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
   public _onActivate() {
     this.state.$data?.subscribeToState((state) => {
       this.setState({ loading: state.data?.state === LoadingState.Loading });
-      if (
-        (state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Streaming) &&
-        state.data?.series.length
-      ) {
+
+      if ((state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Streaming) && state.data?.series.length) {
         const frame = state.data?.series[0].fields[0].values[0];
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
@@ -239,7 +237,10 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
     const metric = value as MetricFunction;
 
-    const isLoading = loading || ($data?.state.data?.state === LoadingState.Streaming && !tree?.children.length);
+    let isLoading = loading || !tree?.children.length;
+    if ($data?.state.data?.state === LoadingState.Done) {
+      isLoading = false;
+    }
 
     let description;
     let emptyMsg = '';
@@ -318,7 +319,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     return (
       <Stack direction={'column'} gap={1}>
         <div className={styles.description}>{description}</div>
-        {isLoading ? (
+        {isLoading && (
           <Stack direction={'column'} gap={2}>
             <Skeleton
               count={4}
@@ -327,9 +328,13 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
               highlightColor={theme.colors.background.primary}
             />
           </Stack>
-        ) : tree && tree.children.length ? (
+        )}
+
+        {!isLoading && tree && tree.children.length > 0 && (
           <div className={styles.traceViewList}>{panel && <panel.Component model={panel} />}</div>
-        ) : (
+        )}
+
+        {$data?.state.data?.state === LoadingState.Done && !tree?.children.length && (
           <EmptyState message={noDataMessage} padding={'32px'} />
         )}
       </Stack>
