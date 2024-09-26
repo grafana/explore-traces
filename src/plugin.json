@@ -16,15 +16,15 @@
     },
     "screenshots": [
       {
-        "name": "patterns",
+        "name": "histogram-breakdown",
         "path": "img/histogram-breakdown.png"
       },
       {
-        "name": "fields",
+        "name": "errors-metric-flow",
         "path": "img/errors-metric-flow.png"
       },
       {
-        "name": "table",
+        "name": "errors-root-cause",
         "path": "img/errors-root-cause.png"
       }
     ],
