@@ -220,7 +220,7 @@ export class TraceExplorationScene extends SceneObjectBase {
           label="Give feedback" 
           ariaLabel="Give feedback" 
           icon={"comment-alt-message"}
-          url='https://forms.gle/52nPMeDvZ4iZD9iV8'
+          url='https://grafana.qualtrics.com/jfe/form/SV_9LUZ21zl3x4vUcS'
           target='_blank'
           onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.global_docs_link_clicked)}
         />
