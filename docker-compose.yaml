@@ -16,7 +16,7 @@ services:
       - ./provisioning:/etc/grafana/provisioning
 
   tempo:
-    image: mdisibio2/tempo:494feaf21
+    image: grafana/tempo:r157-be6e14a
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./devenv/tempo.yaml:/etc/tempo.yaml

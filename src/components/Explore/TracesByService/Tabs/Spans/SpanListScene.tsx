@@ -93,7 +93,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
           }),
         });
       }
-    } else if (data?.state === LoadingState.Loading) {
+    } else if (data?.state === LoadingState.Loading || !data?.state) {
       this.setState({
         panel: new SceneFlexLayout({
           direction: 'row',
