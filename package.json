@@ -13,7 +13,8 @@
     "e2e": "npm exec cypress install && npm exec grafana-e2e run",
     "e2e:update": "npm exec cypress install && npm exec grafana-e2e run --update-screenshots",
     "server": "docker-compose up --build",
-    "sign": "npx --yes @grafana/sign-plugin@latest"
+    "sign": "npx --yes @grafana/sign-plugin@latest",
+    "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\""
   },
   "author": "Grafana",
   "license": "Apache-2.0",
@@ -34,6 +35,7 @@
     "@types/react-router-dom": "^5.2.0",
     "@types/testing-library__jest-dom": "5.14.8",
     "copy-webpack-plugin": "^11.0.0",
+    "cspell": "^6.13.3",
     "css-loader": "^6.7.3",
     "eslint-plugin-deprecation": "^2.0.0",
     "eslint-webpack-plugin": "^4.0.1",
@@ -60,9 +62,9 @@
   },
   "dependencies": {
     "@emotion/css": "^11.10.6",
+    "@grafana/data": "^11.2.0",
     "@grafana/scenes": "^5.14.7",
     "@grafana/ui": "11.2.0",
-    "@grafana/data": "^11.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-loading-skeleton": "3.4.0",

@@ -15,7 +15,7 @@ type State = {
   apiUrl: string;
   // Tells us if the API key secret is set.
   // Set to `true` ONLY if it has already been set and haven't been changed.
-  // (We unfortunately need an auxiliray variable for this, as `secureJsonData` is never exposed to the browser after it is set)
+  // (We unfortunately need an auxiliary variable for this, as `secureJsonData` is never exposed to the browser after it is set)
   isApiKeySet: boolean;
   // An secret key for our custom API.
   apiKey: string;
@@ -189,7 +189,6 @@ const testIds = {
     submit: 'data-testid ac-submit-form',
   },
 };
-
 
 export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) => {
   const response = getBackendSrv().fetch({
