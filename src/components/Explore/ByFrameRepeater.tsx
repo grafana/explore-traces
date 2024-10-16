@@ -20,6 +20,7 @@ import { debounce } from 'lodash';
 import { Search } from './Search';
 import { getGroupByVariable } from 'utils/utils';
 import { EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
+import { doesQueryMatchDataFrameLabels } from './helpers/doesQueryMatchDataFrameLabels';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -54,11 +55,9 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
             } else {
               const filtered = {
                 ...data.data,
-                series: data.data?.series.filter((frame) => {
-                  return frame.fields.some((f) => !f.labels ? false : Object.values(f.labels).find((label) => label.toLowerCase().includes(this.state.searchQuery ?? '')));
-                }),
+                series: data.data?.series.filter(doesQueryMatchDataFrameLabels(this.state.searchQuery)),
               };
-              this.renderFilteredData(filtered as PanelData);              
+              this.renderFilteredData(filtered as PanelData);
               this.publishEvent(new EventTimeseriesDataReceived({ series: data.data.series }), true);
             }
           } else if (data.data?.state === LoadingState.Error) {
@@ -109,9 +108,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     const data = sceneGraph.getData(this);
     const filtered = {
       ...data.state.data,
-      series: data.state.data?.series.filter((frame) => {
-        return frame.fields.some((f) => !f.labels ? false : Object.values(f.labels).find((label) => label.toLowerCase().includes(searchQuery)));
-      }),
+      series: data.state.data?.series.filter(doesQueryMatchDataFrameLabels(searchQuery)),
     };
     this.renderFilteredData(filtered as PanelData);
   }, 250);
