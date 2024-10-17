@@ -128,3 +128,7 @@ export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
 export function shouldShowSelection(tab?: ActionViewType): boolean {
   return tab === 'comparison' || tab === 'traceList';
 }
+
+export function getMetricValue(scene: SceneObject) {
+  return getMetricVariable(scene).useState().value;
+}
