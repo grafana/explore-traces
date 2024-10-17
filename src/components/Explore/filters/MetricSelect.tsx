@@ -5,7 +5,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Select, SelectBaseProps, useStyles2 } from '@grafana/ui';
 
 import { FilterByVariable } from './FilterByVariable';
-import { getTraceExplorationScene } from '../../../utils/utils';
+import { getMetricValue, getTraceExplorationScene } from '../../../utils/utils';
 import { MetricFunction } from '../../../utils/shared';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
@@ -14,8 +14,7 @@ interface Props {
 }
 
 export function MetricSelect({ model }: Props) {
-  const exploration = getTraceExplorationScene(model);
-  const { value: metric } = exploration.getMetricVariable().useState();
+  const metric = getMetricValue(model);
 
   return (
     <BaseSelect
@@ -26,7 +25,7 @@ export function MetricSelect({ model }: Props) {
         { label: 'Duration', value: 'duration' },
       ]}
       onChange={(v) => {
-        v.value && exploration.onChangeMetricFunction(v.value);
+        v.value && getTraceExplorationScene(model).onChangeMetricFunction(v.value);
       
         reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_changed, {
           metric: v.value,
@@ -49,12 +48,6 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
 };
 
 const getStyles = (theme: GrafanaTheme2) => ({
-  wrapper: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    fontSize: 12,
-  }),
   control: css({
     padding: 0,
     border: `1px solid ${theme.colors.border.weak}`,
