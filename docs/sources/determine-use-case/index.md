@@ -16,12 +16,12 @@ draft: true
 
 {{< docs/public-preview product="Explore Traces" >}}
 
-At the beginning of your investigation, you may either know what's wrong (for example, you know the affected service or that there’s too much CPU usage), or you may want identify resource hotspots so you can address them.
+At the beginning of your investigation, you may either know what's wrong (for example, you know the affected service or that there’s too much CPU usage), or you may want identify resource hot spots so you can address them.
 
 This can lead you to two different starting points:
 
 - Use case 1 - You want to investigate an issue to determine the root cause.
-- Use case 2 - You want to research resource and performance hotspots to determine areas that can be optimized.
+- Use case 2 - You want to research resource and performance hot spots to determine areas that can be optimized.
 
 Your use case determines what’s most important.
 For example, in use case 1, if a service is misbehaving, then you might want to see the profile types so you can see the CPU and memory profiles alongside each other.

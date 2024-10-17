@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import React, {  } from 'react';
+import React from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { useTheme2 } from '@grafana/ui';
@@ -10,27 +10,24 @@ type Tag = {
 };
 
 type Props = {
-  desctiption: string;
+  description: string;
   tags: Tag[];
 };
 
-export function AttributesDescription({ desctiption, tags }: Props) {
+export function AttributesDescription({ description, tags }: Props) {
   const theme = useTheme2();
   const styles = getStyles(theme);
 
   return (
     <div className={styles.infoFlex}>
-      <div className={styles.tagsFlex}>
-        {desctiption}
-      </div>
-      {tags.length > 0 && (
+      <div className={styles.tagsFlex}>{description}</div>
+      {tags.length > 0 &&
         tags.map((tag) => (
           <div className={styles.tagsFlex} key={tag.label}>
-            <div className={styles.tag} style={{backgroundColor: tag.color}} />
+            <div className={styles.tag} style={{ backgroundColor: tag.color }} />
             <div>{tag.label}</div>
           </div>
-        ))
-      )}
+        ))}
     </div>
   );
 }
