@@ -23,7 +23,7 @@ describe('MetricSelect', () => {
     render(<MetricSelect model={{} as FilterByVariable} />);
   });
   
-  it('should render correctly', async () => {
+  it('should render correctly', () => {
     const dropdown = screen.getByText('Rate');
     expect(dropdown).toBeInTheDocument();
   });

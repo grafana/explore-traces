@@ -32,7 +32,7 @@ describe('FilterSetRenderer', () => {
     });
   });
 
-  it('should render correctly', async () => {
+  it('should render correctly', () => {
     expect(screen.getByText('Rate')).toBeInTheDocument();
     expect(screen.getByText('of')).toBeInTheDocument();
     expect(screen.getByText('Full traces')).toBeInTheDocument();

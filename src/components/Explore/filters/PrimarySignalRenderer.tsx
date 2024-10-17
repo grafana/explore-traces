@@ -39,6 +39,7 @@ export const BaseSelect = (props: SelectBaseProps<string>) => {
       width="auto"
       {...props}
       className={css(styles.control, props.className)}
+      role="option"
     />
   );
 };

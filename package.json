@@ -19,7 +19,6 @@
   "author": "Grafana",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@testing-library/user-event": "14.5.2",
     "@babel/core": "^7.21.4",
     "@grafana/e2e": "^10.0.0",
     "@grafana/e2e-selectors": "^10.0.0",
@@ -30,6 +29,7 @@
     "@swc/jest": "^0.2.26",
     "@testing-library/jest-dom": "6.1.4",
     "@testing-library/react": "14.0.0",
+    "@testing-library/user-event": "14.5.2",
     "@types/jest": "^29.5.0",
     "@types/lodash": "^4.14.194",
     "@types/node": "^20.8.7",

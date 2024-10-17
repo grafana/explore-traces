@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { FilterByVariable } from './FilterByVariable';
@@ -15,15 +15,17 @@ jest.mock('../../../utils/utils', () => ({
 describe('PrimarySignalRenderer', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Need to use delay: null here to work with fakeTimers
     // see https://github.com/testing-library/user-event/issues/833
     user = userEvent.setup({ delay: null });
 
-    render(<PrimarySignalRenderer model={{} as FilterByVariable} />);
+    await act(async () => {
+      render(<PrimarySignalRenderer model={{} as FilterByVariable} />);
+    });
   });
 
-  it('should render correctly', async () => {
+  it('should render correctly', () => {
     const dropdown = screen.getByText('Full traces');
     expect(dropdown).toBeInTheDocument();
   });
