@@ -26,17 +26,19 @@ describe('PrimarySignalRenderer', () => {
   });
 
   it('should render correctly', () => {
-    const dropdown = screen.getByText('Full traces');
-    expect(dropdown).toBeInTheDocument();
+    expect(screen.getByText('Full traces')).toBeInTheDocument();
   });
 
-  it('should update correctly', async () => {
-    const dropdown = screen.getByText('Full traces');
-    await user.click(dropdown);
+  it('should show options', async () => {
+    await user.click(screen.getByText('Full traces'));
     expect(screen.getByText('Server spans')).toBeInTheDocument();
     expect(screen.getByText('Consumer spans')).toBeInTheDocument();
     expect(screen.getByText('Database calls')).toBeInTheDocument();
     expect(screen.getByText('All spans')).toBeInTheDocument();
+  });
+
+  it('should update correctly', async () => {
+    await user.click(screen.getByText('Full traces'));
     await user.click(screen.getByText('Consumer spans'));
     expect(onChangePrimarySignalMock).toHaveBeenCalledTimes(1);
     expect(onChangePrimarySignalMock).toHaveBeenCalledWith('consumer_spans');
