@@ -74,8 +74,5 @@
     "rxjs": "7.8.0",
     "tslib": "2.5.3"
   },
-  "packageManager": "yarn@1.22.22",
-  "overrides": {
-    "nwsapi": "2.2.12"
-  }
+  "packageManager": "yarn@1.22.22"
 }

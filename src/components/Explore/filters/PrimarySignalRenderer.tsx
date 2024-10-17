@@ -20,7 +20,6 @@ export function PrimarySignalRenderer({ model }: Props) {
   return (
     <BaseSelect
       value={primarySignal}
-      // Allows us to add a custom border to the bottom of the group heading
       options={[{
         options: primarySignalOptions,
       }]}

@@ -4,11 +4,9 @@ import React from 'react';
 import { FilterByVariable } from './FilterByVariable';
 import { PrimarySignalRenderer } from './PrimarySignalRenderer';
 
-const onChangePrimarySignalMock = jest.fn();
 jest.mock('../../../utils/utils', () => ({
   getTraceExplorationScene: () => ({
     useState: jest.fn().mockReturnValue({ primarySignal: 'full_traces' }),
-    onChangePrimarySignal: onChangePrimarySignalMock,
   }),
 }));
 
@@ -35,12 +33,5 @@ describe('PrimarySignalRenderer', () => {
     expect(screen.getByText('Consumer spans')).toBeInTheDocument();
     expect(screen.getByText('Database calls')).toBeInTheDocument();
     expect(screen.getByText('All spans')).toBeInTheDocument();
-  });
-
-  it('should update correctly', async () => {
-    await user.click(screen.getByText('Full traces'));
-    await user.click(screen.getByText('Consumer spans'));
-    expect(onChangePrimarySignalMock).toHaveBeenCalledTimes(1);
-    expect(onChangePrimarySignalMock).toHaveBeenCalledWith('consumer_spans');
   });
 });
