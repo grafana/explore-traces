@@ -64,6 +64,7 @@ export const maxOptions = 1000;
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export interface ComparisonSelection {
+  type: 'auto' | 'manual';
   raw?: { x: { from: number; to: number }; y: { from: number; to: number } };
   timeRange?: { from: number; to: number };
   duration?: { from: string; to: string };

@@ -1,4 +1,4 @@
-import { getTraceByServiceScene } from '../../../utils/utils';
+import { getTraceByServiceScene, shouldShowSelection } from '../../../utils/utils';
 import { ComparisonSelection } from '../../../utils/shared';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { PanelBuilders, SceneFlexItem, SceneFlexLayout, SceneObject } from '@grafana/scenes';
@@ -21,7 +21,7 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         }
         const rawSelection = args[0];
         // @ts-ignore
-        const newSelection: ComparisonSelection = { raw: rawSelection };
+        const newSelection: ComparisonSelection = { type: 'manual', raw: rawSelection };
 
         newSelection.timeRange = {
           from: Math.round((rawSelection.x?.from || 0) / 1000),
@@ -33,6 +33,9 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         newSelection.duration = { from: yFrom, to: yTo };
 
         parent.setState({ selection: newSelection });
+        if (!shouldShowSelection(parent.state.actionView)) {
+          parent.setActionView('comparison');
+        }
 
         reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.start_investigation, {
           selection: newSelection,

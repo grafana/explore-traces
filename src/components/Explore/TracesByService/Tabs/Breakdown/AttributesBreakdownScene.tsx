@@ -138,7 +138,7 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
     return (
       <div className={styles.container}>
         <AttributesDescription
-          desctiption={description}
+          description={description}
           tags={
             metric === 'duration'
               ? []

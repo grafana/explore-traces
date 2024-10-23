@@ -23,6 +23,7 @@ import {
 } from './shared';
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
+import { ActionViewType } from '../components/Explore/TracesByService/Tabs/TabsBarScene';
 
 export function getTraceExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
@@ -122,4 +123,8 @@ export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
     throw new Error('Datasource variable not found');
   }
   return variable;
+}
+
+export function shouldShowSelection(tab?: ActionViewType): boolean {
+  return tab === 'comparison' || tab === 'traceList';
 }

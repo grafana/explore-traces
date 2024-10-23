@@ -178,7 +178,7 @@ export class AttributesComparisonScene extends SceneObjectBase<AttributesCompari
     return (
       <div className={styles.container}>
         <AttributesDescription
-          desctiption="Attributes are ordered by the difference between the baseline and selection values for each value."
+          description="Attributes are ordered by the difference between the baseline and selection values for each value."
           tags={[
             {
               label: 'Baseline',

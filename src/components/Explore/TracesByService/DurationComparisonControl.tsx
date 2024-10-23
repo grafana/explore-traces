@@ -4,50 +4,53 @@ import { SceneObjectBase, SceneComponentProps, SceneObjectState } from '@grafana
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { getTraceByServiceScene } from 'utils/utils';
+import { getTraceByServiceScene, shouldShowSelection } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { ComparisonSelection } from '../../../utils/shared';
 
 export interface ComparisonControlState extends SceneObjectState {
   selection?: ComparisonSelection;
-  buttonLabel?: string;
 }
 
-export class ComparisonControl extends SceneObjectBase<ComparisonControlState> {
-  public constructor({ selection, buttonLabel }: ComparisonControlState) {
-    super({ selection, buttonLabel });
+export class DurationComparisonControl extends SceneObjectBase<ComparisonControlState> {
+  public constructor({ selection }: ComparisonControlState) {
+    super({ selection });
   }
 
   public startInvestigation = () => {
     const byServiceScene = getTraceByServiceScene(this);
     byServiceScene.setState({ selection: this.state.selection });
+    if (!shouldShowSelection(byServiceScene.state.actionView)) {
+      byServiceScene.setActionView('comparison');
+    }
+
     reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.start_investigation, {
       selection: this.state.selection,
       metric: byServiceScene.state.metric,
     });
   };
 
-  public stopInvestigation = () => {
-    const byServiceScene = getTraceByServiceScene(this);
-    byServiceScene.setState({ selection: undefined });
-    reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.stop_investigation);
-  };
-
-  public static Component = ({ model }: SceneComponentProps<ComparisonControl>) => {
-    const { buttonLabel } = model.useState();
+  public static Component = ({ model }: SceneComponentProps<DurationComparisonControl>) => {
     const { selection } = getTraceByServiceScene(model).useState();
     const styles = useStyles2(getStyles);
+
+    const isDisabled = selection?.type === 'auto';
+    const tooltip = isDisabled
+      ? 'Slowest traces are selected, navigate to the Comparison or Slow Traces tab for more details.'
+      : undefined;
 
     return (
       <div className={styles.wrapper}>
         <Button
-          variant={selection ? 'destructive' : 'secondary'}
+          variant="secondary"
           size="sm"
           fill="solid"
-          icon={selection ? 'times' : 'bolt'}
-          onClick={selection ? model.stopInvestigation : model.startInvestigation}
+          disabled={isDisabled}
+          icon={'bolt'}
+          onClick={model.startInvestigation}
+          tooltip={tooltip}
         >
-          {selection ? 'Clear investigation' : buttonLabel}
+          {isDisabled ? 'Slowest traces selected' : 'Select slowest traces'}
         </Button>
       </div>
     );

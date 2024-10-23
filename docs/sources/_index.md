@@ -64,7 +64,7 @@ Using the app, you can:
 * Browse automatic visualizations of your data based on its characteristics
 * Do all of this without writing TraceQL queries
 
-<!-- need new video {{< youtube id="Yqx8yCMCvgQ" >}} -->
+{{< youtube id="a3uB1C2oHA4" >}}
 
 ![The Explore Traces app](explore-traces-homescreen.png)
 

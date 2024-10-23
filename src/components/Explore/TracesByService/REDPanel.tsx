@@ -5,6 +5,7 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
+  SceneObject,
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
@@ -21,16 +22,20 @@ import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import {
   getLatencyPartialThresholdVariable,
   getLatencyThresholdVariable,
+  getMetricVariable,
   getTraceByServiceScene,
+  shouldShowSelection,
 } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
 import { TraceSceneState } from './TracesByServiceScene';
 import { SelectionColor } from '../layouts/allComparison';
 import { buildHistogramQuery } from '../queries/histogram';
+import { isEqual } from 'lodash';
+import { DurationComparisonControl } from './DurationComparisonControl';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  metric: MetricFunction;
+  actions?: SceneObject[];
   yBuckets?: number[];
 }
 
@@ -38,6 +43,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   constructor(state: RateMetricsPanelState) {
     super({
       yBuckets: [],
+      actions: [],
       ...state,
     });
 
@@ -67,20 +73,18 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
               let yBuckets: number[] | undefined = [];
               if (this.isDuration()) {
                 yBuckets = data.state.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
-                if (
-                  parent.state.selection &&
-                  newData.data?.state === LoadingState.Done &&
-                  !data.state.data?.annotations?.length
-                ) {
+                if (parent.state.selection && newData.data?.state === LoadingState.Done) {
                   // set selection annotation if it exists
                   const annotations = this.buildSelectionAnnotation(parent.state);
 
-                  data.setState({
-                    data: {
-                      ...data.state.data!,
-                      annotations: annotations,
-                    },
-                  });
+                  if (annotations && !data.state.data?.annotations?.length) {
+                    data.setState({
+                      data: {
+                        ...data.state.data!,
+                        annotations: annotations,
+                      },
+                    });
+                  }
                 }
 
                 if (yBuckets?.length) {
@@ -90,7 +94,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                     minBucket = 0;
                   }
 
-                  const selection: ComparisonSelection = {};
+                  const selection: ComparisonSelection = { type: 'auto' };
                   const minDuration = yBucketToDuration(minBucket - 1, yBuckets);
 
                   getLatencyThresholdVariable(this).changeValueTo(minDuration);
@@ -107,7 +111,14 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                     y: { from: minBucket - 0.5, to: yBuckets.length - 0.5 },
                   };
 
-                  if (!parent.state.selection?.duration) {
+                  this.setState({
+                    actions: [
+                      new DurationComparisonControl({
+                        selection,
+                      }),
+                    ],
+                  });
+                  if (!parent.state.selection?.duration || parent.state.selection.type === 'auto') {
                     parent.setState({ selection });
                   }
                 }
@@ -116,7 +127,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
               // update panel
               this.setState({
                 yBuckets,
-                panel: this.getVizPanel(this.state.metric),
+                panel: this.getVizPanel(),
               });
             }
           } else if (newData.data?.state === LoadingState.Loading) {
@@ -136,15 +147,16 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
 
       this._subs.add(
         parent.subscribeToState((newState, prevState) => {
-          if (newState.selection !== prevState.selection && data.state.data?.state === LoadingState.Done) {
-            const annotations = this.buildSelectionAnnotation(newState);
-
-            data.setState({
-              data: {
-                ...data.state.data!,
-                annotations: annotations,
-              },
-            });
+          if (data.state.data?.state === LoadingState.Done) {
+            if (!isEqual(newState.selection, prevState.selection) || newState.actionView !== prevState.actionView) {
+              const annotations = this.buildSelectionAnnotation(newState);
+              data.setState({
+                data: {
+                  ...data.state.data!,
+                  annotations: annotations,
+                },
+              });
+            }
           }
         })
       );
@@ -152,26 +164,28 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   private isDuration() {
-    return this.state.metric === 'duration';
+    return getMetricVariable(this).state.value === 'duration';
   }
 
   private _onActivate() {
+    const metric = getMetricVariable(this).state.value as MetricFunction;
     this.setState({
       $data: new StepQueryRunner({
         maxDataPoints: this.isDuration() ? 24 : 64,
         datasource: explorationDS,
-        queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(this.state.metric)],
+        queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(metric)],
       }),
-      panel: this.getVizPanel(this.state.metric),
+      panel: this.getVizPanel(),
     });
   }
 
-  private getVizPanel(type: MetricFunction) {
+  private getVizPanel() {
+    const metric = getMetricVariable(this).state.value as MetricFunction;
     if (this.isDuration()) {
       return getHistogramVizPanel(this, this.state.yBuckets ?? []);
     }
 
-    return this.getRateOrErrorVizPanel(type);
+    return this.getRateOrErrorVizPanel(metric);
   }
 
   private getRateOrErrorVizPanel(type: MetricFunction) {
@@ -193,6 +207,10 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   private buildSelectionAnnotation(state: TraceSceneState) {
+    if (!shouldShowSelection(state.actionView)) {
+      return undefined;
+    }
+
     const xSel = state.selection?.raw?.x;
     const ySel = state.selection?.raw?.y;
 
@@ -217,7 +235,8 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<REDPanel>) => {
-    const { panel, metric } = model.useState();
+    const { panel, actions } = model.useState();
+    const { value: metric } = getMetricVariable(model).useState();
     const styles = useStyles2(getStyles);
 
     if (!panel) {
@@ -254,13 +273,18 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
           <div className={styles.titleContainer}>
             <div className={styles.titleRadioWrapper}>
               <RadioButtonList
-                name={`metric-${model.state.metric}`}
+                name={`metric-${metric}`}
                 options={[{ title: '', value: 'selected' }]}
                 value={'selected'}
               />
               <span>{getTitle()}</span>
             </div>
             {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
+          </div>
+          <div className={styles.actions}>
+            {actions?.map((action) => (
+              <action.Component model={action} key={action.state.key} />
+            ))}
           </div>
         </div>
         <panel.Component model={panel} />
@@ -306,6 +330,11 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     titleRadioWrapper: css({
       display: 'flex',
+    }),
+    actions: css({
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'center',
     }),
     subtitle: css({
       display: 'flex',

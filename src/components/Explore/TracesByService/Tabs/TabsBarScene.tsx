@@ -20,8 +20,8 @@ interface ActionViewDefinition {
 export type ActionViewType = 'traceList' | 'breakdown' | 'structure' | 'comparison';
 export const actionViewsDefinitions: ActionViewDefinition[] = [
   { displayName: breakdownDisplayName, value: 'breakdown', getScene: buildBreakdownScene },
-  { displayName: comparisonDisplayName, value: 'comparison', getScene: buildComparisonScene },
   { displayName: structureDisplayName, value: 'structure', getScene: buildStructureScene },
+  { displayName: comparisonDisplayName, value: 'comparison', getScene: buildComparisonScene },
   {
     displayName: tracesDisplayName,
     value: 'traceList',
