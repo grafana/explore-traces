@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import z from 'zod';
+
 import { newTracesExploration } from '../../utils/utils';
 import { TraceExploration } from './TraceExploration';
 import { DATASOURCE_LS_KEY } from '../../utils/shared';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 import { UrlSyncContextProvider } from '@grafana/scenes';
-import {AdHocVariableFilter, usePluginContext} from '@grafana/data';
+import { AdHocVariableFilter } from '@grafana/data';
+
+// @ts-ignore new API that is not yet in stable release
+import { useSidecar_EXPERIMENTAL } from '@grafana/runtime';
 
 export const TraceExplorationPage = () => {
-  const pluginContext = usePluginContext();
+  // We are calling this conditionally, but it will depend on grafana version and should not change in runtime so we
+  // can ignore the hook rule here
+  const sidecarContext = useSidecar_EXPERIMENTAL?.() ?? {};
+
   const initialDs = localStorage.getItem(DATASOURCE_LS_KEY) || '';
-  const [exploration] = useState(
-    newTracesExploration(
-      initialDs,
-      getInitialFilters(
-        // @ts-ignore
-        pluginContext.initialContext
-      )
-    )
-  );
+  const [exploration] = useState(newTracesExploration(initialDs, getInitialFilters(sidecarContext.initialContext)));
 
   return <TraceExplorationView exploration={exploration} />;
 };
@@ -44,28 +44,29 @@ export function TraceExplorationView({ exploration }: { exploration: TraceExplor
   );
 }
 
+const AdHocVariableFilterSchema = z.object({
+  key: z.string(),
+  operator: z.string(),
+  value: z.string(),
+});
+
+const InitialFiltersSchema = z.object({
+  filters: z.array(AdHocVariableFilterSchema),
+});
+
+/** Because the context comes from a different app plugin we cannot really count on it being the correct type even if
+ * it was typed, so it is safer to do runtime parsing here. It also can come from different app extensions and at this
+ * point we don't know which, but we also have implemented only one so far it's a fair guess.
+ *
+ * At this point there is no smartness. What ever we got from the other app we use as is. Ideally there should be some
+ * normalization of the filters or smart guesses when there are differences.
+ * @param context
+ */
 function getInitialFilters(context: unknown): AdHocVariableFilter[] | undefined {
-  if (context && typeof context === 'object' && 'filters' in context && Array.isArray(context.filters)) {
-    const mappedFilters = context.filters.reduce<AdHocVariableFilter[]>((filters, maybeFilter) => {
-      if (
-        maybeFilter &&
-        typeof maybeFilter === 'object' &&
-        'key' in maybeFilter &&
-        'operator' in maybeFilter &&
-        'value' in maybeFilter
-      ) {
-        filters.push({
-          key: maybeFilter.key,
-          value: maybeFilter.value,
-          operator: maybeFilter.operator,
-        });
-      }
-      return filters;
-    }, []);
-    if (mappedFilters.length) {
-      return mappedFilters;
-    }
+  const result = InitialFiltersSchema.safeParse(context);
+  if (!result.success) {
+    return undefined;
   }
 
-  return undefined;
+  return result.data.filters;
 }

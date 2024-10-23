@@ -60,7 +60,7 @@
     "addedLinks": [
       {
         "targets": ["grafana-lokiexplore-app/toolbar"],
-        "title": "Open traces",
+        "title": "traces",
         "description": "Open traces"
       }
     ]
