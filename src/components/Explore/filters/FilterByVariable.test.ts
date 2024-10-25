@@ -1,6 +1,6 @@
 import { renderTraceQLLabelFilters } from "./FilterByVariable";
 
-describe('FilterByVariable', () => {
+describe('renderTraceQLLabelFilters', () => {
   it('should render empty expression from no filters', () => {
     const expression = renderTraceQLLabelFilters([]);
     expect(expression).toBe('true');
