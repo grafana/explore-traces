@@ -38,7 +38,7 @@ To use Explore Traces with Grafana Cloud, you need the following:
 To use Explore Traces with self-managed Grafana open source or Grafana Enterprise, you need:
 
 - Your own Grafana instance running 11.2 or later
-- Tempo 2.6 or later
+- Tempo 2.6 or later with [TraceQL metrics configured](https://grafana.com/docs/tempo/<TEMPO_VERSION>/operations/traceql-metrics/)
 - Configured [Tempo data source](https://grafana.com/docs/grafana/latest/datasources/tempo/configure-tempo-data-source/) receiving tracing data
 
 Next, [access Explore Traces](#access-explore-traces).

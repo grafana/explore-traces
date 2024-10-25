@@ -64,9 +64,11 @@ Using the app, you can:
 * Browse automatic visualizations of your data based on its characteristics
 * Do all of this without writing TraceQL queries
 
-{{< youtube id="a3uB1C2oHA4" >}}
+To learn more, read:
+* [From multi-line queries to no-code investigations: meeting Grafana users where they are](https://grafana.com/blog/2024/10/22/from-multi-line-queries-to-no-code-investigations-meeting-grafana-users-where-they-are/)
+* [A queryless experience for exploring metrics, logs, traces, and profiles: Introducing the Explore apps suite for Grafana](https://grafana.com/blog/2024/09/24/queryless-metrics-logs-traces-profiles/).
 
-![The Explore Traces app](explore-traces-homescreen.png)
+{{< youtube id="a3uB1C2oHA4" >}}
 
 ## Explore
 
