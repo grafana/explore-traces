@@ -24,7 +24,7 @@ You can access Explore Traces using any of these:
  - [Grafana Cloud](access-in-grafana-cloud): The easiest method, since no setup or installation is required.
  - Self-managed [Grafana](#access-in-self-managed-grafana) open source or Enterprise: You must install the Explore Traces plugin.
 
-Explore Traces requires Tempo 2.6 or later.
+Explore Traces requires Grafana Tempo 2.6 or later with [TraceQL metrics configured](https://grafana.com/docs/tempo/<TEMPO_VERSION>/operations/traceql-metrics/).
 
 ## Set up in Grafana Cloud
 
