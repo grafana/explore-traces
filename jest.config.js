@@ -7,6 +7,6 @@ module.exports = {
   ...require('./.config/jest.config'),
   moduleNameMapper: {
     '\\.(css|scss|sass)$': 'identity-obj-proxy',
-    '\\.(svg|png|jpg|jpeg|gif)$': '<rootDir>/__mocks__/fileMock.js', // Mock static file imports
+    '\\.(svg|png|jpg|jpeg|gif)$': '<rootDir>/.config/jest/mocks/fileMock.js', // Mock static file imports
   },
 };
