@@ -42,6 +42,7 @@
     "volkovlabs",
     "Spanset",
     "tempopb",
-    "querysharding"
+    "querysharding",
+    "queryless"
   ]
 }
