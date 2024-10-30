@@ -41,12 +41,12 @@ runs:
       run: npm run test:ci
       shell: bash
 
-    - name: Check bundlesize
-      run: yarn run bundlewatch
-      shell: bash
-
     - name: Build frontend
       run: npm run build
+      shell: bash
+
+    - name: Check bundlesize
+      run: yarn run bundlewatch
       shell: bash
 
     - name: Check for backend
