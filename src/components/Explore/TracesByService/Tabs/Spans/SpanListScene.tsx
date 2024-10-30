@@ -1,15 +1,15 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
   PanelBuilders,
+  SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
+  SceneObjectBase,
+  SceneObjectState,
 } from '@grafana/scenes';
-import { LoadingState, GrafanaTheme2, PanelData } from '@grafana/data';
+import { GrafanaTheme2, LoadingState, PanelData } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
@@ -19,11 +19,15 @@ import { useStyles2 } from '@grafana/ui';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
+  dataState: 'empty' | 'loading' | 'done';
 }
 
 export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
-  constructor(state: SpanListSceneState) {
-    super(state);
+  constructor(state: Partial<SpanListSceneState>) {
+    super({
+      dataState: 'empty',
+      ...state,
+    });
 
     this.addActivationHandler(() => {
       const sceneData = sceneGraph.getData(this);
@@ -38,9 +42,31 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
   }
 
   private updatePanel(data?: PanelData) {
-    if (data?.state === LoadingState.Done) {
-      if (data.series.length === 0 || data.series[0].length === 0) {
+    console.log(this.state.dataState, data?.series?.[0]?.length, data?.state, data);
+
+    if (
+      this.state.dataState !== 'loading' &&
+      (data?.state === LoadingState.Loading ||
+        data?.state === LoadingState.NotStarted ||
+        !data?.state ||
+        (data?.state === LoadingState.Streaming && !data.series?.[0]?.length))
+    ) {
+      this.setState({
+        dataState: 'loading',
+        panel: new SceneFlexLayout({
+          direction: 'row',
+          children: [
+            new LoadingStateScene({
+              component: SkeletonComponent,
+            }),
+          ],
+        }),
+      });
+    }
+    if (data?.state === LoadingState.Done || data?.state === LoadingState.Streaming) {
+      if (this.state.dataState !== 'empty' && (data.series.length === 0 || data.series[0].length === 0)) {
         this.setState({
+          dataState: 'empty',
           panel: new SceneFlexLayout({
             children: [
               new SceneFlexItem({
@@ -51,8 +77,9 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
             ],
           }),
         });
-      } else {
+      } else if (this.state.dataState !== 'done') {
         this.setState({
+          dataState: 'done',
           panel: new SceneFlexLayout({
             direction: 'row',
             children: [
@@ -93,17 +120,6 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
           }),
         });
       }
-    } else if (data?.state === LoadingState.Loading || !data?.state) {
-      this.setState({
-        panel: new SceneFlexLayout({
-          direction: 'row',
-          children: [
-            new LoadingStateScene({
-              component: SkeletonComponent,
-            }),
-          ],
-        }),
-      });
     }
   }
 
