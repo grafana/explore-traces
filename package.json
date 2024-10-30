@@ -16,6 +16,14 @@
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\""
   },
+  "bundlewatch": {
+    "files": [
+      {
+        "path": "dist/module.js",
+        "maxSize": "300KB"
+      }
+    ]
+  },
   "author": "Grafana",
   "license": "Apache-2.0",
   "devDependencies": {
@@ -35,6 +43,7 @@
     "@types/node": "^20.8.7",
     "@types/react-router-dom": "^5.2.0",
     "@types/testing-library__jest-dom": "5.14.9",
+    "bundlewatch": "^0.4.0",
     "copy-webpack-plugin": "^11.0.0",
     "cspell": "^6.13.3",
     "css-loader": "^6.7.3",

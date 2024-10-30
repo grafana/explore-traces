@@ -32,15 +32,23 @@ runs:
     - name: Check types
       run: npm run typecheck
       shell: bash
+
     - name: Lint
       run: npm run lint
       shell: bash
+
     - name: Unit tests
       run: npm run test:ci
       shell: bash
+
     - name: Build frontend
       run: npm run build
       shell: bash
+
+    - name: Check bundlesize
+      run: yarn run bundlewatch
+      shell: bash
+
     - name: Check for backend
       id: check-for-backend
       run: |
