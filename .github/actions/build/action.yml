@@ -43,6 +43,7 @@ runs:
 
     - name: Check bundlesize
       run: yarn run bundlewatch
+      shell: bash
 
     - name: Build frontend
       run: npm run build
