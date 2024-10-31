@@ -18,7 +18,7 @@ export const plugin = new AppPlugin<{}>()
     title: 'traces',
     description: 'Open traces',
     icon: 'align-left',
-    targets: 'grafana-lokiexplore-app/toolbar',
+    targets: 'grafana-lokiexplore-app/toolbar-open-related/v1',
     configure: () => {
       if (sidecarServiceSingleton_EXPERIMENTAL?.isAppOpened(pluginJson.id)) {
         return undefined;

@@ -59,7 +59,7 @@
   "extensions": {
     "addedLinks": [
       {
-        "targets": ["grafana-lokiexplore-app/toolbar"],
+        "targets": ["grafana-lokiexplore-app/toolbar-open-related/v1"],
         "title": "traces",
         "description": "Open traces"
       }
