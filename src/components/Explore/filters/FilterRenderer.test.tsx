@@ -5,6 +5,14 @@ import { FilterRenderer, formatKeys, sortValues } from './FilterRenderer';
 import { AdHocVariableFilter, toOption } from '@grafana/data';
 import { FilterByVariable } from './FilterByVariable';
 
+// Removes 'Failed to patch getAdhocFilters' console.log in scenes
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: () => ({
+    getAdhocFilters: jest.fn(),
+  }),
+}));
+
 jest.mock('utils/utils', () => ({
   getTraceExplorationScene: () => ({
     useState: jest.fn().mockReturnValue({ primarySignal: 'full_traces' }),
@@ -18,29 +26,25 @@ const mockFilter: AdHocVariableFilter = { key: 'testKey', operator: '=', value: 
 const mockKeys = [{ value: 'resource.tag1' }, { value: 'span.tag1' }, { value: 'kind' }, { value: 'resource.tag2' }];
 const mockValues = [toOption('value1'), toOption('zValue'), toOption('aValue')];
 
-const mockModel = {
-  _getKeys: jest.fn().mockReturnValue(mockKeys),
-  _getOperators: jest.fn(() => [{ label: '=', value: '=' }, { label: '!=', value: '!=' }]),
-  _getValuesFor: jest.fn().mockReturnValue(mockValues),
-  _updateFilter: jest.fn(),
-  _removeFilter: jest.fn(),
-  state: { filters: [], readOnly: false },
-};
-
 describe('FilterRenderer Component', () => {
   let user: ReturnType<typeof userEvent.setup>;
+  let model: FilterByVariable;
 
   beforeEach(() => {
     // Need to use delay: null here to work with fakeTimers
     // see https://github.com/testing-library/user-event/issues/833
     user = userEvent.setup({ delay: null });
     
-    jest.clearAllMocks();
+    model = new FilterByVariable({});
+    jest.spyOn(model, '_getKeys').mockReturnValue(Promise.resolve(mockKeys));
+    jest.spyOn(model, '_getValuesFor').mockReturnValue(Promise.resolve(mockValues))
+    jest.spyOn(model, '_updateFilter').mockImplementation(jest.fn());
+    jest.spyOn(model, '_removeFilter').mockImplementation(jest.fn());
   });
 
   it('renders keys correctly', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
     
     await user.click(screen.getByText('testKey'));
@@ -62,7 +66,7 @@ describe('FilterRenderer Component', () => {
 
   it('updates filter key on selection change', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
     
     await user.click(screen.getByText('testKey'));
@@ -70,13 +74,13 @@ describe('FilterRenderer Component', () => {
     expect(screen.getByText('resource.tag1')).toBeInTheDocument();
     await user.click(screen.getByText('kind'));
     
-    expect(mockModel._updateFilter).toHaveBeenCalledWith(mockFilter, { key: 'kind' });
+    expect(model._updateFilter).toHaveBeenCalledWith(mockFilter, { key: 'kind' });
     expect(screen.queryByText('resource.tag1')).not.toBeInTheDocument(); // closes dropdown on above selection
   });
 
   it('renders operators correctly', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
     await user.click(screen.getByText('='));
     expect(screen.getByText('!=')).toBeInTheDocument();
@@ -84,7 +88,7 @@ describe('FilterRenderer Component', () => {
 
   it('renders values correctly', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
     
     await user.click(screen.getByText('testValue'));
@@ -104,7 +108,7 @@ describe('FilterRenderer Component', () => {
 
   it('updates filter value on selection change', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
     
     await user.click(screen.getByText('testValue'));
@@ -112,16 +116,16 @@ describe('FilterRenderer Component', () => {
     expect(screen.getByText('value1')).toBeInTheDocument();
     await user.click(screen.getByText('aValue'));
     
-    expect(mockModel._updateFilter).toHaveBeenCalledWith(mockFilter, { value: 'aValue' });
+    expect(model._updateFilter).toHaveBeenCalledWith(mockFilter, { value: 'aValue' });
     expect(screen.queryByText('value1')).not.toBeInTheDocument(); // closes dropdown on above selection
   });
 
   it('removes filter on remove button click', async () => {
     await act(async () => {
-      render(<FilterRenderer filter={mockFilter} model={mockModel as unknown as FilterByVariable} />);
+      render(<FilterRenderer filter={mockFilter} model={model} />);
     });
 
     await user.click(screen.getByRole('button', { name: /Remove filter/i }));
-    expect(mockModel._removeFilter).toHaveBeenCalledWith(mockFilter);
+    expect(model._removeFilter).toHaveBeenCalledWith(mockFilter);
   });
 });

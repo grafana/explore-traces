@@ -3,6 +3,13 @@ import { render, fireEvent, screen, act } from '@testing-library/react';
 import { ShareExplorationAction } from './ShareExplorationAction';
 import { TraceExploration } from '../../../pages/Explore';
 
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: () => ({
+    getAdhocFilters: jest.fn(),
+  }),
+}));
+
 jest.mock('react-use', () => ({
   useLocation: jest.fn().mockReturnValue({ origin: 'http://localhost' }),
 }));
@@ -20,10 +27,6 @@ describe('ShareExplorationAction', () => {
         writeText: jest.fn(),
       },
     });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('renders the component with the correct tooltip', async () => {

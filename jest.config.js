@@ -8,5 +8,8 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|scss|sass)$': 'identity-obj-proxy',
     '\\.(svg|png|jpg|jpeg|gif)$': '<rootDir>/.config/jest/mocks/fileMock.js', // Mock static file imports
+    resetMocks: true,
+    clearMocks: true,
+    resetModules: true,
   },
 };

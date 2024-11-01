@@ -4,10 +4,7 @@ import { AddToFiltersAction, addToFilters } from './AddToFiltersAction';
 import { DataFrame } from '@grafana/data';
 import { AdHocFiltersVariable } from '@grafana/scenes';
 
-jest.mock('../../../utils/utils', () => ({
-  getFiltersVariable: jest.fn(),
-  getLabelValue: jest.fn(),
-}));
+jest.mock('../../../utils/utils');
 
 const mockGetFiltersVariable = require('../../../utils/utils').getFiltersVariable;
 const mockGetLabelValue = require('../../../utils/utils').getLabelValue;
