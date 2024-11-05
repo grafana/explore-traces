@@ -3,6 +3,7 @@ import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana
 import { useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import { SkeletonTheme } from 'react-loading-skeleton';
+import { testIds } from 'utils/testIds';
 
 interface LoadingStateSceneState extends SceneObjectState {
   component: () => React.JSX.Element;
@@ -15,7 +16,7 @@ export class LoadingStateScene extends SceneObjectBase<LoadingStateSceneState> {
     const { component } = model.useState();
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid={testIds.loadingState}>
         <SkeletonTheme
           baseColor={theme.colors.emphasize(theme.colors.background.secondary)}
           highlightColor={theme.colors.emphasize(theme.colors.background.secondary, 0.1)}

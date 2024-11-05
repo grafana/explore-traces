@@ -5,21 +5,21 @@ services:
     container_name: 'grafana-explore-traces'
     platform: 'linux/amd64'
     build:
-      context: ./.config
+      context: ../.config
       args:
         grafana_image: ${GRAFANA_IMAGE:-grafana-dev}
         grafana_version: ${GRAFANA_VERSION:-11.3.0-196950}
     ports:
       - 3000:3000/tcp
     volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-explore-traces
-      - ./provisioning:/etc/grafana/provisioning
+      - ../dist:/var/lib/grafana/plugins/grafana-explore-traces
+      - ../provisioning:/etc/grafana/provisioning
 
   tempo:
-    image: mdisibio2/tempo:494feaf21
+    image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./devenv/tempo.yaml:/etc/tempo.yaml
+      - ./tempo.yaml:/etc/tempo.yaml
     ports:
       - "3200:3200"   # tempo
 
