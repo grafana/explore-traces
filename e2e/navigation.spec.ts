@@ -22,6 +22,6 @@ test.describe('navigating app', () => {
   test('menu click should visit default explore traces url', async ({ page }) => {
     await explorePage.click(page.getByTestId('data-testid Toggle menu'));
     await explorePage.click(page.getByTestId('data-testid navigation mega-menu').getByRole('link', { name: 'Traces' }));
-    await expect(page).toHaveURL(/a\/grafana-exploretraces-app\/explore\?primarySignal=full_traces&from=now-15m&to=now&var-ds=gdev-tempo&var-filters=nestedSetParent%7C%3C%7C0&var-metric=rate&var-groupBy=resource.service.name&var-latencyThreshold=&var-partialLatencyThreshold=&refresh=&actionView=breakdown/);
+    await expect(page).toHaveURL("http://localhost:3001/a/grafana-exploretraces-app/explore?primarySignal=full_traces&from=now-15m&to=now&var-ds=gdev-tempo&var-filters=nestedSetParent%7C%3C%7C0&var-metric=rate&var-groupBy=&var-latencyThreshold=&var-partialLatencyThreshold=&refresh=&actionView=breakdown");
   });
 });
