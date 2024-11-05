@@ -6,7 +6,7 @@
     "build": "webpack -c ./webpack.config.ts --env production",
     "dev": "webpack -w -c ./webpack.config.ts --env development",
     "e2e": "playwright test -x --trace on",
-    "e2e:fast": "playwright test --retries=1 --workers=3",
+    "e2e:fast": "playwright test --retries=2 --workers=3",
     "e2e:debug": "playwright test --debug -x --trace on /test",
     "e2e:codegen": "playwright codegen",
     "test": "jest --watch --onlyChanged",

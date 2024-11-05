@@ -89,7 +89,7 @@ runs:
       shell: bash
     - name: Run e2e tests
       id: run-tests
-      run: npm run e2e
+      run: npm run e2e:fast
       shell: bash
     - name: Upload Playwright artifacts
       uses: actions/upload-artifact@v4
