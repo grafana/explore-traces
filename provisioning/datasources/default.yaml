@@ -4,11 +4,6 @@ datasources:
   - name: gdev-testdata
     isDefault: false
     type: testdata
-  - name: gdev-tempo
-    type: tempo
-    uid: gdev-tempo
-    access: proxy
-    url: http://host.docker.internal:3200
 
   - name: Tempo
     type: tempo
