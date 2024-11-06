@@ -22,11 +22,68 @@ services:
     ports:
       - "3200:3200"   # tempo
 
-  # generates uninteresting traces, but is useful for testing
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing:latest
+  # A RabbitMQ queue used to send message between the requester and the server microservices.
+  mythical-queue:
+    image: rabbitmq:management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_running
+      interval: 5s
+      timeout: 30s
+      retries: 10
+
+  # A postgres DB used to store data by the API server microservice.
+  mythical-database:
+    image: postgres:14.5
+    restart: always
     environment:
-      - ENDPOINT=tempo:4317
+      POSTGRES_PASSWORD: "mythical"
+    ports:
+      - "5432:5432"
+
+  # A microservice that makes requests to the API server microservice. Requests are also pushed onto the mythical-queue.
+  mythical-requester-A:
+    image: grafana/intro-to-mltp:mythical-beasts-requester-0.3.1
     restart: always
     depends_on:
-      - tempo
+      mythical-queue:
+        condition: service_healthy
+      mythical-server-A:
+        condition: service_started
+    environment:
+      - MYTHICAL_SERVER_HOST_PORT=mythical-server-A:4000
+      - NAMESPACE=production
+      - TRACING_COLLECTOR_HOST=tempo
+      - TRACING_COLLECTOR_PORT=4317
+      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.3.4,region=eu-east
+
+  # The API server microservice.
+  mythical-server-A:
+    image: grafana/intro-to-mltp:mythical-beasts-server-0.3.1
+    restart: always
+    depends_on:
+      - mythical-database
+    environment:
+      - NAMESPACE=production
+      - TRACING_COLLECTOR_HOST=tempo
+      - TRACING_COLLECTOR_PORT=4317
+      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.3.5,region=eu-east
+
+  # A microservice that consumes requests from the mythical-queue
+  mythical-recorder:
+    image: grafana/intro-to-mltp:mythical-beasts-recorder-latest
+    restart: always
+    depends_on:
+      mythical-queue:
+        condition: service_healthy
+    environment:
+      - NAMESPACE=production
+      - TRACING_COLLECTOR_HOST=tempo
+      - TRACING_COLLECTOR_PORT=4317
+      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.3.5

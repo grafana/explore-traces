@@ -56,6 +56,6 @@ test.describe('components', () => {
     await expect(page.getByLabel('Grid')).toBeVisible();
     await expect(page.getByLabel('Rows')).toBeVisible();
     await expect(page.getByPlaceholder('Search')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'shop-backend' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'mythical-requester' })).toBeVisible();
   });
 });
