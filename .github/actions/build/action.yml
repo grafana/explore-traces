@@ -49,7 +49,7 @@ runs:
       run: yarn run bundlewatch
       shell: bash
 
-     - name: Start Grafana Docker container
+    - name: Start Grafana Docker container
       run: npm run server:ci
       shell: bash
     
