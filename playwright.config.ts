@@ -38,7 +38,7 @@ export default defineConfig<PluginOptions>({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/admin.json' },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 });
