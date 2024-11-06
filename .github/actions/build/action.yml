@@ -48,10 +48,6 @@ runs:
     - name: Check bundlesize
       run: yarn run bundlewatch
       shell: bash
-
-    - name: Start Grafana Docker container
-      run: npm run server:ci
-      shell: bash
     
     - name: Start Grafana Docker container
       run: npm run server:ci
