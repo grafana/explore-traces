@@ -36,17 +36,9 @@ export default defineConfig<PluginOptions>({
 
   /* Configure projects for major browsers */
   projects: [
-    // 1. Login to Grafana and store the cookie on disk for use in other tests.
-    {
-      name: 'auth',
-      testDir: pluginE2eAuth,
-      testMatch: [/.*\.js/],
-    },
-    // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/admin.json' },
-      dependencies: ['auth'],
     },
   ],
 });
