@@ -46,6 +46,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
               new SceneFlexItem({
                 body: new EmptyStateScene({
                   message: 'No data for selected query',
+                  padding: '32px',
                 }),
               }),
             ],
