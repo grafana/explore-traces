@@ -20,6 +20,7 @@ import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
 import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import {
+  fieldHasEmptyValues,
   getLatencyPartialThresholdVariable,
   getLatencyThresholdVariable,
   getMetricVariable,
@@ -56,7 +57,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
       this._subs.add(
         data.subscribeToState((newData) => {
           if (newData.data?.state === LoadingState.Done) {
-            if (newData.data.series.length === 0 || newData.data.series[0].length === 0) {
+            if (newData.data.series.length === 0 || newData.data.series[0].length === 0 || fieldHasEmptyValues(newData)) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [

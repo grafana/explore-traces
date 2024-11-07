@@ -18,7 +18,7 @@ import { rateByWithStatus } from '../queries/rateByWithStatus';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
-import { getTraceExplorationScene } from '../../../utils/utils';
+import { fieldHasEmptyValues, getTraceExplorationScene } from '../../../utils/utils';
 import { MINI_PANEL_HEIGHT } from './TracesByServiceScene';
 import { buildHistogramQuery } from '../queries/histogram';
 import { histogramPanelConfig } from '../panels/histogram';
@@ -42,7 +42,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
       this._subs.add(
         data.subscribeToState((data) => {
           if (data.data?.state === LoadingState.Done) {
-            if (data.data.series.length === 0 || data.data.series[0].length === 0) {
+            if (data.data.series.length === 0 || data.data.series[0].length === 0 || fieldHasEmptyValues(data)) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
