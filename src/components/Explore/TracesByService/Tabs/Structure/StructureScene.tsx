@@ -303,7 +303,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
               size={'sm'}
               target={'_blank'}
               href={
-                'https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data'
+                'https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/concepts/#trace-structure'
               }
             >
               {`${tabName.toLowerCase()}`}
