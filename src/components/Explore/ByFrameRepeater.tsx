@@ -19,7 +19,7 @@ import { ErrorStateScene } from 'components/states/ErrorState/ErrorStateScene';
 import { debounce } from 'lodash';
 import { Search } from './Search';
 import { getGroupByVariable } from 'utils/utils';
-import { EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
+import { EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE, EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -45,8 +45,8 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 children: [
                   new SceneFlexItem({
                     body: new EmptyStateScene({
-                      message: 'No data for selected query',
-                      remedyMessage: 'Please try removing some filters or changing your query.',
+                      message: EMPTY_STATE_ERROR_MESSAGE,
+                      remedyMessage: EMPTY_STATE_ERROR_REMEDY_MESSAGE,
                       padding: '32px',
                     }),
                   }),

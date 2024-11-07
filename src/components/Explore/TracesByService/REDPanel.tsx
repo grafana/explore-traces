@@ -10,7 +10,7 @@ import {
   SceneObjectState,
 } from '@grafana/scenes';
 import { arrayToDataFrame, GrafanaTheme2, LoadingState } from '@grafana/data';
-import { ComparisonSelection, explorationDS, MetricFunction } from 'utils/shared';
+import { ComparisonSelection, EMPTY_STATE_ERROR_MESSAGE, explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -63,7 +63,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                   children: [
                     new SceneFlexItem({
                       body: new EmptyStateScene({
-                        message: 'No data for selected query',
+                        message: EMPTY_STATE_ERROR_MESSAGE,
                         imgWidth: 150,
                       }),
                     }),

@@ -16,6 +16,7 @@ import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2, useTheme2 } from '@grafana/ui';
+import { EMPTY_STATE_ERROR_MESSAGE } from 'utils/shared';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -45,7 +46,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
             children: [
               new SceneFlexItem({
                 body: new EmptyStateScene({
-                  message: 'No data for selected query',
+                  message: EMPTY_STATE_ERROR_MESSAGE,
                   padding: '32px',
                 }),
               }),

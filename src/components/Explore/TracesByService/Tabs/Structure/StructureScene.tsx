@@ -13,6 +13,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 import {
+  EMPTY_STATE_ERROR_MESSAGE,
   explorationDS,
   filterStreamingProgressTransformations,
   MetricFunction,
@@ -278,7 +279,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const noDataMessage = (
       <>
         <Text textAlignment={'center'} variant="h3">
-          No data for selected query
+          {EMPTY_STATE_ERROR_MESSAGE}
         </Text>
         <Text textAlignment={'center'} variant="body">
           <div className={styles.longText}>
