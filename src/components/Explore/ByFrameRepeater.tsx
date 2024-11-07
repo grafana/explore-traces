@@ -46,7 +46,8 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                   new SceneFlexItem({
                     body: new EmptyStateScene({
                       message: 'No data for selected query',
-                      padding: '48px',
+                      remedyMessage: 'Please try removing some filters or changing your query.',
+                      padding: '32px',
                     }),
                   }),
                 ],
@@ -121,6 +122,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
           new SceneFlexItem({
             body: new EmptyStateScene({
               message: 'No data for search term',
+              padding: '32px',
             }),
           }),
         ],
