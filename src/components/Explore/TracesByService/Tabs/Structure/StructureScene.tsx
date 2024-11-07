@@ -278,7 +278,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const noDataMessage = (
       <>
         <Text textAlignment={'center'} variant="h3">
-          No data
+          No data for selected query
         </Text>
         <Text textAlignment={'center'} variant="body">
           <div className={styles.longText}>
