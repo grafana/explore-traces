@@ -15,7 +15,7 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
-import { useStyles2 } from '@grafana/ui';
+import { useStyles2, useTheme2 } from '@grafana/ui';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -109,14 +109,34 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<SpanListScene>) => {
     const { panel } = model.useState();
+    const styles = getStyles(useTheme2());
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    
+    return (
+      <div className={styles.container}>
+        <div className={styles.description}>View a list of spans for the current set of filters.</div>
+        <panel.Component model={panel} />
+      </div>
+    );
   };
 }
+
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    container: css({
+      display: 'contents',
+    }),
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+      padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
+    }),
+  };
+};
+
 
 const SkeletonComponent = () => {
   const styles = useStyles2(getSkeletonStyles);
