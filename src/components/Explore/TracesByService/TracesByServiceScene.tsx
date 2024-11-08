@@ -262,7 +262,7 @@ const MetricTypeTooltip = () => {
           size={'sm'}
           target={'_blank'}
           href={
-            'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
+            'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/concepts/#rate-error-and-duration-metrics'
           }
           onClick={() =>
             reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_docs_link_clicked)
