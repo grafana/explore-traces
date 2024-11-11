@@ -1,12 +1,13 @@
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { CompatRoute } from 'react-router-dom-v5-compat';
 import { TraceExplorationPage } from '../../pages/Explore';
 import { PLUGIN_BASE_URL, ROUTES } from 'utils/shared';
 
 export const Routes = () => {
   return (
     <Switch>
-      <Route path={prefixRoute(`${ROUTES.Explore}`)} component={TraceExplorationPage} />
+      <CompatRoute path={prefixRoute(`${ROUTES.Explore}`)} component={TraceExplorationPage} />
       <Redirect to={prefixRoute(ROUTES.Explore)} />
     </Switch>
   );
