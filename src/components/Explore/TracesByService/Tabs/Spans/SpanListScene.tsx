@@ -10,12 +10,12 @@ import {
   sceneGraph,
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2, PanelData } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
+import { getTraceExplorationScene } from '../../../../../utils/utils';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -67,6 +67,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                           title: 'Span: ${__value.raw}',
                           url: '',
                           onClick: (clickEvent) => {
+                            const traceExplorationScene = getTraceExplorationScene(this);
                             const data = sceneGraph.getData(this);
                             const firstSeries = data.state.data?.series[0];
                             const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
@@ -75,7 +76,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                             const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
 
                             traceId &&
-                              locationService.partial({
+                              traceExplorationScene.state.locationService.partial({
                                 traceId,
                                 spanId,
                               });

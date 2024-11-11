@@ -8,16 +8,20 @@ import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '..
 import { UrlSyncContextProvider } from '@grafana/scenes';
 import { AdHocVariableFilter } from '@grafana/data';
 
-// @ts-ignore new API that is not yet in stable release
-import { useSidecar_EXPERIMENTAL } from '@grafana/runtime';
+import {
+  // @ts-ignore new API that is not yet in stable release
+  useSidecar_EXPERIMENTAL,
+  useLocationService,
+} from '@grafana/runtime';
 
 export const TraceExplorationPage = () => {
   // We are calling this conditionally, but it will depend on grafana version and should not change in runtime so we
   // can ignore the hook rule here
   const sidecarContext = useSidecar_EXPERIMENTAL?.() ?? {};
+  const locationService = useLocationService();
 
   const initialDs = localStorage.getItem(DATASOURCE_LS_KEY) || '';
-  const [exploration] = useState(newTracesExploration(initialDs, getInitialFilters(sidecarContext.initialContext)));
+  const [exploration] = useState(newTracesExploration(locationService, initialDs, getInitialFilters(sidecarContext.initialContext)));
 
   return <TraceExplorationView exploration={exploration} />;
 };
