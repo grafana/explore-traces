@@ -3,6 +3,7 @@
   "type": "app",
   "name": "Explore Traces",
   "id": "grafana-exploretraces-app",
+  "preload": true,
   "autoEnabled": true,
   "info": {
     "keywords": ["app", "tempo", "traces", "explore"],
@@ -52,7 +53,16 @@
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=11.2.0",
+    "grafanaDependency": ">=11.3.0",
     "plugins": []
+  },
+  "extensions": {
+    "addedLinks": [
+      {
+        "targets": ["grafana-lokiexplore-app/toolbar-open-related/v1"],
+        "title": "traces",
+        "description": "Open traces"
+      }
+    ]
   }
 }

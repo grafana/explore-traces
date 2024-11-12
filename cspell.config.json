@@ -43,6 +43,7 @@
     "Spanset",
     "tempopb",
     "querysharding",
-    "queryless"
+    "queryless",
+    "lokiexplore"
   ]
 }
