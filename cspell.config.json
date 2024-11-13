@@ -44,6 +44,8 @@
     "tempopb",
     "querysharding",
     "queryless",
+    "unroute",
+    "gdev",
     "lokiexplore"
   ]
 }

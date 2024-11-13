@@ -2,41 +2,25 @@ version: '3.0'
 
 services:
   grafana:
-    container_name: 'grafana-explore-traces'
-    platform: 'linux/amd64'
+    container_name: 'grafana-explore-traces-e2e'
     build:
-      context: ./.config
+      context: ../.config
       args:
-        grafana_image: ${GRAFANA_IMAGE:-grafana-dev}
-        grafana_version: ${GRAFANA_VERSION:-11.3.0-196950}
+        grafana_image: ${GRAFANA_IMAGE:-grafana}
+        grafana_version: ${GRAFANA_VERSION:-latest}
     ports:
-      - 3000:3000/tcp
+      - 3001:3000/tcp
     volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-explore-traces
-      - ./provisioning:/etc/grafana/provisioning
+      - ../dist:/var/lib/grafana/plugins/grafana-explore-traces-e2e
+      - ../provisioning:/etc/grafana/provisioning
 
   tempo:
-    image: mdisibio2/tempo:494feaf21
+    image: grafana/tempo:main-3449ef6
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./devenv/tempo.yaml:/etc/tempo.yaml
+      - ./tempo.yaml:/etc/tempo.yaml
     ports:
       - "3200:3200"   # tempo
-
-  # generates uninteresting traces, but is useful for testing
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing:latest
-    environment:
-      - ENDPOINT=tempo:4317
-    restart: always
-    depends_on:
-      - tempo
-
-  # A collection of services designed to generate real telemetry
-  # Two regions are created: eu-east and us-west. Each region has a server and a requester.
-  # eu-east will fail occassionall, but us-west will always succeed to allow for exploration
-  # at the resource level
-  #  See github.com/grafana/intro-to-mltp
 
   # A RabbitMQ queue used to send message between the requester and the server microservices.
   mythical-queue:
@@ -89,37 +73,6 @@ services:
       - TRACING_COLLECTOR_PORT=4317
       - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
       - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.3.5,region=eu-east
-
-   # A microservice that makes requests to the API server microservice. Requests are also pushed onto the mythical-queue.
-  mythical-requester-B:
-    image: grafana/intro-to-mltp:mythical-beasts-requester-0.3.1
-    restart: always
-    depends_on:
-      mythical-queue:
-        condition: service_healthy
-      mythical-server-B:
-        condition: service_started
-    environment:
-      - MYTHICAL_SERVER_HOST_PORT=mythical-server-B:4000
-      - NAMESPACE=production
-      - TRACING_COLLECTOR_HOST=tempo
-      - TRACING_COLLECTOR_PORT=4317
-      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
-      - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.4.4,region=us-west
-
-  # The API server microservice.
-  mythical-server-B:
-    image: grafana/intro-to-mltp:mythical-beasts-server-0.3.1
-    restart: always
-    depends_on:
-      - mythical-database
-    environment:
-      - NAMESPACE=production
-      - ALWAYS_SUCCEED=true
-      - TRACING_COLLECTOR_HOST=tempo
-      - TRACING_COLLECTOR_PORT=4317
-      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
-      - OTEL_RESOURCE_ATTRIBUTES=ip=1.2.4.5,region=us-west
 
   # A microservice that consumes requests from the mythical-queue
   mythical-recorder:
