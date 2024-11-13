@@ -45,6 +45,7 @@
     "querysharding",
     "queryless",
     "unroute",
-    "gdev"
+    "gdev",
+    "lokiexplore"
   ]
 }
