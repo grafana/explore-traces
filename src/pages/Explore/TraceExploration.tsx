@@ -22,6 +22,7 @@ import {
 } from '@grafana/scenes';
 import {
   LocationService,
+  config,
   // @ts-ignore
   sidecarServiceSingleton_EXPERIMENTAL,
 } from '@grafana/runtime';
@@ -108,9 +109,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToState((newState, oldState) => {
       if (newState.showDetails !== oldState.showDetails) {
         if (newState.showDetails) {
-          this.setSecondaryScene(this.state.detailsScene?.resolve())
+          this.setSecondaryScene(this.state.detailsScene?.resolve());
         } else {
-          this.setSecondaryScene(undefined)
+          this.setSecondaryScene(undefined);
         }
       }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
@@ -161,7 +162,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       stateUpdate.spanId = values.spanId ? (values.spanId as string) : undefined;
 
       const detailsScene = this.state.detailsScene?.resolve();
-      this.setSecondaryScene(detailsScene)
+      this.setSecondaryScene(detailsScene);
     }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
@@ -210,7 +211,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     // The API looks a bit weird because duh we are opened if we are here, but this specifically means we are in a
     // sidecar with some other app. In that case we don't want to show additional split layout as there is not much
     // space and 3 splits is a bit too much.
-    const body: SceneObject = sidecarServiceSingleton_EXPERIMENTAL?.isAppOpened(pluginJson.id) ? singleBody : splitBody;
+    const body: SceneObject =
+      config.featureToggles.appSidecar && sidecarServiceSingleton_EXPERIMENTAL?.isAppOpened(pluginJson.id)
+        ? singleBody
+        : splitBody;
 
     return <div className={styles.bodyContainer}> {body && <body.Component model={body} />} </div>;
   };
