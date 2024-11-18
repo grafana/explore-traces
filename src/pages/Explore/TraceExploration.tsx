@@ -223,7 +223,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   // This could have been easier but we have to keep the split scene in memory to no trigger unmount (this is a bit
   // different from react where components can be returned from a function without triggering unmount) and use
   // `setState` to change the secondary scene. We could also just keep the splitScene and not use the secondary prop
-  // for the sidecar usecase but splitScene adds some css that makes responsive sizing in sidecar complicated.
+  // for the sidecar use case but splitScene adds some css that makes responsive sizing in sidecar complicated.
   private setSecondaryScene(scene?: SceneObject) {
     this.state.splitBody.setState({ secondary: scene });
     if (scene) {
