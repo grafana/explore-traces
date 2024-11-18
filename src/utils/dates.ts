@@ -29,7 +29,7 @@ const UNIT_STEPS: Array<{ unit: string; microseconds: number; ofPrevious: number
  * @param {number} duration (in microseconds)
  * @return {string} formatted duration
  */
-export function formatDuration(duration: number): string {
+export const formatDuration = (duration: number): string => {
   // Drop all units that are too large except the last one
   const [primaryUnit, secondaryUnit] = _dropWhile(
     UNIT_STEPS,
@@ -48,7 +48,7 @@ export function formatDuration(duration: number): string {
   return secondaryValue === 0 ? primaryUnitString : `${primaryUnitString} ${secondaryUnitString}`;
 }
 
-export function getStepForTimeRange(scene: SceneObject, dataPoints?: number) {
+export const getStepForTimeRange = (scene: SceneObject, dataPoints?: number) => {
   const sceneTimeRange = sceneGraph.getTimeRange(scene);
   const from = sceneTimeRange.state.value.from.unix();
   const to = sceneTimeRange.state.value.to.unix();

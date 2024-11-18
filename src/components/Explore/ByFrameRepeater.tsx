@@ -20,7 +20,6 @@ import { debounce } from 'lodash';
 import { Search } from './Search';
 import { getGroupByVariable } from 'utils/utils';
 import { EventTimeseriesDataReceived, GRID_TEMPLATE_COLUMNS } from '../../utils/shared';
-import { doesQueryMatchDataFrameLabels } from './helpers/doesQueryMatchDataFrameLabels';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -278,3 +277,14 @@ function getSkeletonStyles(theme: GrafanaTheme2) {
     }),
   };
 }
+
+export const doesQueryMatchDataFrameLabels = (searchQuery?: string) => (dataFrame: DataFrame) => {
+  const pattern = searchQuery?.trim();
+  if (!pattern) {
+    return true;
+  }
+
+  const regex = new RegExp(pattern, 'i');
+
+  return dataFrame.fields.some((f) => (!f.labels ? false : Object.values(f.labels).find((label) => regex.test(label))));
+};

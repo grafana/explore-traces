@@ -48,6 +48,34 @@ runs:
     - name: Check bundlesize
       run: yarn run bundlewatch
       shell: bash
+    
+    - name: Start Grafana Docker container
+      run: npm run server:ci
+      shell: bash
+    - name: Install Playwright Browsers
+      run: npx playwright install chromium --with-deps
+      shell: bash
+    - name: Wait for Docker container
+      uses: cygnetdigital/wait_for_response@v2.0.0
+      with:
+        url: 'http://localhost:3001/'
+        responseCode: '200'
+        timeout: 60000
+        interval: 500
+    - name: Run e2e tests
+      id: run-tests
+      run: npm run e2e:fast
+      shell: bash
+    - name: Upload Playwright artifacts
+      uses: actions/upload-artifact@v4
+      if: ${{ (always() && steps.run-tests.outcome == 'success') || (failure() && steps.run-tests.outcome == 'failure') }}
+      with:
+        name: playwright-report-${{github.run_id}}
+        path: playwright-report/
+        retention-days: 5
+    - name: Stop Grafana Docker container
+      run: npm run server:ci:down
+      shell: bash
 
     - name: Check for backend
       id: check-for-backend
@@ -77,34 +105,6 @@ runs:
       with:
         version: latest
         args: buildAll
-
-    #      - name: Check for E2E
-    #        id: check-for-e2e
-    #        run: |
-    #          if [ -d "cypress" ]
-    #          then
-    #            echo "has-e2e=true" >> $GITHUB_OUTPUT
-    #          fi
-    #
-    #      - name: Start grafana docker
-    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-    #        run: docker-compose up -d
-    #
-    #      - name: Run e2e tests
-    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-    #        run: npm run e2e
-    #
-    #      - name: Stop grafana docker
-    #        if: steps.check-for-e2e.outputs.has-e2e == 'true'
-    #        run: docker-compose down
-    #
-    #      - name: Archive E2E output
-    #        uses: actions/upload-artifact@v4
-    #        if: steps.check-for-e2e.outputs.has-e2e == 'true' && steps.run-e2e-tests.outcome != 'success'
-    #        with:
-    #          name: cypress-videos
-    #          path: cypress/videos
-    #          retention-days: 5
 
     - name: Sign plugin
       run: npm run sign

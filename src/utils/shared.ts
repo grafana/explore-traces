@@ -1,5 +1,4 @@
 import { BusEventWithPayload, DataFrame } from '@grafana/data';
-import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
 
@@ -7,7 +6,6 @@ export enum ROUTES {
   Explore = 'explore',
 }
 
-export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 

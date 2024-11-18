@@ -1,5 +1,5 @@
 import { FieldType } from '@grafana/data';
-import { doesQueryMatchDataFrameLabels } from '../doesQueryMatchDataFrameLabels';
+import { doesQueryMatchDataFrameLabels } from 'components/Explore/ByFrameRepeater';
 
 const DATA_FRAME_FIELDS = [
   {

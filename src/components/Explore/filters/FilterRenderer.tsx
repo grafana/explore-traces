@@ -67,61 +67,6 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     return filteredOptions(state.values, valueQuery);
   }, [valueQuery, state.values]);
 
-  const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
-    // Ensure we always have the same order of keys
-    const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
-    const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
-    const intrinsicAttributes = keys.filter((k) => {
-      let checks =
-        !k.value?.includes(RESOURCE_ATTR) &&
-        !k.value?.includes(SPAN_ATTR) &&
-        ignoredAttributes.indexOf(k.value!) === -1;
-
-      // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes
-      // as you would overwrite it in the query if it's selected in the drop down
-      if (filters.find((f) => f.key === 'kind')) {
-        checks = checks && k.value !== 'kind' && k.value !== 'span:kind';
-      }
-
-      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes
-      // as you would overwrite it in the query if it's selected in the drop down
-      if (filters.find((f) => f.key === 'nestedSetParent')) {
-        checks =
-          checks &&
-          k.value !== 'rootName' &&
-          k.value !== 'rootServiceName' &&
-          k.value !== 'trace:rootName' &&
-          k.value !== 'trace:rootService';
-      }
-
-      // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
-      // as you would overwrite it in the query if it's selected in the drop down
-      if (metric === 'rate' || metric === 'errors') {
-        checks = checks && k.value !== 'status' && k.value !== 'span:status';
-      }
-
-      return checks;
-    });
-    return intrinsicAttributes
-      ?.concat(resourceAttributes)
-      .concat(spanAttributes)
-      .map((key) => {
-        return {
-          label: key.value,
-          value: key.value,
-        };
-      });
-  };
-
-  const sortValues = (values: Array<SelectableValue<string>>) => {
-    return values.sort((a, b) => {
-      if (a.label && b.label) {
-        return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
-      }
-      return 0;
-    });
-  };
-
   const keyAutoFocus = isWip && filter.key === '';
   const keySelect = (
     <BaseSelect
@@ -199,6 +144,61 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
     </div>
   );
 }
+
+export const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
+  // Ensure we always have the same order of keys
+  const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
+  const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
+  const intrinsicAttributes = keys.filter((k) => {
+    let checks =
+      !k.value?.includes(RESOURCE_ATTR) &&
+      !k.value?.includes(SPAN_ATTR) &&
+      ignoredAttributes.indexOf(k.value!) === -1;
+
+    // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes
+    // as you would overwrite it in the query if it's selected in the drop down
+    if (filters.find((f) => f.key === 'kind')) {
+      checks = checks && k.value !== 'kind' && k.value !== 'span:kind';
+    }
+
+    // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to intrinsicAttributes
+    // as you would overwrite it in the query if it's selected in the drop down
+    if (filters.find((f) => f.key === 'nestedSetParent')) {
+      checks =
+        checks &&
+        k.value !== 'rootName' &&
+        k.value !== 'rootServiceName' &&
+        k.value !== 'trace:rootName' &&
+        k.value !== 'trace:rootService';
+    }
+
+    // if rate or error rate metric is selected, then don't add status to intrinsicAttributes
+    // as you would overwrite it in the query if it's selected in the drop down
+    if (metric === 'rate' || metric === 'errors') {
+      checks = checks && k.value !== 'status' && k.value !== 'span:status';
+    }
+
+    return checks;
+  });
+  return intrinsicAttributes
+    ?.concat(resourceAttributes)
+    .concat(spanAttributes)
+    .map((key) => {
+      return {
+        label: key.value,
+        value: key.value,
+      };
+    });
+};
+
+export const sortValues = (values: Array<SelectableValue<string>>) => {
+  return values.sort((a, b) => {
+    if (a.label && b.label) {
+      return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
+    }
+    return 0;
+  });
+};
 
 const BaseSelect = (props: SelectBaseProps<string>) => {
   const styles = useStyles2(getStyles);
