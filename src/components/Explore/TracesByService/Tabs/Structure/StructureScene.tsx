@@ -13,6 +13,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 import {
+  EMPTY_STATE_ERROR_MESSAGE,
   explorationDS,
   filterStreamingProgressTransformations,
   MetricFunction,
@@ -24,14 +25,13 @@ import { TraceSearchMetadata } from '../../../../../types';
 import { mergeTraces } from '../../../../../utils/trace-merge/merge';
 import { createDataFrame, Field, FieldType, GrafanaTheme2, LinkModel, LoadingState } from '@grafana/data';
 import { TreeNode } from '../../../../../utils/trace-merge/tree-node';
-import { Button, Icon, Stack, Text, useTheme2 } from '@grafana/ui';
+import { Icon, LinkButton, Stack, Text, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
 import { locationService } from '@grafana/runtime';
 import { getTraceExplorationScene } from 'utils/utils';
 import { structureDisplayName } from '../TabsBarScene';
-import { primarySignalOptions } from 'pages/Explore/primary-signals';
 
 export interface ServicesTabSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -279,7 +279,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     const noDataMessage = (
       <>
         <Text textAlignment={'center'} variant="h3">
-          No data
+          {EMPTY_STATE_ERROR_MESSAGE}
         </Text>
         <Text textAlignment={'center'} variant="body">
           <div className={styles.longText}>
@@ -296,22 +296,20 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
         <div className={styles.actionContainer}>
           Read more about
-          <a
-            href="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/#compare-tracing-data"
-            className={styles.link}
-            title={`Read more about ${tabName.toLowerCase()}`}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {`${tabName.toLowerCase()}`}
-          </a>
-          <Button
-            variant="primary"
-            fill="solid"
-            onClick={() => exploration.onChangePrimarySignal(primarySignalOptions[0]?.value || '')}
-          >
-            Apply full traces filter
-          </Button>
+
+          <div className={styles.action}>
+            <LinkButton
+              icon="external-link-alt"
+              fill="solid"
+              size={'sm'}
+              target={'_blank'}
+              href={
+                'https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/concepts/#trace-structure'
+              }
+            >
+              {`${tabName.toLowerCase()}`}
+            </LinkButton>
+          </div>
         </div>
       </>
     );
@@ -398,13 +396,8 @@ const getStyles = (theme: GrafanaTheme2) => {
       maxWidth: '800px',
       margin: '0 auto',
     }),
-    link: css({
-      margin: '6px',
-      color: theme.colors.text.link,
-      marginRight: theme.spacing(2),
-      '&:hover': {
-        textDecoration: 'underline',
-      },
+    action: css({
+      marginLeft: theme.spacing(1),
     }),
     actionContainer: css({
       display: 'flex',

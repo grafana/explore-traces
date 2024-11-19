@@ -10,7 +10,7 @@ import {
   SceneObjectState,
 } from '@grafana/scenes';
 import { arrayToDataFrame, GrafanaTheme2, LoadingState } from '@grafana/data';
-import { ComparisonSelection, explorationDS, MetricFunction } from 'utils/shared';
+import { ComparisonSelection, EMPTY_STATE_ERROR_MESSAGE, explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { SkeletonComponent } from '../ByFrameRepeater';
@@ -20,6 +20,7 @@ import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { css } from '@emotion/css';
 import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import {
+  fieldHasEmptyValues,
   getLatencyPartialThresholdVariable,
   getLatencyThresholdVariable,
   getMetricVariable,
@@ -56,13 +57,13 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
       this._subs.add(
         data.subscribeToState((newData) => {
           if (newData.data?.state === LoadingState.Done) {
-            if (newData.data.series.length === 0 || newData.data.series[0].length === 0) {
+            if (newData.data.series.length === 0 || newData.data.series[0].length === 0 || fieldHasEmptyValues(newData)) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
                     new SceneFlexItem({
                       body: new EmptyStateScene({
-                        message: 'No data for selected query',
+                        message: EMPTY_STATE_ERROR_MESSAGE,
                         imgWidth: 150,
                       }),
                     }),

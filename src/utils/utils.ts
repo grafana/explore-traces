@@ -3,6 +3,7 @@ import {
   AdHocFiltersVariable,
   CustomVariable,
   DataSourceVariable,
+  SceneDataState,
   sceneGraph,
   SceneObject,
   SceneObjectUrlValues,
@@ -131,4 +132,8 @@ export function shouldShowSelection(tab?: ActionViewType): boolean {
 
 export function getMetricValue(scene: SceneObject) {
   return getMetricVariable(scene).useState().value;
+}
+
+export function fieldHasEmptyValues(data: SceneDataState) {
+  return data?.data?.series[0].fields?.some((v) => v.values.every((e) => e === undefined)) ?? false;
 }

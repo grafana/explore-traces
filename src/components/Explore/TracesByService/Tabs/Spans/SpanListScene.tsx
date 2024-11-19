@@ -16,9 +16,10 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
-import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2 } from '@grafana/ui';
+import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2, useTheme2 } from '@grafana/ui';
 import { map, Observable } from 'rxjs';
 import { getDataSource, getTraceExplorationScene } from '../../../../../utils/utils';
+import { EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE } from '../../../../../utils/shared';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -160,7 +161,9 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
             children: [
               new SceneFlexItem({
                 body: new EmptyStateScene({
-                  message: 'No data for selected query',
+                  message: EMPTY_STATE_ERROR_MESSAGE,
+                  remedyMessage: EMPTY_STATE_ERROR_REMEDY_MESSAGE,
+                  padding: '32px',
                 }),
               }),
             ],
@@ -195,19 +198,54 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<SpanListScene>) => {
     const { panel } = model.useState();
-    const styles = useStyles2(getTableStyles);
+    const styles = getStyles(useTheme2());
 
     if (!panel) {
       return;
     }
 
     return (
-      <div className={styles.overrideCell}>
+      <div className={styles.container}>
+        <div className={styles.description}>View a list of spans for the current set of filters.</div>
         <panel.Component model={panel} />
       </div>
     );
   };
 }
+
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    container: css({
+      display: 'contents',
+
+      '[role="cell"] > div': {
+        display: 'flex',
+        width: '100%',
+      },
+
+      '.cell-link-wrapper': {
+        display: 'flex',
+        gap: '4px',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      },
+
+      '.cell-link': {
+        color: theme.colors.text.link,
+        cursor: 'pointer',
+
+        ':hover': {
+          textDecoration: 'underline',
+        },
+      },
+    }),
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+      padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
+    }),
+  };
+};
 
 const SkeletonComponent = () => {
   const styles = useStyles2(getSkeletonStyles);
@@ -250,36 +288,6 @@ function getSkeletonStyles(theme: GrafanaTheme2) {
     }),
     rowItem: css({
       width: '14%',
-    }),
-  };
-}
-
-function getTableStyles(theme: GrafanaTheme2) {
-  return {
-    overrideCell: css({
-      display: 'flex',
-      flexGrow: 1,
-      '[role="cell"] > div': {
-        display: 'flex',
-        width: '100%',
-      },
-
-      '.cell-link-wrapper': {
-        display: 'flex',
-        gap: '4px',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-      },
-
-      '.cell-link': {
-        color: theme.colors.text.link,
-        cursor: 'pointer',
-
-        ':hover': {
-          textDecoration: 'underline',
-        },
-      },
     }),
   };
 }

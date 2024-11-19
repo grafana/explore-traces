@@ -395,7 +395,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     filters: css({
       backgroundColor: theme.colors.background.primary,
-      paddingTop: theme.spacing(1),
+      marginTop: theme.spacing(1),
     }),
   };
 }

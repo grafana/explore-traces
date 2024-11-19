@@ -11,6 +11,9 @@ export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
+export const EMPTY_STATE_ERROR_MESSAGE = 'No data for selected query';
+export const EMPTY_STATE_ERROR_REMEDY_MESSAGE = 'Please try removing some filters or changing your query.';
+
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_FILTERS = 'filters';
