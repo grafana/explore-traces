@@ -30,10 +30,21 @@ export const RESOURCE_ATTR = 'resource.';
 export const SPAN_ATTR = 'span.';
 
 export const radioAttributesResource = [
+  // https://opentelemetry.io/docs/specs/semconv/resource/
   'resource.service.name',
+  'resource.service.namespace',
+  'resource.service.version',
+  // custom
   'resource.cluster',
   'resource.environment',
   'resource.namespace',
+  // https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+  'resource.deployment.environment',
+  // https://opentelemetry.io/docs/specs/semconv/resource/k8s/
+  'resource.k8s.namespace.name',
+  'resource.k8s.pod.name',
+  'resource.k8s.container.name',
+  'resource.k8s.node.name',
 ];
 export const radioAttributesSpan = [
   'name',
