@@ -3,19 +3,22 @@ import React from 'react';
 import {
   PanelBuilders,
   SceneComponentProps,
+  SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { GrafanaTheme2, LoadingState, PanelData } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
+import { DataFrame, GrafanaTheme2, LoadingState, PanelData, toURLRange, urlUtil } from '@grafana/data';
+import { config, locationService } from '@grafana/runtime';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
-import { useStyles2 } from '@grafana/ui';
+import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2 } from '@grafana/ui';
+import { map, Observable } from 'rxjs';
+import { getDataSource, getTraceExplorationScene } from '../../../../../utils/utils';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -30,6 +33,11 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
     });
 
     this.addActivationHandler(() => {
+      this.setState({
+        $data: new SceneDataTransformer({
+          transformations: this.setupTransformations(),
+        }),
+      });
       const sceneData = sceneGraph.getData(this);
 
       this.updatePanel(sceneData.state.data);
@@ -41,16 +49,93 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
     });
   }
 
-  private updatePanel(data?: PanelData) {
-    console.log(this.state.dataState, data?.series?.[0]?.length, data?.state, data);
+  private setupTransformations() {
+    return [
+      () => (source: Observable<DataFrame[]>) => {
+        return source.pipe(
+          map((data: DataFrame[]) => {
+            return data.map((df) => {
+              const fields = df.fields;
+              const nameField = fields.find((f) => f.name === 'traceName');
 
+              const options: TableCustomCellOptions = {
+                type: TableCellDisplayMode.Custom,
+                cellComponent: (props) => {
+                  const data = props.frame;
+                  const traceIdField = data?.fields.find((f) => f.name === 'traceIdHidden');
+                  const spanIdField = data?.fields.find((f) => f.name === 'spanID');
+                  const traceId = traceIdField?.values[props.rowIndex];
+                  const spanId = spanIdField?.values[props.rowIndex];
+
+                  if (!traceId) {
+                    return props.value as string;
+                  }
+
+                  return (
+                    <div className={'cell-link-wrapper'}>
+                      <div
+                        className={'cell-link'}
+                        onClick={() => {
+                          locationService.partial({
+                            traceId,
+                            spanId,
+                          });
+                        }}
+                      >
+                        {props.value ? (props.value as string) : '<name not yet available>'}
+                      </div>
+                      <Link href={this.getLinkToExplore(traceId, spanId)} target={'_blank'}>
+                        <Icon name={'external-link-alt'} />
+                      </Link>
+                    </div>
+                  );
+                },
+              };
+              if (nameField?.config?.custom) {
+                nameField.config.custom.cellOptions = options;
+              }
+              return {
+                ...df,
+                fields,
+              };
+            });
+          })
+        );
+      },
+    ];
+  }
+
+  private getLinkToExplore = (traceId: string, spanId: string) => {
+    const traceExplorationScene = getTraceExplorationScene(this);
+    const datasource = getDataSource(traceExplorationScene);
+
+    const timeRange = sceneGraph.getTimeRange(this).state.value;
+    const exploreState = JSON.stringify({
+      ['explore-traces']: {
+        range: toURLRange(timeRange.raw),
+        queries: [{ refId: 'traceId', queryType: 'traceql', query: traceId, datasource }],
+        panelsState: {
+          trace: {
+            spanId,
+          },
+        },
+        datasource,
+      },
+    });
+    const subUrl = config.appSubUrl ?? '';
+    return urlUtil.renderUrl(`${subUrl}/explore`, { panes: exploreState, schemaVersion: 1 });
+  };
+
+  private updatePanel(data?: PanelData) {
     if (
-      this.state.dataState !== 'loading' &&
-      (data?.state === LoadingState.Loading ||
-        data?.state === LoadingState.NotStarted ||
-        !data?.state ||
-        (data?.state === LoadingState.Streaming && !data.series?.[0]?.length))
+      data?.state === LoadingState.Loading ||
+      data?.state === LoadingState.NotStarted ||
+      !data?.state ||
+      (data?.state === LoadingState.Streaming && !data.series?.[0]?.length)
     ) {
+      if (this.state.dataState === 'loading') {
+        return;
+      }
       this.setState({
         dataState: 'loading',
         panel: new SceneFlexLayout({
@@ -62,9 +147,13 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
           ],
         }),
       });
+      return;
     }
     if (data?.state === LoadingState.Done || data?.state === LoadingState.Streaming) {
-      if (this.state.dataState !== 'empty' && (data.series.length === 0 || data.series[0].length === 0)) {
+      if (data.series.length === 0 || data.series[0].length === 0) {
+        if (this.state.dataState === 'empty') {
+          return;
+        }
         this.setState({
           dataState: 'empty',
           panel: new SceneFlexLayout({
@@ -89,26 +178,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                   .setOverrides((builder) => {
                     return builder
                       .matchFieldsWithName('spanID')
-                      .overrideLinks([
-                        {
-                          title: 'Span: ${__value.raw}',
-                          url: '',
-                          onClick: (clickEvent) => {
-                            const data = sceneGraph.getData(this);
-                            const firstSeries = data.state.data?.series[0];
-                            const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
-                            const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
-                            const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
-                            const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
-
-                            traceId &&
-                              locationService.partial({
-                                traceId,
-                                spanId,
-                              });
-                          },
-                        },
-                      ])
+                      .overrideCustomFieldConfig('hidden', true)
                       .matchFieldsWithName('traceService')
                       .overrideCustomFieldConfig('width', 350)
                       .matchFieldsWithName('traceName')
@@ -125,12 +195,17 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<SpanListScene>) => {
     const { panel } = model.useState();
+    const styles = useStyles2(getTableStyles);
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    return (
+      <div className={styles.overrideCell}>
+        <panel.Component model={panel} />
+      </div>
+    );
   };
 }
 
@@ -175,6 +250,36 @@ function getSkeletonStyles(theme: GrafanaTheme2) {
     }),
     rowItem: css({
       width: '14%',
+    }),
+  };
+}
+
+function getTableStyles(theme: GrafanaTheme2) {
+  return {
+    overrideCell: css({
+      display: 'flex',
+      flexGrow: 1,
+      '[role="cell"] > div': {
+        display: 'flex',
+        width: '100%',
+      },
+
+      '.cell-link-wrapper': {
+        display: 'flex',
+        gap: '4px',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      },
+
+      '.cell-link': {
+        color: theme.colors.text.link,
+        cursor: 'pointer',
+
+        ':hover': {
+          textDecoration: 'underline',
+        },
+      },
     }),
   };
 }
