@@ -43,6 +43,9 @@
     "Spanset",
     "tempopb",
     "querysharding",
-    "queryless"
+    "queryless",
+    "unroute",
+    "gdev",
+    "lokiexplore"
   ]
 }

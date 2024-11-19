@@ -1,5 +1,4 @@
 import { BusEventWithPayload, DataFrame } from '@grafana/data';
-import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
 
@@ -7,7 +6,6 @@ export enum ROUTES {
   Explore = 'explore',
 }
 
-export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
@@ -35,10 +33,21 @@ export const RESOURCE_ATTR = 'resource.';
 export const SPAN_ATTR = 'span.';
 
 export const radioAttributesResource = [
+  // https://opentelemetry.io/docs/specs/semconv/resource/
   'resource.service.name',
+  'resource.service.namespace',
+  'resource.service.version',
+  // custom
   'resource.cluster',
   'resource.environment',
   'resource.namespace',
+  // https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+  'resource.deployment.environment',
+  // https://opentelemetry.io/docs/specs/semconv/resource/k8s/
+  'resource.k8s.namespace.name',
+  'resource.k8s.pod.name',
+  'resource.k8s.container.name',
+  'resource.k8s.node.name',
 ];
 export const radioAttributesSpan = [
   'name',
