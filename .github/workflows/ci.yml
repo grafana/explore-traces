@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  BUNDLEWATCH_GITHUB_TOKEN: ${{secrets.BUNDLEWATCH_GITHUB_TOKEN}}
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -33,10 +33,10 @@ export function getTraceByServiceScene(model: SceneObject): TracesByServiceScene
   return sceneGraph.getAncestor(model, TracesByServiceScene);
 }
 
-export function newTracesExploration(initialDS?: string): TraceExploration {
+export function newTracesExploration(initialDS?: string, initialFilters?: AdHocVariableFilter[]): TraceExploration {
   return new TraceExploration({
     initialDS,
-    initialFilters: [primarySignalOptions[0].filter],
+    initialFilters: initialFilters ?? [primarySignalOptions[0].filter],
     $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
   });
 }
@@ -127,4 +127,8 @@ export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
 
 export function shouldShowSelection(tab?: ActionViewType): boolean {
   return tab === 'comparison' || tab === 'traceList';
+}
+
+export function getMetricValue(scene: SceneObject) {
+  return getMetricVariable(scene).useState().value;
 }

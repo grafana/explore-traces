@@ -33,3 +33,9 @@ e2e-results/
 .idea
 
 .eslintcache
+.DS_Store
+
+# Playwright
+playwright-report/
+playwright/
+test-results/
