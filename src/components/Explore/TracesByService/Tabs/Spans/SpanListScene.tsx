@@ -18,7 +18,8 @@ import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2, useTheme2 } from '@grafana/ui';
 import { map, Observable } from 'rxjs';
-import { getDataSource, getTraceExplorationScene, EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE } from '../../../../../utils/utils';
+import { getDataSource, getTraceExplorationScene } from '../../../../../utils/utils';
+import { EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE } from '../../../../../utils/shared';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -203,7 +204,6 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
       return;
     }
 
-
     return (
       <div className={styles.container}>
         <div className={styles.description}>View a list of spans for the current set of filters.</div>
@@ -218,27 +218,27 @@ const getStyles = (theme: GrafanaTheme2) => {
     container: css({
       display: 'contents',
 
-        '[role="cell"] > div': {
-            display: 'flex',
-            width: '100%',
-        },
+      '[role="cell"] > div': {
+        display: 'flex',
+        width: '100%',
+      },
 
-        '.cell-link-wrapper': {
-            display: 'flex',
-            gap: '4px',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-        },
+      '.cell-link-wrapper': {
+        display: 'flex',
+        gap: '4px',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      },
 
-        '.cell-link': {
-            color: theme.colors.text.link,
-            cursor: 'pointer',
+      '.cell-link': {
+        color: theme.colors.text.link,
+        cursor: 'pointer',
 
-            ':hover': {
-                textDecoration: 'underline',
-            },
+        ':hover': {
+          textDecoration: 'underline',
         },
+      },
     }),
     description: css({
       fontSize: theme.typography.h6.fontSize,
@@ -246,7 +246,6 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
   };
 };
-
 
 const SkeletonComponent = () => {
   const styles = useStyles2(getSkeletonStyles);
