@@ -18,14 +18,17 @@ type Props = {
   model: AttributesBreakdownScene | AttributesComparisonScene;
 };
 
+const additionalWidthPerItem = 40;
+const widthOfOtherAttributes = 180;
+
 export function GroupBySelector({ options, radioAttributes, value, onChange, showAll = false, model }: Props) {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
+  const { fontSize } = theme.typography;
+
   const [selectQuery, setSelectQuery] = useState<string>('');
 
-  const [labelSelectorRequiredWidth, setLabelSelectorRequiredWidth] = useState<number>(0);
   const [availableWidth, setAvailableWidth] = useState<number>(0);
-  const useHorizontalLabelSelector = availableWidth > labelSelectorRequiredWidth;
   const controlsContainer = useRef<HTMLDivElement>(null);
 
   const { filters } = getFiltersVariable(model).useState();
@@ -42,59 +45,59 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
     },
   });
 
-  const radioOptions = radioAttributes
-    .filter((op) => {
-      // remove radio options that are in the dropdown
-      let checks = !!options.find((o) => o.value === op);
+  const radioOptions = useMemo(() => {
+    let radioOptionsWidth = 0;
+    return radioAttributes
+      .filter((op) => {
+        // remove radio options that are in the dropdown
+        let checks = !!options.find((o) => o.value === op);
 
-      // remove radio options that are in the filters
-      if (filters.find((f) => f.key === op && (f.operator === '=' || f.operator === '!='))) {
-        return false;
-      }
+        // remove radio options that are in the filters
+        if (filters.find((f) => f.key === op && (f.operator === '=' || f.operator === '!='))) {
+          return false;
+        }
 
-      // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options
-      // as you would overwrite it in the query if it's selected
-      if (filters.find((f) => f.key === 'nestedSetParent')) {
-        checks = checks && op !== 'rootName' && op !== 'rootServiceName';
-      }
+        // if filters (primary signal) has 'Full Traces' selected, then don't add rootName or rootServiceName to options
+        // as you would overwrite it in the query if it's selected
+        if (filters.find((f) => f.key === 'nestedSetParent')) {
+          checks = checks && op !== 'rootName' && op !== 'rootServiceName';
+        }
 
-      // if rate or error rate metric is selected, then don't add status to options
-      // as you would overwrite it in the query if it's selected
-      if (metricValue === 'rate' || metricValue === 'errors') {
-        checks = checks && op !== 'status';
-      }
+        // if rate or error rate metric is selected, then don't add status to options
+        // as you would overwrite it in the query if it's selected
+        if (metricValue === 'rate' || metricValue === 'errors') {
+          checks = checks && op !== 'status';
+        }
 
-      return checks;
-    })
-    .map((attribute) => ({
-      label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''),
-      text: attribute,
-      value: attribute,
-    }));
+        return checks;
+      })
+      .map((attribute) => ({
+        label: attribute.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''),
+        text: attribute,
+        value: attribute,
+      }))
+      .filter((option) => {
+        const text = option.label || option.text || '';
+        const textWidth = measureText(text, fontSize).width;
+        if (radioOptionsWidth + textWidth + additionalWidthPerItem + widthOfOtherAttributes < availableWidth) {
+          radioOptionsWidth += textWidth + additionalWidthPerItem;
+          return true;
+        } else {
+          return false;
+        }
+      });
+  }, [radioAttributes, options, filters, metricValue, fontSize, availableWidth]);
 
   const otherAttrOptions = useMemo(() => {
-    const ops = options.filter((op) => !radioAttributes.includes(op.value?.toString()!));
+    const ops = options.filter((op) => !radioOptions.find((ro) => ro.value === op.value?.toString()));
     return filteredOptions(ops, selectQuery);
-  }, [selectQuery, options, radioAttributes]);
-
-  const attrOptions = useMemo(() => {
-    return filteredOptions(options, selectQuery);
-  }, [selectQuery, options]);
+  }, [selectQuery, options, radioOptions]);
 
   const getModifiedSelectOptions = (options: Array<SelectableValue<string>>) => {
     return options
       .filter((op) => !ignoredAttributes.includes(op.value?.toString()!))
       .map((op) => ({ label: op.label?.replace(SPAN_ATTR, '').replace(RESOURCE_ATTR, ''), value: op.value }));
   };
-
-  useEffect(() => {
-    const { fontSize } = theme.typography;
-    const text = radioOptions.map((option) => option.label || option.text || '').join(' ');
-    const textWidth = measureText(text, fontSize).width;
-    const additionalWidthPerItem = 40;
-    const widthOfOtherAttributes = 180;
-    setLabelSelectorRequiredWidth(textWidth + additionalWidthPerItem * radioOptions.length + widthOfOtherAttributes);
-  }, [radioOptions, theme]);
 
   // Set default value as first value in options
   useEffect(() => {
@@ -112,44 +115,24 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
   return (
     <Field label="Group by">
       <div ref={controlsContainer} className={styles.container}>
-        {useHorizontalLabelSelector ? (
-          <>
-            {radioOptions.length > 0 && (
-              <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
-            )}
-            <Select
-              value={value && getModifiedSelectOptions(otherAttrOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
-              placeholder={'Other attributes'}
-              options={getModifiedSelectOptions(otherAttrOptions)}
-              onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
-              className={styles.select}
-              isClearable
-              onInputChange={(value: string, { action }: InputActionMeta) => {
-                if (action === 'input-change') {
-                  setSelectQuery(value);
-                }
-              }}
-              onCloseMenu={() => setSelectQuery('')}
-              virtualized
-            />
-          </>
-        ) : (
-          <Select
-            value={value}
-            placeholder={'Select attribute'}
-            options={getModifiedSelectOptions(attrOptions)}
-            onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
-            className={styles.select}
-            isClearable
-            onInputChange={(value: string, { action }: InputActionMeta) => {
-              if (action === 'input-change') {
-                setSelectQuery(value);
-              }
-            }}
-            onCloseMenu={() => setSelectQuery('')}
-            virtualized
-          />
+        {radioOptions.length > 0 && (
+          <RadioButtonGroup options={[...showAllOption, ...radioOptions]} value={value} onChange={onChange} />
         )}
+        <Select
+          value={value && getModifiedSelectOptions(otherAttrOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
+          placeholder={'Other attributes'}
+          options={getModifiedSelectOptions(otherAttrOptions)}
+          onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
+          className={styles.select}
+          isClearable
+          onInputChange={(value: string, { action }: InputActionMeta) => {
+            if (action === 'input-change') {
+              setSelectQuery(value);
+            }
+          }}
+          onCloseMenu={() => setSelectQuery('')}
+          virtualized
+        />
       </div>
     </Field>
   );

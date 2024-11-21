@@ -11,6 +11,9 @@ export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 
+export const EMPTY_STATE_ERROR_MESSAGE = 'No data for selected query';
+export const EMPTY_STATE_ERROR_REMEDY_MESSAGE = 'Please try removing some filters or changing your query.';
+
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_FILTERS = 'filters';
@@ -30,10 +33,21 @@ export const RESOURCE_ATTR = 'resource.';
 export const SPAN_ATTR = 'span.';
 
 export const radioAttributesResource = [
+  // https://opentelemetry.io/docs/specs/semconv/resource/
   'resource.service.name',
+  'resource.service.namespace',
+  'resource.service.version',
+  // custom
   'resource.cluster',
   'resource.environment',
   'resource.namespace',
+  // https://opentelemetry.io/docs/specs/semconv/resource/deployment-environment/
+  'resource.deployment.environment',
+  // https://opentelemetry.io/docs/specs/semconv/resource/k8s/
+  'resource.k8s.namespace.name',
+  'resource.k8s.pod.name',
+  'resource.k8s.container.name',
+  'resource.k8s.node.name',
 ];
 export const radioAttributesSpan = [
   'name',

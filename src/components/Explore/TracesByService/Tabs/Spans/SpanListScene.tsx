@@ -1,31 +1,44 @@
 import React from 'react';
 
 import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
   PanelBuilders,
+  SceneComponentProps,
+  SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
+  SceneObjectBase,
+  SceneObjectState,
 } from '@grafana/scenes';
-import { LoadingState, GrafanaTheme2, PanelData } from '@grafana/data';
+import { DataFrame, GrafanaTheme2, LoadingState, PanelData, toURLRange, urlUtil } from '@grafana/data';
+import { config, locationService } from '@grafana/runtime';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
-import { useStyles2 } from '@grafana/ui';
-import { getTraceExplorationScene } from '../../../../../utils/utils';
+import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2, useTheme2 } from '@grafana/ui';
+import { map, Observable } from 'rxjs';
+import { getDataSource, getTraceExplorationScene } from '../../../../../utils/utils';
+import { EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE } from '../../../../../utils/shared';
 
 export interface SpanListSceneState extends SceneObjectState {
   panel?: SceneFlexLayout;
+  dataState: 'empty' | 'loading' | 'done';
 }
 
 export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
-  constructor(state: SpanListSceneState) {
-    super(state);
+  constructor(state: Partial<SpanListSceneState>) {
+    super({
+      dataState: 'empty',
+      ...state,
+    });
 
     this.addActivationHandler(() => {
+      this.setState({
+        $data: new SceneDataTransformer({
+          transformations: this.setupTransformations(),
+        }),
+      });
       const sceneData = sceneGraph.getData(this);
 
       this.updatePanel(sceneData.state.data);
@@ -37,22 +50,128 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
     });
   }
 
+  private setupTransformations() {
+    return [
+      () => (source: Observable<DataFrame[]>) => {
+        return source.pipe(
+          map((data: DataFrame[]) => {
+            return data.map((df) => {
+              const fields = df.fields;
+              const nameField = fields.find((f) => f.name === 'traceName');
+
+              const options: TableCustomCellOptions = {
+                type: TableCellDisplayMode.Custom,
+                cellComponent: (props) => {
+                  const data = props.frame;
+                  const traceIdField = data?.fields.find((f) => f.name === 'traceIdHidden');
+                  const spanIdField = data?.fields.find((f) => f.name === 'spanID');
+                  const traceId = traceIdField?.values[props.rowIndex];
+                  const spanId = spanIdField?.values[props.rowIndex];
+
+                  if (!traceId) {
+                    return props.value as string;
+                  }
+
+                  return (
+                    <div className={'cell-link-wrapper'}>
+                      <div
+                        className={'cell-link'}
+                        onClick={() => {
+                          locationService.partial({
+                            traceId,
+                            spanId,
+                          });
+                        }}
+                      >
+                        {props.value ? (props.value as string) : '<name not yet available>'}
+                      </div>
+                      <Link href={this.getLinkToExplore(traceId, spanId)} target={'_blank'}>
+                        <Icon name={'external-link-alt'} />
+                      </Link>
+                    </div>
+                  );
+                },
+              };
+              if (nameField?.config?.custom) {
+                nameField.config.custom.cellOptions = options;
+              }
+              return {
+                ...df,
+                fields,
+              };
+            });
+          })
+        );
+      },
+    ];
+  }
+
+  private getLinkToExplore = (traceId: string, spanId: string) => {
+    const traceExplorationScene = getTraceExplorationScene(this);
+    const datasource = getDataSource(traceExplorationScene);
+
+    const timeRange = sceneGraph.getTimeRange(this).state.value;
+    const exploreState = JSON.stringify({
+      ['explore-traces']: {
+        range: toURLRange(timeRange.raw),
+        queries: [{ refId: 'traceId', queryType: 'traceql', query: traceId, datasource }],
+        panelsState: {
+          trace: {
+            spanId,
+          },
+        },
+        datasource,
+      },
+    });
+    const subUrl = config.appSubUrl ?? '';
+    return urlUtil.renderUrl(`${subUrl}/explore`, { panes: exploreState, schemaVersion: 1 });
+  };
+
   private updatePanel(data?: PanelData) {
-    if (data?.state === LoadingState.Done) {
+    if (
+      data?.state === LoadingState.Loading ||
+      data?.state === LoadingState.NotStarted ||
+      !data?.state ||
+      (data?.state === LoadingState.Streaming && !data.series?.[0]?.length)
+    ) {
+      if (this.state.dataState === 'loading') {
+        return;
+      }
+      this.setState({
+        dataState: 'loading',
+        panel: new SceneFlexLayout({
+          direction: 'row',
+          children: [
+            new LoadingStateScene({
+              component: SkeletonComponent,
+            }),
+          ],
+        }),
+      });
+      return;
+    }
+    if (data?.state === LoadingState.Done || data?.state === LoadingState.Streaming) {
       if (data.series.length === 0 || data.series[0].length === 0) {
+        if (this.state.dataState === 'empty') {
+          return;
+        }
         this.setState({
+          dataState: 'empty',
           panel: new SceneFlexLayout({
             children: [
               new SceneFlexItem({
                 body: new EmptyStateScene({
-                  message: 'No data for selected query',
+                  message: EMPTY_STATE_ERROR_MESSAGE,
+                  remedyMessage: EMPTY_STATE_ERROR_REMEDY_MESSAGE,
+                  padding: '32px',
                 }),
               }),
             ],
           }),
         });
-      } else {
+      } else if (this.state.dataState !== 'done') {
         this.setState({
+          dataState: 'done',
           panel: new SceneFlexLayout({
             direction: 'row',
             children: [
@@ -62,27 +181,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                   .setOverrides((builder) => {
                     return builder
                       .matchFieldsWithName('spanID')
-                      .overrideLinks([
-                        {
-                          title: 'Span: ${__value.raw}',
-                          url: '',
-                          onClick: (clickEvent) => {
-                            const traceExplorationScene = getTraceExplorationScene(this);
-                            const data = sceneGraph.getData(this);
-                            const firstSeries = data.state.data?.series[0];
-                            const traceIdField = firstSeries?.fields.find((f) => f.name === 'traceIdHidden');
-                            const spanIdField = firstSeries?.fields.find((f) => f.name === 'spanID');
-                            const traceId = traceIdField?.values[clickEvent.origin?.rowIndex || 0];
-                            const spanId = spanIdField?.values[clickEvent.origin?.rowIndex || 0];
-
-                            traceId &&
-                              traceExplorationScene.state.locationService.partial({
-                                traceId,
-                                spanId,
-                              });
-                          },
-                        },
-                      ])
+                      .overrideCustomFieldConfig('hidden', true)
                       .matchFieldsWithName('traceService')
                       .overrideCustomFieldConfig('width', 350)
                       .matchFieldsWithName('traceName')
@@ -94,30 +193,59 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
           }),
         });
       }
-    } else if (data?.state === LoadingState.Loading) {
-      this.setState({
-        panel: new SceneFlexLayout({
-          direction: 'row',
-          children: [
-            new LoadingStateScene({
-              component: SkeletonComponent,
-            }),
-          ],
-        }),
-      });
     }
   }
 
   public static Component = ({ model }: SceneComponentProps<SpanListScene>) => {
     const { panel } = model.useState();
+    const styles = getStyles(useTheme2());
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    return (
+      <div className={styles.container}>
+        <div className={styles.description}>View a list of spans for the current set of filters.</div>
+        <panel.Component model={panel} />
+      </div>
+    );
   };
 }
+
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    container: css({
+      display: 'contents',
+
+      '[role="cell"] > div': {
+        display: 'flex',
+        width: '100%',
+      },
+
+      '.cell-link-wrapper': {
+        display: 'flex',
+        gap: '4px',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+      },
+
+      '.cell-link': {
+        color: theme.colors.text.link,
+        cursor: 'pointer',
+
+        ':hover': {
+          textDecoration: 'underline',
+        },
+      },
+    }),
+    description: css({
+      fontSize: theme.typography.h6.fontSize,
+      padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
+    }),
+  };
+};
 
 const SkeletonComponent = () => {
   const styles = useStyles2(getSkeletonStyles);

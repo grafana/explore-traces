@@ -237,10 +237,10 @@ const MetricTypeTooltip = () => {
   const styles = useStyles2(getStyles);
 
   return (
-    <Stack direction={'column'} gap={2}>
+    <Stack direction={'column'} gap={1}>
       <div className={styles.tooltip.title}>RED metrics for traces</div>
+      <span className={styles.tooltip.subtitle}>Explore rate, errors, and duration (RED) metrics generated from traces by Tempo.</span>
       <div className={styles.tooltip.text}>
-        <div>Explore rate, errors, and duration (RED) metrics generated from traces by Tempo.</div>
         <div>
           <span className={styles.tooltip.emphasize}>Rate</span> - Spans per second that match your filter, useful to
           find unusual spikes in activity
@@ -255,14 +255,14 @@ const MetricTypeTooltip = () => {
         </div>
       </div>
 
-      <div>
+      <div className={styles.tooltip.button}>
         <LinkButton
           icon="external-link-alt"
           fill="solid"
           size={'sm'}
           target={'_blank'}
           href={
-            'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/#rate-error-and-duration-metrics'
+            'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces/concepts/#rate-error-and-duration-metrics'
           }
           onClick={() =>
             reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.metric_docs_link_clicked)
@@ -294,15 +294,24 @@ function getStyles(theme: GrafanaTheme2) {
       title: css({
         fontSize: '14px',
         fontWeight: 500,
-        lineHeight: '22px',
+      }),
+      subtitle: css({
+        marginBottom: theme.spacing.x1,
       }),
       text: css({
         label: 'text',
         color: theme.colors.text.secondary,
+
+        'div': {
+          marginBottom: theme.spacing.x0_5,
+        }
       }),
       emphasize: css({
         label: 'emphasize',
         color: theme.colors.text.primary,
+      }),
+      button: css({
+        marginBottom: theme.spacing.x0_5,
       }),
     },
   };
