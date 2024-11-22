@@ -278,6 +278,7 @@ const MetricTypeTooltip = () => {
 function getStyles(theme: GrafanaTheme2) {
   return {
     title: css({
+      label: 'title',
       display: 'flex',
       gap: theme.spacing.x0_5,
       fontSize: theme.typography.bodySmall.fontSize,
@@ -285,9 +286,11 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
     }),
     hand: css({
+      label: 'hand',
       cursor: 'pointer',
     }),
     tooltip: {
+      label: 'tooltip',
       title: css({
         fontSize: '14px',
         fontWeight: 500,
@@ -296,6 +299,7 @@ function getStyles(theme: GrafanaTheme2) {
         marginBottom: theme.spacing.x1,
       }),
       text: css({
+        label: 'text',
         color: theme.colors.text.secondary,
 
         'div': {
@@ -303,6 +307,7 @@ function getStyles(theme: GrafanaTheme2) {
         }
       }),
       emphasize: css({
+        label: 'emphasize',
         color: theme.colors.text.primary,
       }),
       button: css({

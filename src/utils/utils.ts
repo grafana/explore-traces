@@ -25,6 +25,7 @@ import {
 import { primarySignalOptions } from '../pages/Explore/primary-signals';
 import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { ActionViewType } from '../components/Explore/TracesByService/Tabs/TabsBarScene';
+import { LocationService } from '@grafana/runtime';
 
 export function getTraceExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
@@ -34,11 +35,16 @@ export function getTraceByServiceScene(model: SceneObject): TracesByServiceScene
   return sceneGraph.getAncestor(model, TracesByServiceScene);
 }
 
-export function newTracesExploration(initialDS?: string, initialFilters?: AdHocVariableFilter[]): TraceExploration {
+export function newTracesExploration(
+  locationService: LocationService,
+  initialDS?: string,
+  initialFilters?: AdHocVariableFilter[]
+): TraceExploration {
   return new TraceExploration({
     initialDS,
     initialFilters: initialFilters ?? [primarySignalOptions[0].filter],
     $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
+    locationService,
   });
 }
 

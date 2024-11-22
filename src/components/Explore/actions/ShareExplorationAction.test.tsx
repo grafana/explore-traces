@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
+import { locationService } from '@grafana/runtime';
+
 import { ShareExplorationAction } from './ShareExplorationAction';
 import { TraceExploration } from '../../../pages/Explore';
 
@@ -19,7 +21,11 @@ jest.mock('../../../utils/utils', () => ({
 }));
 
 describe('ShareExplorationAction', () => {
-  const mockExploration = new TraceExploration({ initialDS: 'mockDataSource', initialFilters: [] });
+  const mockExploration = new TraceExploration({
+    initialDS: 'mockDataSource',
+    initialFilters: [],
+    locationService: locationService,
+  });
 
   beforeEach(() => {
     Object.assign(navigator, {

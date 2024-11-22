@@ -29,7 +29,6 @@ import { Icon, LinkButton, Stack, Text, useTheme2 } from '@grafana/ui';
 import Skeleton from 'react-loading-skeleton';
 import { EmptyState } from '../../../../states/EmptyState/EmptyState';
 import { css } from '@emotion/css';
-import { locationService } from '@grafana/runtime';
 import { getTraceExplorationScene } from 'utils/utils';
 import { structureDisplayName } from '../TabsBarScene';
 
@@ -63,7 +62,10 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
     this.state.$data?.subscribeToState((state) => {
       this.setState({ loading: state.data?.state === LoadingState.Loading });
 
-      if ((state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Streaming) && state.data?.series.length) {
+      if (
+        (state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Streaming) &&
+        state.data?.series.length
+      ) {
         const frame = state.data?.series[0].fields[0].values[0];
         if (frame) {
           const response = JSON.parse(frame) as TraceSearchMetadata[];
@@ -95,6 +97,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
   private getPanel(tree: TreeNode) {
     const timeRange = sceneGraph.getTimeRange(this);
+    const traceExplorationScene = getTraceExplorationScene(this);
     const from = timeRange.state.value.from;
     const to = timeRange.state.value.to;
 
@@ -105,7 +108,7 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
           title: 'Open trace',
           href: '#',
           onClick: () => {
-            locationService.partial({ traceId, spanId });
+            traceExplorationScene.state.locationService.partial({ traceId, spanId });
           },
           origin: {} as Field,
           target: '_self',

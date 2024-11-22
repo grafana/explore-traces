@@ -20,6 +20,12 @@ import {
   SceneVariableSet,
   SplitLayout,
 } from '@grafana/scenes';
+import {
+  LocationService,
+  config,
+  // @ts-ignore
+  sidecarServiceSingleton_EXPERIMENTAL,
+} from '@grafana/runtime';
 import { Badge, Button, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
@@ -39,12 +45,14 @@ import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
 import { VariableHide } from '@grafana/schema';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
+import pluginJson from '../../plugin.json';
 
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
 
-  body: SplitLayout;
+  splitBody: SplitLayout;
+  singleBody: SceneObject;
 
   detailsScene?: SceneObjectRef<DetailsScene>;
   showDetails?: boolean;
@@ -57,6 +65,8 @@ export interface TraceExplorationState extends SceneObjectState {
   // just for the starting data source
   initialDS?: string;
   initialFilters?: AdHocVariableFilter[];
+
+  locationService: LocationService;
 }
 
 const version = process.env.VERSION;
@@ -67,12 +77,13 @@ const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId'] });
 
-  public constructor(state: Partial<TraceExplorationState>) {
+  public constructor(state: { locationService: LocationService } & Partial<TraceExplorationState>) {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
-      body: buildSplitLayout(),
+      singleBody: new TraceExplorationScene({}),
+      splitBody: buildSplitLayout(),
       detailsScene: new DetailsScene({}).getRef(),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
       ...state,
@@ -98,9 +109,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     this.subscribeToState((newState, oldState) => {
       if (newState.showDetails !== oldState.showDetails) {
         if (newState.showDetails) {
-          this.state.body.setState({ secondary: this.state.detailsScene?.resolve() });
+          this.setSecondaryScene(this.state.detailsScene?.resolve());
         } else {
-          this.state.body.setState({ secondary: undefined });
+          this.setSecondaryScene(undefined);
         }
       }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
@@ -150,10 +161,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       stateUpdate.traceId = values.traceId ? (values.traceId as string) : undefined;
       stateUpdate.spanId = values.spanId ? (values.spanId as string) : undefined;
 
-      if (!this.state.body.state.secondary) {
-        const detailsScene = this.state.detailsScene?.resolve();
-        this.state.body.setState({ secondary: detailsScene });
-      }
+      const detailsScene = this.state.detailsScene?.resolve();
+      this.setSecondaryScene(detailsScene);
     }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
@@ -196,11 +205,33 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
-    const { body } = model.useState();
+    const { singleBody, splitBody } = model.useState();
     const styles = useStyles2(getStyles);
+
+    // The API looks a bit weird because duh we are opened if we are here, but this specifically means we are in a
+    // sidecar with some other app. In that case we don't want to show additional split layout as there is not much
+    // space and 3 splits is a bit too much.
+    const body: SceneObject =
+      config.featureToggles.appSidecar && sidecarServiceSingleton_EXPERIMENTAL?.isAppOpened(pluginJson.id)
+        ? singleBody
+        : splitBody;
 
     return <div className={styles.bodyContainer}> {body && <body.Component model={body} />} </div>;
   };
+
+  // Because we have two modes of how to present the secondary scene depending on sidecar we need to set it 2 ways.
+  // This could have been easier but we have to keep the split scene in memory to no trigger unmount (this is a bit
+  // different from react where components can be returned from a function without triggering unmount) and use
+  // `setState` to change the secondary scene. We could also just keep the splitScene and not use the secondary prop
+  // for the sidecar use case but splitScene adds some css that makes responsive sizing in sidecar complicated.
+  private setSecondaryScene(scene?: SceneObject) {
+    this.state.splitBody.setState({ secondary: scene });
+    if (scene) {
+      this.setState({ singleBody: scene });
+    } else {
+      this.setState({ singleBody: new TraceExplorationScene({}) });
+    }
+  }
 }
 
 export class TraceExplorationScene extends SceneObjectBase {
@@ -213,32 +244,37 @@ export class TraceExplorationScene extends SceneObjectBase {
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, traceExploration);
     const filtersVariable = getFiltersVariable(traceExploration);
 
-    const menu = 
-    <Menu>
-      <div className={styles.menu}>
-        <Menu.Item 
-          label="Give feedback" 
-          ariaLabel="Give feedback" 
-          icon={"comment-alt-message"}
-          url='https://grafana.qualtrics.com/jfe/form/SV_9LUZ21zl3x4vUcS'
-          target='_blank'
-          onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.global_docs_link_clicked)}
-        />
-        <Menu.Item
-          label="Documentation"
-          ariaLabel="Documentation"
-          icon={"external-link-alt"}
-          url='https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/'
-          target='_blank'
-          onClick={() => reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.feedback_link_clicked)}
-        />
-      </div>
-    </Menu>;
+    const menu = (
+      <Menu>
+        <div className={styles.menu}>
+          <Menu.Item
+            label="Give feedback"
+            ariaLabel="Give feedback"
+            icon={'comment-alt-message'}
+            url="https://grafana.qualtrics.com/jfe/form/SV_9LUZ21zl3x4vUcS"
+            target="_blank"
+            onClick={() =>
+              reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.global_docs_link_clicked)
+            }
+          />
+          <Menu.Item
+            label="Documentation"
+            ariaLabel="Documentation"
+            icon={'external-link-alt'}
+            url="https://grafana.com/docs/grafana/next/explore/simplified-exploration/traces/"
+            target="_blank"
+            onClick={() =>
+              reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.feedback_link_clicked)
+            }
+          />
+        </div>
+      </Menu>
+    );
 
     return (
       <div className={styles.container}>
         <div className={styles.headerContainer}>
-          <Stack gap={2} justifyContent={'space-between'}>
+          <Stack gap={2} justifyContent={'space-between'} wrap={'wrap'}>
             {dsVariable && (
               <Stack gap={1} alignItems={'center'}>
                 <div className={styles.datasourceLabel}>Data source</div>
@@ -248,7 +284,7 @@ export class TraceExplorationScene extends SceneObjectBase {
             <div className={styles.controls}>
               <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
                 <span className={styles.preview}>
-                  <Badge text='&nbsp;Preview' color='blue' icon='rocket' />
+                  <Badge text="&nbsp;Preview" color="blue" icon="rocket" />
                 </span>
               </Tooltip>
 
@@ -334,12 +370,14 @@ function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter
 function getStyles(theme: GrafanaTheme2) {
   return {
     bodyContainer: css({
+      label: 'bodyContainer',
       flexGrow: 1,
       display: 'flex',
       minHeight: '100%',
       flexDirection: 'column',
     }),
     container: css({
+      label: 'container',
       flexGrow: 1,
       display: 'flex',
       gap: theme.spacing(2),
@@ -350,12 +388,14 @@ function getStyles(theme: GrafanaTheme2) {
       height: '1px' /* Needed for sticky positioning */,
     }),
     body: css({
+      label: 'body',
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(1),
     }),
     headerContainer: css({
+      label: 'headerContainer',
       backgroundColor: theme.colors.background.canvas,
       display: 'flex',
       flexDirection: 'column',
@@ -365,19 +405,24 @@ function getStyles(theme: GrafanaTheme2) {
       padding: `${theme.spacing(1.5)} 0`,
     }),
     datasourceLabel: css({
+      label: 'datasourceLabel',
       fontSize: '12px',
     }),
     controls: css({
+      label: 'controls',
       display: 'flex',
       gap: theme.spacing(1),
       zIndex: 3,
+      flexWrap: 'wrap',
     }),
     menu: css({
+      label: 'menu',
       'svg, span': {
         color: theme.colors.text.link,
       },
     }),
     preview: css({
+      label: 'preview',
       cursor: 'help',
 
       '> div:first-child': {
@@ -385,15 +430,18 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
     tooltip: css({
+      label: 'tooltip',
       fontSize: '14px',
       lineHeight: '22px',
       width: '180px',
       textAlign: 'center',
     }),
     helpIcon: css({
+      label: 'helpIcon',
       marginLeft: theme.spacing(1),
     }),
     filters: css({
+      label: 'filters',
       backgroundColor: theme.colors.background.primary,
       marginTop: theme.spacing(1),
     }),

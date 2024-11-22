@@ -11,7 +11,7 @@ import {
   SceneObjectState,
 } from '@grafana/scenes';
 import { DataFrame, GrafanaTheme2, LoadingState, PanelData, toURLRange, urlUtil } from '@grafana/data';
-import { config, locationService } from '@grafana/runtime';
+import { config } from '@grafana/runtime';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { css } from '@emotion/css';
@@ -67,6 +67,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                   const spanIdField = data?.fields.find((f) => f.name === 'spanID');
                   const traceId = traceIdField?.values[props.rowIndex];
                   const spanId = spanIdField?.values[props.rowIndex];
+                  const traceExplorationScene = getTraceExplorationScene(this);
 
                   if (!traceId) {
                     return props.value as string;
@@ -77,7 +78,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                       <div
                         className={'cell-link'}
                         onClick={() => {
-                          locationService.partial({
+                          traceExplorationScene.state.locationService.partial({
                             traceId,
                             spanId,
                           });
