@@ -4,6 +4,7 @@ export type MetricFunction = 'rate' | 'errors' | 'duration';
 
 export enum ROUTES {
   Explore = 'explore',
+  Home = 'home',
 }
 
 export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
