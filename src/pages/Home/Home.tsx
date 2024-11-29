@@ -76,7 +76,7 @@ function buildSplitLayout() {
         rowGap: 2,
         children: [
           new SceneCSSGridItem({
-            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error}', title: 'Errored traces', type: 'errors' }),
+            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error}', title: 'Errored services', type: 'errors' }),
           }),
           new SceneCSSGridItem({
             body: new DurationAttributePanel({}),

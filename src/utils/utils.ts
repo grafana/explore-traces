@@ -56,7 +56,7 @@ export function newTracesExploration(
 export function newHome(initialDS?: string): Home {
   return new Home({
     initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
+    $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
   });
 }
 

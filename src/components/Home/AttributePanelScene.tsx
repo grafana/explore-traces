@@ -1,10 +1,9 @@
 import { css } from '@emotion/css';
-import { DataFrame, dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, dateTimeFormat, Field, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
 import { Badge, Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
 import { formatDuration } from 'utils/dates';
 import { EXPLORATIONS_ROUTE, MetricFunction } from 'utils/shared';
 
@@ -17,7 +16,6 @@ interface AttributePanelSceneState extends SceneObjectState {
 export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneState> {
   public static Component = ({ model }: SceneComponentProps<AttributePanelScene>) => {
     const { series, title, type } = model.useState();
-    const navigate = useNavigate();
     const styles = useStyles2(getStyles);
 
     const Traces = () => {
@@ -25,7 +23,7 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
         console.log(series);
 
         const sortByField = series[0].fields.find((f) => f.name === (type === 'duration' ? 'duration' : 'time'));
-        if (sortByField) {
+        if (sortByField && sortByField.values) {
           const sortedByDuration = sortByField?.values.map((_, i) => i)?.sort((a, b) => sortByField?.values[b] - sortByField?.values[a]);
           const sortedFields = series[0].fields.map((f) => {
             return {
@@ -52,7 +50,13 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
             return label.length === 0 ? 'Trace service & name not found' : label;
           }
 
-          const getErrorTimeAgo = (dateString: string) => {
+          const getErrorTimeAgo = (timeField: Field | undefined, index: number) => {
+            if (!timeField || !timeField.values) {
+              return 'Times not found';
+            }
+
+            const dateString = dateTimeFormat(timeField?.values[index]);
+
             const now = new Date();
             const date = new Date(dateString);
             const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // Difference in seconds
@@ -71,6 +75,29 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
             }
           }
 
+          const getDuration = (durationField: Field | undefined, index: number) => {
+            if (!durationField || !durationField.values) {
+              return 'Durations not found';
+            }
+
+            return formatDuration(durationField.values[index] / 1000);
+          }
+
+          const getUrl = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
+            let url = EXPLORATIONS_ROUTE + '?primarySignal=full_traces';
+
+            if (!spanIdField || !spanIdField.values || !traceServiceField || !traceServiceField.values) {
+              console.error('SpanId or traceService not found');
+              return url;
+            }
+
+            url = url + `&traceId=${traceId}&spanId=${spanIdField.values[index]}`;
+            url = url + `&var-filters=resource.service.name|=|${traceServiceField.values[index]}`;
+            url = type === 'duration' ? url + '&var-metric=duration' : url + '&var-metric=errors';
+
+            return url;
+          }
+
           // http://localhost:3000/a/grafana-exploretraces-app/explore?
           // primarySignal=full_traces&traceId=76712b89f2507a5
           // &spanId=4f3109e5b3e2c67c
@@ -83,40 +110,38 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
           // &var-partialLatencyThreshold=
           // &actionView=breakdown
 
+          // http://localhost:3000/a/grafana-exploretraces-app/explore?
+          // primarySignal=full_traces
+          // &traceId=f65180774b30270043537cb48a52e4d7
+          // &spanId=1f98ea0121c168ba
+          // &actionView=breakdown
+
           return (
             <>
-              {traceIdField && spanIdField && traceNameField && traceServiceField && durationField && timeField && (
-                traceIdField.values.map((traceId, index) => (
-                  <div className={styles.tracesRow} key={index}>
-                    {getLabel(index)}
-                    
-                    <div className={styles.action}>
-                      <span className={styles.actionText}>
-                        <Badge 
-                          text={type === 'duration' ? formatDuration(durationField.values[index] / 1000) : getErrorTimeAgo(dateTimeFormat(timeField.values[index]))} 
-                          color={type === 'duration' ? 'orange' : 'red'}                       
-                        />
-                      </span>
-                      <Button 
-                        variant='secondary' 
-                        icon='arrow-right'
-                        title='View trace'
-                        onClick={() => {
-                          navigate(EXPLORATIONS_ROUTE);
-                          traceId &&
-                          spanIdField.values[index] && 
-                          traceServiceField.values[index] &&
-                          locationService.partial({
-                            traceId,
-                            spanId: spanIdField.values[index],
-                            'var-filters': `resource.service.name|=|${traceServiceField.values[index]}`,
-                          });
-                        }}
+              {traceIdField?.values?.map((traceId, index) => (
+                <div className={styles.tracesRow} key={index}>
+                  {getLabel(index)}
+                  
+                  <div className={styles.action}>
+                    <span className={styles.actionText}>
+                      <Badge 
+                        text={type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)} 
+                        color={type === 'duration' ? 'orange' : 'red'}                       
                       />
-                    </div>
+                    </span>
+                    <Button 
+                      variant='secondary' 
+                      icon='arrow-right'
+                      title='View trace'
+                      onClick={() => {
+                        const url = getUrl(traceId, spanIdField, traceServiceField, index);
+                        console.log(url)
+                        locationService.push(url);
+                      }}
+                    />
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </>
           );
         }
@@ -140,6 +165,8 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
+      border: `1px solid ${theme.colors.border.medium}`,
+      borderRadius: '4px',
       width: '100%',
     }),
     title: css({
@@ -162,7 +189,7 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
     }),
     actionText: css({
-      paddingRight: theme.spacing(1),
+      padding: `0 ${theme.spacing(1)}`,
     }),
   };
 }

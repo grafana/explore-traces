@@ -9,7 +9,7 @@ import {
   SceneObjectState,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import { GrafanaTheme2, LoadingState } from '@grafana/data';
+import { LoadingState } from '@grafana/data';
 import { explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
@@ -105,11 +105,9 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles() {
   return {
     container: css({
-      border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: '4px',
       minWidth: '350px',
       width: '-webkit-fill-available',
     }),
