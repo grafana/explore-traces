@@ -11,15 +11,15 @@ export const barsPanelConfig = () => {
     .setCustomFieldConfig('pointSize', 0)
     .setCustomFieldConfig('axisLabel', 'Rate')
     .setOverrides((overrides) => {
-      overrides.matchFieldsWithNameByRegex('.*"error".*').overrideColor({
+      overrides.matchFieldsWithNameByRegex('.*"?error"?.*').overrideColor({
         mode: 'fixed',
         fixedColor: 'semi-dark-red',
       });
-      overrides.matchFieldsWithNameByRegex('.*"unset".*').overrideColor({
+      overrides.matchFieldsWithNameByRegex('.*"?unset"?.*').overrideColor({
         mode: 'fixed',
         fixedColor: 'green',
       });
-      overrides.matchFieldsWithNameByRegex('.*"ok".*').overrideColor({
+      overrides.matchFieldsWithNameByRegex('.*"?ok"?.*').overrideColor({
         mode: 'fixed',
         fixedColor: 'dark-green',
       });
