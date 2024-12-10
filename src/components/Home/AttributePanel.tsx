@@ -9,15 +9,15 @@ import {
   SceneObjectState,
   SceneQueryRunner,
 } from '@grafana/scenes';
-import { LoadingState } from '@grafana/data';
+import { GrafanaTheme2, LoadingState } from '@grafana/data';
 import { explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
-import { SkeletonComponent } from '../Explore/ByFrameRepeater';
 import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { AttributePanelScene } from './AttributePanelScene';
+import Skeleton from 'react-loading-skeleton';
 
 export interface AttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -78,7 +78,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                 height: MINI_PANEL_HEIGHT,
                 children: [
                   new LoadingStateScene({
-                    component: () => SkeletonComponent(1),
+                    component: () => SkeletonComponent(),
                   }),
                 ],
               }),
@@ -110,6 +110,62 @@ function getStyles() {
     container: css({
       minWidth: '350px',
       width: '-webkit-fill-available',
+    }),
+  };
+}
+
+export const SkeletonComponent = () => {
+  const styles = useStyles2(getSkeletonStyles);
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.title}>
+        <Skeleton count={1} width={200} />
+      </div>
+      <div className={styles.tracesContainer}>
+        {[...Array(5)].map((_, i) => (
+          <div className={styles.row} key={i}>
+            <div className={styles.rowLeft}>
+              <Skeleton count={1} />
+            </div>
+            <div className={styles.rowRight}>
+              <Skeleton count={1} />
+              </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+function getSkeletonStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      border: `1px solid ${theme.colors.border.medium}`,
+      borderRadius: theme.spacing(0.5),
+      marginBottom: theme.spacing(4),
+      width: '100%',
+    }),
+    title: css({
+      color: theme.colors.text.secondary,
+      backgroundColor: theme.colors.background.secondary,
+      fontSize: '1.3rem',
+      padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+      textAlign: 'center',
+    }),
+    tracesContainer: css({
+      padding: `${theme.spacing(2)}`,
+    }),
+    row: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+    }),
+    rowLeft: css({
+      margin: '6px 0',
+      width: '150px',
+    }),
+    rowRight: css({
+      width: '50px',
     }),
   };
 }

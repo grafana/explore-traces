@@ -13,10 +13,9 @@ import { LoadingState } from '@grafana/data';
 import { explorationDS } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
-import { SkeletonComponent } from '../Explore/ByFrameRepeater';
 import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { yBucketToDuration } from 'components/Explore/panels/histogram';
-import { AttributePanel } from './AttributePanel';
+import { AttributePanel, SkeletonComponent } from './AttributePanel';
 
 export interface DurationAttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -80,7 +79,7 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
                 height: MINI_PANEL_HEIGHT,
                 children: [
                   new LoadingStateScene({
-                    component: () => SkeletonComponent(1),
+                    component: () => SkeletonComponent(),
                   }),
                 ],
               }),
