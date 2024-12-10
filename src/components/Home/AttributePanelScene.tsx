@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { DataFrame, dateTimeFormat, Field, GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
-import { Badge, Button, useStyles2 } from '@grafana/ui';
+import { Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 import { formatDuration } from 'utils/dates';
 import { EXPLORATIONS_ROUTE, MetricFunction } from 'utils/shared';
@@ -60,16 +60,13 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
             const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // Difference in seconds
 
             if (diff < 60) {
-              return `${diff} second${diff === 1 ? '' : 's'} ago`;
+              return `${diff}s`;
             } else if (diff < 3600) {
-              const minutes = Math.floor(diff / 60);
-              return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+              return `${Math.floor(diff / 60)}m`;
             } else if (diff < 86400) {
-              const hours = Math.floor(diff / 3600);
-              return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+              return `${Math.floor(diff / 3600)}h`;
             } else {
-              const days = Math.floor(diff / 86400);
-              return `${days} day${days === 1 ? '' : 's'} ago`;
+              return `${Math.floor(diff / 86400)}d`;
             }
           }
 
@@ -81,7 +78,7 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
             return formatDuration(durationField.values[index] / 1000);
           }
 
-          const getUrl = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
+          const getLink = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
             let url = EXPLORATIONS_ROUTE + '?primarySignal=full_traces';
 
             if (!spanIdField || !spanIdField.values || !traceServiceField || !traceServiceField.values) {
@@ -96,46 +93,38 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
             return url;
           }
 
-          // http://localhost:3000/a/grafana-exploretraces-app/explore?
-          // primarySignal=full_traces&traceId=76712b89f2507a5
-          // &spanId=4f3109e5b3e2c67c
-          // &from=now-15m&to=now&timezone=UTC&var-ds=EbPO1fYnz
-          // &var-filters=nestedSetParent%7C%3C%7C0
-          // &var-filters=resource.service.name%7C%3D%7Cgrafana
-          // &var-groupBy=resource.service.name
-          // &var-metric=rate
-          // &var-latencyThreshold=
-          // &var-partialLatencyThreshold=
-          // &actionView=breakdown
-
-          // http://localhost:3000/a/grafana-exploretraces-app/explore?
-          // primarySignal=full_traces
-          // &traceId=f65180774b30270043537cb48a52e4d7
-          // &spanId=1f98ea0121c168ba
-          // &actionView=breakdown
-
           return (
             <>
               {traceIdField?.values?.map((traceId, index) => (
-                <div className={styles.tracesRow} key={index}>
-                  {getLabel(index)}
-                  
-                  <div className={styles.action}>
-                    <span className={styles.actionText}>
-                      <Badge 
-                        text={type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)} 
-                        color={type === 'duration' ? 'orange' : 'red'}                       
+                <div key={index}>
+                  {index === 0 && (
+                    <div className={styles.tracesRowHeader}>
+                      <span>Trace Name</span>
+                      <span className={styles.tracesRowHeaderText}>{type === 'duration' ? 'Duration' : 'Since'}</span>
+                    </div>
+                  )}
+
+                  <div 
+                    className={styles.tracesRow} 
+                    key={index} 
+                    onClick={() => {
+                      const link = getLink(traceId, spanIdField, traceServiceField, index);
+                      locationService.push(link);
+                    }}
+                  >
+                    <div className={'tracesRowLabel'}>{getLabel(index)}</div>
+                    
+                    <div className={styles.action}>
+                      <span className={styles.actionText}>
+                        {type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)} 
+                      </span>
+                      <Icon 
+                        className={styles.actionIcon}
+                        name='arrow-right'
+                        title='View spans for this request'
+                        size='xl'
                       />
-                    </span>
-                    <Button 
-                      variant='secondary' 
-                      icon='arrow-right'
-                      title='View trace'
-                      onClick={() => {
-                        const url = getUrl(traceId, spanIdField, traceServiceField, index);
-                        locationService.push(url);
-                      }}
-                    />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -149,9 +138,10 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.title}>
-          {title}
+          <Icon name={type === 'duration' ? 'clock-nine' : 'exclamation-circle'} size='lg' />
+          <span className={styles.titleText}>{title}</span>
         </div>
-        <div className={styles.traces}>
+        <div className={styles.tracesContainer}>
           <Traces />
         </div>
       </div>
@@ -168,26 +158,55 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
     }),
     title: css({
+      color: theme.colors.text.secondary,
       backgroundColor: theme.colors.background.secondary,
       fontSize: '1.3rem',
       padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
       textAlign: 'center',
     }),
-    traces: css({
-      padding: theme.spacing(2),
+    titleText: css({
+      marginLeft: theme.spacing(1),
     }),
+
+    tracesContainer: css({
+      padding: `${theme.spacing(2)} 0`,
+    }),
+    tracesRowHeader: css({
+      color: theme.colors.text.secondary,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: `0 ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
+    }),
+    tracesRowHeaderText: css({
+      margin: '0 45px 0 0',
+    }),
+
     tracesRow: css({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: `${theme.spacing(0.5)} 0`,
+      padding: `${theme.spacing(0.75)} ${theme.spacing(2)}`,
+
+      '&:hover': {
+        backgroundColor: theme.colors.background.secondary,
+        cursor: 'pointer',
+        '.tracesRowLabel': {
+          textDecoration: 'underline',
+        }
+      },
     }),
     action: css({
       display: 'flex',
       alignItems: 'center',
     }),
     actionText: css({
+      color: '#d5983c',
       padding: `0 ${theme.spacing(1)}`,
+    }),
+    actionIcon: css({
+      cursor: 'pointer',
+      margin: `0 ${theme.spacing(0.5)} 0 ${theme.spacing(1)}`,
     }),
   };
 }
