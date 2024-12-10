@@ -23,7 +23,7 @@ import {
   VAR_DATASOURCE,
 } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
-import { HomeHeaderScene } from 'components/Home/HomeHeaderScene';
+import { HeaderScene } from 'components/Home/HeaderScene';
 import { DurationAttributePanel } from 'components/Home/DurationAttributePanel';
 
 export interface HomeState extends SceneObjectState {
@@ -38,7 +38,7 @@ export class Home extends SceneObjectBase<HomeState> {
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
-      body: buildSplitLayout(),
+      body: buildPanels(),
       ...state,
     });
 
@@ -59,15 +59,15 @@ export class Home extends SceneObjectBase<HomeState> {
     const styles = useStyles2(getStyles);
 
     return (
-      <>
-        <HomeHeaderScene.Component model={model} />
-        <div className={styles.container}> {body && <body.Component model={body} />} </div>
-      </>
+      <div className={styles.container}>
+        <HeaderScene.Component model={model} />
+        {body && <body.Component model={body} />}
+      </div>
     );
   };
 }
 
-function buildSplitLayout() {
+function buildPanels() {
   return new SceneCSSGridLayout({
     children: [
       new SceneCSSGridLayout({
@@ -103,7 +103,12 @@ function getVariableSet(initialDS?: string) {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
-      padding: theme.spacing(2),
+      margin: `${theme.spacing(4)} auto`,
+      width: '75%',
+
+      '@media (max-width: 900px)': {
+        width: '100%',
+      },
     }),
   };
 }

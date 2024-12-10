@@ -65,7 +65,7 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
                   panel: new SceneFlexLayout({
                     children: [
                       new SceneFlexItem({
-                        body: new AttributePanel({ query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}} | by (resource.service.name)`, title: 'Slowest services', type: 'duration' })
+                        body: new AttributePanel({ query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}} | by (resource.service.name)`, title: 'Slow services', type: 'duration' })
                       }),
                     ],
                   })

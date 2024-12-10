@@ -20,8 +20,6 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
 
     const Traces = () => {
       if (series && series.length > 0) {
-        console.log(series);
-
         const sortByField = series[0].fields.find((f) => f.name === (type === 'duration' ? 'duration' : 'time'));
         if (sortByField && sortByField.values) {
           const sortedByDuration = sortByField?.values.map((_, i) => i)?.sort((a, b) => sortByField?.values[b] - sortByField?.values[a]);
@@ -135,7 +133,6 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
                       title='View trace'
                       onClick={() => {
                         const url = getUrl(traceId, spanIdField, traceServiceField, index);
-                        console.log(url)
                         locationService.push(url);
                       }}
                     />
@@ -166,7 +163,8 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: '4px',
+      borderRadius: theme.spacing(0.5),
+      marginBottom: theme.spacing(4),
       width: '100%',
     }),
     title: css({

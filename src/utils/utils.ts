@@ -48,7 +48,7 @@ export function newTracesExploration(
   return new TraceExploration({
     initialDS,
     initialFilters: initialFilters ?? [primarySignalOptions[0].filter],
-    $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
+    $timeRange: new SceneTimeRange({ from: 'now-30m', to: 'now' }),
     locationService,
   });
 }
@@ -56,7 +56,7 @@ export function newTracesExploration(
 export function newHome(initialDS?: string): Home {
   return new Home({
     initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-15m', to: 'now' }),
+    $timeRange: new SceneTimeRange({ from: 'now-30m', to: 'now' }),
   });
 }
 
