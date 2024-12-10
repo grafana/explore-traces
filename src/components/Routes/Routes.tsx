@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Route, Routes as ReactRoutes, Navigate } from 'react-router-dom-v5-compat';
-import { TraceExplorationPage } from '../../pages/Explore';
 import { ROUTES } from 'utils/shared';
+const TraceExplorationPage = lazy(() => import('../../pages/Explore/TraceExplorationPage'));
 
 export const Routes = () => {
   return (
