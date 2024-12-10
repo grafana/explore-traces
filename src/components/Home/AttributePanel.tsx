@@ -141,7 +141,7 @@ export const SkeletonComponent = () => {
 function getSkeletonStyles(theme: GrafanaTheme2) {
   return {
     container: css({
-      border: `1px solid ${theme.colors.border.medium}`,
+      border: `1px solid ${theme.isDark ? theme.colors.border.medium : theme.colors.border.weak}`,
       borderRadius: theme.spacing(0.5),
       marginBottom: theme.spacing(4),
       width: '100%',

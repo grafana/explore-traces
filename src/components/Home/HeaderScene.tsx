@@ -132,7 +132,7 @@ function getStyles(theme: GrafanaTheme2) {
       label: 'joeyTop',
       display: 'flex',
       alignItems: 'center',
-      backgroundColor: theme.colors.background.secondary,
+      backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
       borderRadius: theme.spacing(0.5),
       justifyContent: 'center',
       padding: theme.spacing(3),

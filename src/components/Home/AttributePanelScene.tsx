@@ -152,14 +152,16 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
-      border: `1px solid ${theme.colors.border.medium}`,
+      border: `1px solid ${theme.isDark ? theme.colors.border.medium : theme.colors.border.weak}`,
       borderRadius: theme.spacing(0.5),
       marginBottom: theme.spacing(4),
       width: '100%',
     }),
     title: css({
-      color: theme.colors.text.secondary,
-      backgroundColor: theme.colors.background.secondary,
+      color: theme.isDark ? theme.colors.text.secondary : theme.colors.text.primary,
+      backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
+      borderTopLeftRadius: theme.spacing(0.5),
+      borderTopRightRadius: theme.spacing(0.5),
       fontSize: '1.3rem',
       padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
       textAlign: 'center',
@@ -189,7 +191,7 @@ function getStyles(theme: GrafanaTheme2) {
       padding: `${theme.spacing(0.75)} ${theme.spacing(2)}`,
 
       '&:hover': {
-        backgroundColor: theme.colors.background.secondary,
+        backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
         cursor: 'pointer',
         '.tracesRowLabel': {
           textDecoration: 'underline',
