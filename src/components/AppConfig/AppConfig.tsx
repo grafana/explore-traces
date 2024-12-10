@@ -23,7 +23,7 @@ type State = {
 
 interface Props extends PluginConfigPageProps<AppPluginMeta<JsonData>> {}
 
-export const AppConfig = ({ plugin }: Props) => {
+const AppConfig = ({ plugin }: Props) => {
   const s = useStyles2(getStyles);
   const { enabled, pinned, jsonData } = plugin.meta;
   const [state, setState] = useState<State>({
@@ -201,3 +201,5 @@ export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) 
 
   return dataResponse.data;
 };
+
+export default AppConfig;

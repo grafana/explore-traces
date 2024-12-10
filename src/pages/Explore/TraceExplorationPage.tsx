@@ -14,7 +14,7 @@ import {
   useLocationService,
 } from '@grafana/runtime';
 
-export const TraceExplorationPage = () => {
+const TraceExplorationPage = () => {
   // We are calling this conditionally, but it will depend on grafana version and should not change in runtime so we
   // can ignore the hook rule here
   const sidecarContext = useSidecar_EXPERIMENTAL?.() ?? {};
@@ -25,6 +25,8 @@ export const TraceExplorationPage = () => {
 
   return <TraceExplorationView exploration={exploration} />;
 };
+
+export default TraceExplorationPage;
 
 export function TraceExplorationView({ exploration }: { exploration: TraceExploration }) {
   const [isInitialized, setIsInitialized] = React.useState(false);
