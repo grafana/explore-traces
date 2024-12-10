@@ -107,7 +107,7 @@ function getStyles(theme: GrafanaTheme2) {
       width: '75%',
 
       '@media (max-width: 900px)': {
-        width: '100%',
+        width: '95%',
       },
     }),
   };

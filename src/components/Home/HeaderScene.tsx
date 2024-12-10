@@ -35,12 +35,12 @@ export class HeaderScene extends SceneObjectBase {
 
     return (
       <div className={styles.container}>
-        <div className={styles.top}>
-          <div className={styles.left}>
+        <div className={styles.header}>
+          <div className={styles.headerTitleContainer}>
             {theme.isDark ? <DarkModeRocket /> : <LightModeRocket />}
             <h2 className={styles.title}>Start your traces exploration!</h2>
           </div>
-          <div className={styles.right}>
+          <div>
             <p>Explore and visualize your trace data without writing a query.</p>
             <div className={styles.headerActions}>
               <Button variant='primary' onClick={() => navigate(EXPLORATIONS_ROUTE)}>
@@ -63,31 +63,29 @@ export class HeaderScene extends SceneObjectBase {
           </div>
         </div>
 
-        <div className={styles.middle}>
+        <div className={styles.subHeader}>
           <h4>Or quick-start into your tracing data.</h4>
         </div>
 
-        <div className={styles.bottom}>
-          <Stack gap={2}>
-            {dsVariable && (
-              <Stack gap={1} alignItems={'center'}>
-                <div className={styles.datasourceLabel}>Data source</div>
-                <dsVariable.Component model={dsVariable} />
-              </Stack>
-            )}
-            <div className={styles.controls}>
-              {/* <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
-                <span className={styles.preview}>
-                  <Badge text='&nbsp;Preview' color='blue' icon='rocket' />
-                </span>
-              </Tooltip> */}
+        <Stack gap={2}>
+          {dsVariable && (
+            <Stack gap={1} alignItems={'center'}>
+              <div className={styles.datasourceLabel}>Data source</div>
+              <dsVariable.Component model={dsVariable} />
+            </Stack>
+          )}
+          <div className={styles.controls}>
+            {/* <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
+              <span className={styles.preview}>
+                <Badge text='&nbsp;Preview' color='blue' icon='rocket' />
+              </span>
+            </Tooltip> */}
 
-              {controls.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
-            </div>
-          </Stack>
-        </div>
+            {controls.map((control) => (
+              <control.Component key={control.state.key} model={control} />
+            ))}
+          </div>
+        </Stack>
       </div>
     );
   };
@@ -120,7 +118,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
 
     container: css({
-      label: 'joeyContainer',
       display: 'flex',
       gap: theme.spacing(7),
       flexDirection: 'column',
@@ -128,18 +125,17 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'center',
     }),
 
-    top: css({
-      label: 'joeyTop',
+    header: css({
       display: 'flex',
       alignItems: 'center',
       backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
       borderRadius: theme.spacing(0.5),
+      flexWrap: 'wrap',
       justifyContent: 'center',
       padding: theme.spacing(3),
-      width: '100%',
+      gap: theme.spacing(4),
     }),
-    left: css({
-      label: 'joeyLeft',
+    headerTitleContainer: css({
       display: 'flex',
       alignItems: 'center',
     }),
@@ -147,10 +143,6 @@ function getStyles(theme: GrafanaTheme2) {
       margin: `0 0 0 ${theme.spacing(2)}`,
     }),
 
-    right: css({
-      label: 'joeyRight',
-      margin: `0 0 0 ${theme.spacing(4)}`,
-    }),
     headerActions: css({
       alignItems: 'center',
       justifyContent: 'flex-start',
@@ -158,7 +150,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
     }),
     arrowIcon: css({
-      marginLeft: theme.spacing(1),
+      marginheaderTitleContainer: theme.spacing(1),
     }),
     documentationLink: css({
       textDecoration: 'underline',
@@ -167,17 +159,13 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
 
-    middle: css({
-      label: 'joeyMiddle',
+    subHeader: css({
       textAlign: 'center',
       'h4': {
         margin: 0,
       }
     }),
 
-    bottom: css({
-      label: 'joeyBottom',
-    }),
     datasourceLabel: css({
       fontSize: '12px',
     }),
