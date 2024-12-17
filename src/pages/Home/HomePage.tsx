@@ -4,12 +4,14 @@ import { DATASOURCE_LS_KEY } from '../../utils/shared';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../utils/analytics';
 import { Home } from './Home';
 
-export const HomePage = () => {
+const HomePage = () => {
   const initialDs = localStorage.getItem(DATASOURCE_LS_KEY) || '';
   const [home] = useState(newHome(initialDs));
 
   return <HomeView home={home} />;
 };
+
+export default HomePage;
 
 export function HomeView({ home }: { home: Home }) {
   const [isInitialized, setIsInitialized] = React.useState(false);
