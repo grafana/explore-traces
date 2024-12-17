@@ -76,7 +76,7 @@ function buildPanels() {
         rowGap: 2,
         children: [
           new SceneCSSGridItem({
-            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error}', title: 'Errored services', type: 'errors' }),
+            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error} | by (resource.service.name)', title: 'Errored services', type: 'errors' }),
           }),
           new SceneCSSGridItem({
             body: new DurationAttributePanel({}),
