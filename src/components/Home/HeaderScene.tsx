@@ -7,7 +7,7 @@ import {
   sceneGraph,
   SceneObjectBase,
 } from '@grafana/scenes';
-import { Badge, Button, Icon, LinkButton, Stack, Tooltip, useStyles2, useTheme2 } from '@grafana/ui';
+import { Button, Icon, LinkButton, Stack, useStyles2, useTheme2 } from '@grafana/ui';
 
 import {
   EXPLORATIONS_ROUTE,
@@ -18,11 +18,6 @@ import { useNavigate } from 'react-router-dom-v5-compat';
 import { Home } from 'pages/Home/Home';
 import { DarkModeRocket, LightModeRocket } from './rockets';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
-
-const version = process.env.VERSION;
-const buildTime = process.env.BUILD_TIME;
-const commitSha = process.env.COMMIT_SHA;
-const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
 
 export class HeaderScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<Home>) => {
@@ -80,12 +75,6 @@ export class HeaderScene extends SceneObjectBase {
             </Stack>
           )}
           <div className={styles.controls}>
-            {/* <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
-              <span className={styles.preview}>
-                <Badge text='&nbsp;Preview' color='blue' icon='rocket' />
-              </span>
-            </Tooltip> */}
-
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
@@ -96,16 +85,6 @@ export class HeaderScene extends SceneObjectBase {
   };
 }
 
-const PreviewTooltip = ({ text }: { text: string }) => {
-  const styles = useStyles2(getStyles);
-
-  return (
-    <Stack direction={'column'} gap={2}>
-      <div className={styles.previewTooltip}>{text}</div>
-    </Stack>
-  );
-};
-
 function getStyles(theme: GrafanaTheme2) {
   return {
     preview: css({
@@ -114,12 +93,6 @@ function getStyles(theme: GrafanaTheme2) {
       '> div:first-child': {
         padding: '5.5px',
       },
-    }),
-    previewTooltip: css({
-      fontSize: '14px',
-      lineHeight: '22px',
-      width: '180px',
-      textAlign: 'center',
     }),
 
     container: css({
