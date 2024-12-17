@@ -28,6 +28,11 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
           to: Math.round((rawSelection.x?.to || 0) / 1000),
         };
 
+        // Ignore selection and return if the selection is invalid
+        if (newSelection.timeRange.from === newSelection.timeRange.to) {
+          return;
+        }
+
         const yFrom = yBucketToDuration((args[0].y?.from || 0) - 1, yBuckets);
         const yTo = yBucketToDuration(args[0].y?.to || 0, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };

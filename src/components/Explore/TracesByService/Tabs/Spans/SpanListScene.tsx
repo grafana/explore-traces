@@ -73,10 +73,12 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                     return props.value as string;
                   }
 
+                  const name = props.value ? (props.value as string) : '<name not yet available>';
                   return (
                     <div className={'cell-link-wrapper'}>
                       <div
                         className={'cell-link'}
+                        title={name}
                         onClick={() => {
                           traceExplorationScene.state.locationService.partial({
                             traceId,
@@ -84,10 +86,10 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
                           });
                         }}
                       >
-                        {props.value ? (props.value as string) : '<name not yet available>'}
+                        {name}
                       </div>
-                      <Link href={this.getLinkToExplore(traceId, spanId)} target={'_blank'}>
-                        <Icon name={'external-link-alt'} />
+                      <Link href={this.getLinkToExplore(traceId, spanId)} target={'_blank'} title={'Open in new tab'}>
+                        <Icon name={'external-link-alt'} size={'sm'} />
                       </Link>
                     </div>
                   );
@@ -230,11 +232,23 @@ const getStyles = (theme: GrafanaTheme2) => {
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
+
+        a: {
+          padding: 4,
+          fontSize: 0,
+
+          ':hover': {
+            background: theme.colors.background.secondary,
+          },
+        },
       },
 
       '.cell-link': {
         color: theme.colors.text.link,
         cursor: 'pointer',
+        maxWidth: '300px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
 
         ':hover': {
           textDecoration: 'underline',
