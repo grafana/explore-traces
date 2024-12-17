@@ -20,7 +20,7 @@ export function HomeView({ home }: { home: Home }) {
     if (!isInitialized) {
       setIsInitialized(true);
 
-      reportAppInteraction(USER_EVENTS_PAGES.common, USER_EVENTS_ACTIONS.common.app_initialized);
+      reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.homepage_initialized);
     }
   }, [home, isInitialized]);
 

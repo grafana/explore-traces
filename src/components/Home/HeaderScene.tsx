@@ -17,6 +17,7 @@ import { getHomeScene } from '../../utils/utils';
 import { useNavigate } from 'react-router-dom-v5-compat';
 import { Home } from 'pages/Home/Home';
 import { DarkModeRocket, LightModeRocket } from './rockets';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 
 const version = process.env.VERSION;
 const buildTime = process.env.BUILD_TIME;
@@ -43,7 +44,10 @@ export class HeaderScene extends SceneObjectBase {
           <div>
             <p>Explore and visualize your trace data without writing a query.</p>
             <div className={styles.headerActions}>
-              <Button variant='primary' onClick={() => navigate(EXPLORATIONS_ROUTE)}>
+              <Button variant='primary' onClick={() => {
+                  reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.explore_traces_clicked);
+                  navigate(EXPLORATIONS_ROUTE);
+                }}>
                 Let’s explore traces
                 <Icon className={styles.arrowIcon} name='arrow-right' size='lg' />
               </Button>
@@ -56,6 +60,7 @@ export class HeaderScene extends SceneObjectBase {
                   'https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/traces'
                 }
                 className={styles.documentationLink}
+                onClick={() => reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.read_documentation_clicked)}
               >
                 Read documentation
               </LinkButton>

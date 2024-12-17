@@ -4,6 +4,7 @@ import { locationService } from '@grafana/runtime';
 import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
 import { Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
+import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 import { formatDuration } from 'utils/dates';
 import { EXPLORATIONS_ROUTE, MetricFunction } from 'utils/shared';
 
@@ -108,6 +109,11 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
                     className={styles.tracesRow} 
                     key={index} 
                     onClick={() => {
+                      reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.attribute_panel_item_clicked, {
+                        type,
+                        index,
+                        value: type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)
+                      });
                       const link = getLink(traceId, spanIdField, traceServiceField, index);
                       locationService.push(link);
                     }}
