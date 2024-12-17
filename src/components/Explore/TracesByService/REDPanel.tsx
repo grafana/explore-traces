@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
   SceneComponentProps,
+  SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -33,6 +34,7 @@ import { SelectionColor } from '../layouts/allComparison';
 import { buildHistogramQuery } from '../queries/histogram';
 import { isEqual } from 'lodash';
 import { DurationComparisonControl } from './DurationComparisonControl';
+import { exemplarsTransformations } from '../../../utils/exemplars';
 
 export interface RateMetricsPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -57,7 +59,11 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
       this._subs.add(
         data.subscribeToState((newData) => {
           if (newData.data?.state === LoadingState.Done) {
-            if (newData.data.series.length === 0 || newData.data.series[0].length === 0 || fieldHasEmptyValues(newData)) {
+            if (
+              newData.data.series.length === 0 ||
+              newData.data.series[0].length === 0 ||
+              fieldHasEmptyValues(newData)
+            ) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
@@ -171,10 +177,13 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
   private _onActivate() {
     const metric = getMetricVariable(this).state.value as MetricFunction;
     this.setState({
-      $data: new StepQueryRunner({
-        maxDataPoints: this.isDuration() ? 24 : 64,
-        datasource: explorationDS,
-        queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(metric)],
+      $data: new SceneDataTransformer({
+        $data: new StepQueryRunner({
+          maxDataPoints: this.isDuration() ? 24 : 64,
+          datasource: explorationDS,
+          queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(metric)],
+        }),
+        transformations: [...exemplarsTransformations(this)],
       }),
       panel: this.getVizPanel(),
     });
@@ -283,9 +292,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
             {subtitle && <div className={styles.subtitle}>{subtitle}</div>}
           </div>
           <div className={styles.actions}>
-            {actions?.map((action) => (
-              <action.Component model={action} key={action.state.key} />
-            ))}
+            {actions?.map((action) => <action.Component model={action} key={action.state.key} />)}
           </div>
         </div>
         <panel.Component model={panel} />

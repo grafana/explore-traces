@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
   SceneComponentProps,
+  SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -23,6 +24,7 @@ import { MINI_PANEL_HEIGHT } from './TracesByServiceScene';
 import { buildHistogramQuery } from '../queries/histogram';
 import { histogramPanelConfig } from '../panels/histogram';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
+import { exemplarsTransformations } from '../../../utils/exemplars';
 
 export interface MiniREDPanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -80,10 +82,13 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
 
   private _onActivate() {
     this.setState({
-      $data: new StepQueryRunner({
-        maxDataPoints: this.state.metric === 'duration' ? 24 : 64,
-        datasource: explorationDS,
-        queries: [this.state.metric === 'duration' ? buildHistogramQuery() : rateByWithStatus(this.state.metric)],
+      $data: new SceneDataTransformer({
+        $data: new StepQueryRunner({
+          maxDataPoints: this.state.metric === 'duration' ? 24 : 64,
+          datasource: explorationDS,
+          queries: [this.state.metric === 'duration' ? buildHistogramQuery() : rateByWithStatus(this.state.metric)],
+        }),
+        transformations: [...exemplarsTransformations(this)],
       }),
       panel: this.getVizPanel(this.state.metric),
     });

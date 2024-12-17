@@ -20,6 +20,7 @@ import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { syncYAxis } from '../behaviors/syncYaxis';
+import { exemplarsTransformations } from '../../../utils/exemplars';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -39,6 +40,7 @@ export function buildNormalLayout(
         queries: [query],
       }),
       transformations: [
+        ...exemplarsTransformations(scene),
         () => (source: Observable<DataFrame[]>) => {
           return source.pipe(
             map((data: DataFrame[]) => {

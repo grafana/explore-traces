@@ -28,17 +28,19 @@ export enum SpanKind {
 
 export type SpanAttributes = {
   key: string;
-  value: {
-    stringValue?: string;
-    intValue?: string;
-    boolValue?: boolean;
-    doubleValue?: string;
-    Value?: {
-      string_value?: string;
-      int_value?: string;
-      bool_value?: boolean;
-      double_value?: string;
-    };
+  value: SpanAttributesValue;
+};
+
+export type SpanAttributesValue = {
+  stringValue?: string;
+  intValue?: string;
+  boolValue?: boolean;
+  doubleValue?: string;
+  Value?: {
+    string_value?: string;
+    int_value?: string;
+    bool_value?: boolean;
+    double_value?: string;
   };
 };
 
