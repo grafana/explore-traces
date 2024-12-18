@@ -5,7 +5,7 @@ import { Icon, useStyles2 } from "@grafana/ui";
 import React from "react";
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from "utils/analytics";
 import { formatDuration } from "utils/dates";
-import { EXPLORATIONS_ROUTE, MetricFunction } from "utils/shared";
+import { EXPLORATIONS_ROUTE, MetricFunction, ROUTES } from "utils/shared";
 
 type Props = {
   series?: DataFrame[];
@@ -58,19 +58,19 @@ export const AttributePanelRows = (props: Props) => {
     return formatDuration(durationField.values[index] / 1000);
   }
 
-  const getLink = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
-    let url = EXPLORATIONS_ROUTE + '?primarySignal=full_traces';
-
-    if (!spanIdField || !spanIdField.values || !traceServiceField || !traceServiceField.values) {
+  const getUrl = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
+    if (!spanIdField || !spanIdField.values[index] || !traceServiceField || !traceServiceField.values[index]) {
       console.error('SpanId or traceService not found');
-      return url;
+      return ROUTES.Explore;
     }
 
-    url = url + `&traceId=${traceId}&spanId=${spanIdField.values[index]}`;
-    url = url + `&var-filters=resource.service.name|=|${traceServiceField.values[index]}`;
-    url = type === 'duration' ? url + '&var-metric=duration' : url + '&var-metric=errors';
+    const params = new URLSearchParams();
+    params.set('traceId', traceId);
+    params.set('spanId', spanIdField.values[index]);
+    params.set('var-filters', `resource.service.name|=|${traceServiceField.values[index]}`);
+    params.set('var-metric', type);
 
-    return url;
+    return `${EXPLORATIONS_ROUTE}?${params.toString()}&var-filters=nestedSetParent|<|0`;
   }
 
   if (message) {
@@ -126,8 +126,8 @@ export const AttributePanelRows = (props: Props) => {
                     index,
                     value: type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)
                   });
-                  const link = getLink(traceId, spanIdField, traceServiceField, index);
-                  locationService.push(link);
+                  const url = getUrl(traceId, spanIdField, traceServiceField, index);
+                  locationService.push(url);
                 }}
               >
                 <div className={'rowLabel'}>{getLabel(traceServiceField, traceNameField, index)}</div>
