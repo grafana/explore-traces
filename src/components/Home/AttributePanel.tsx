@@ -132,7 +132,7 @@ export const SkeletonComponent = () => {
         <Skeleton count={1} width={200} />
       </div>
       <div className={styles.tracesContainer}>
-        {[...Array(5)].map((_, i) => (
+        {[...Array(11)].map((_, i) => (
           <div className={styles.row} key={i}>
             <div className={styles.rowLeft}>
               <Skeleton count={1} />
@@ -163,14 +163,14 @@ function getSkeletonStyles(theme: GrafanaTheme2) {
       textAlign: 'center',
     }),
     tracesContainer: css({
-      padding: `${theme.spacing(2)}`,
+      padding: `13px ${theme.spacing(2)}`,
     }),
     row: css({
       display: 'flex',
       justifyContent: 'space-between',
     }),
     rowLeft: css({
-      margin: '6px 0',
+      margin: '7px 0',
       width: '150px',
     }),
     rowRight: css({
