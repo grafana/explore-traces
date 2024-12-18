@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
   SceneComponentProps,
-  SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
@@ -11,13 +10,13 @@ import {
 } from '@grafana/scenes';
 import { GrafanaTheme2, LoadingState } from '@grafana/data';
 import { explorationDS, MetricFunction } from 'utils/shared';
-import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { AttributePanelScene } from './AttributePanelScene';
 import Skeleton from 'react-loading-skeleton';
+import { getErrorMessage, getNoDataMessage } from 'utils/utils';
 
 export interface AttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -47,10 +46,10 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
-                    new SceneFlexItem({
-                      body: new EmptyStateScene({
-                        imgWidth: 110,
-                      }),
+                    new AttributePanelScene({
+                      message: getNoDataMessage(state.title.toLowerCase()),
+                      title: state.title,
+                      type: state.type,
                     }),
                   ],
                 }),
@@ -59,18 +58,28 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
-                    new SceneFlexItem({
-                      body: new AttributePanelScene({
-                        series: data.data.series,
-                        title: state.title,
-                        type: state.type
-                      }),
+                    new AttributePanelScene({
+                      series: data.data.series,
+                      title: state.title,
+                      type: state.type
                     }),
                   ],
                 })
               });
             }
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else if (data.data?.state === LoadingState.Error) {
+            this.setState({
+              panel: new SceneFlexLayout({
+                children: [
+                  new AttributePanelScene({
+                    message: getErrorMessage(data),
+                    title: state.title,
+                    type: state.type,
+                  }),
+                ],
+              })
+            });
+          } else if (data.data?.state === LoadingState.Loading || data.data?.state === LoadingState.Streaming) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',

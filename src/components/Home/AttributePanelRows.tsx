@@ -8,12 +8,13 @@ import { formatDuration } from "utils/dates";
 import { EXPLORATIONS_ROUTE, MetricFunction } from "utils/shared";
 
 type Props = {
-  series: DataFrame[] | undefined;
+  series?: DataFrame[];
   type: MetricFunction;
+  message?: string;
 }
 
 export const AttributePanelRows = (props: Props) => {
-  const { series, type } = props;
+  const { series, type, message } = props;
   const styles = useStyles2(getStyles);
 
   const getLabel = (traceServiceField: Field | undefined, traceNameField: Field | undefined, index: number) => {
@@ -70,6 +71,21 @@ export const AttributePanelRows = (props: Props) => {
     url = type === 'duration' ? url + '&var-metric=duration' : url + '&var-metric=errors';
 
     return url;
+  }
+
+  if (message) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.message}>
+          <Icon 
+            className={styles.actionIcon}
+            name='exclamation-circle'
+            size='xl'
+          />
+          {message}
+        </div>
+      </div>
+    );
   }
 
   if (series && series.length > 0) {
@@ -177,6 +193,13 @@ function getStyles(theme: GrafanaTheme2) {
     actionIcon: css({
       cursor: 'pointer',
       margin: `0 ${theme.spacing(0.5)} 0 ${theme.spacing(1)}`,
+    }),
+
+    message: css({
+      display: 'flex',
+      gap: theme.spacing(1.5),
+      margin: `${theme.spacing(2)} auto`,
+      width: '60%',
     }),
   };
 }

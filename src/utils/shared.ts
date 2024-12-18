@@ -11,7 +11,6 @@ export enum ROUTES {
 export const PLUGIN_ID = pluginJson.id;
 export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
 export const EXPLORATIONS_ROUTE = `${PLUGIN_BASE_URL}/${ROUTES.Explore}`;
-export const HOME_ROUTE = `${PLUGIN_BASE_URL}/${ROUTES.Home}`;
 
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 

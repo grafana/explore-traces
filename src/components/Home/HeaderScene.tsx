@@ -87,14 +87,6 @@ export class HeaderScene extends SceneObjectBase {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    preview: css({
-      cursor: 'help',
-
-      '> div:first-child': {
-        padding: '5.5px',
-      },
-    }),
-
     container: css({
       display: 'flex',
       gap: theme.spacing(7),
@@ -102,7 +94,6 @@ function getStyles(theme: GrafanaTheme2) {
       margin: `0 0 ${theme.spacing(4)} 0`,
       justifyContent: 'center',
     }),
-
     header: css({
       display: 'flex',
       alignItems: 'center',

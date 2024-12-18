@@ -10,11 +10,12 @@ interface AttributePanelSceneState extends SceneObjectState {
   series?: DataFrame[];
   title: string;
   type: MetricFunction;
+  message?: string
 }
 
 export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneState> {
   public static Component = ({ model }: SceneComponentProps<AttributePanelScene>) => {
-    const { series, title, type } = model.useState();
+    const { series, title, type, message } = model.useState();
     const styles = useStyles2(getStyles);
 
     return (
@@ -23,7 +24,7 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
           <Icon name={type === 'duration' ? 'clock-nine' : 'exclamation-circle'} size='lg' />
           <span className={styles.titleText}>{title}</span>
         </div>
-        <AttributePanelRows series={series} type={type} />
+        <AttributePanelRows series={series} type={type} message={message} />
       </div>
     );
   };

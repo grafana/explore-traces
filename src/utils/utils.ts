@@ -60,6 +60,14 @@ export function newHome(initialDS?: string): Home {
   });
 }
 
+export function getErrorMessage(data: SceneDataState) {
+  return data?.data?.error?.message ?? 'Data source error';
+}
+
+export function getNoDataMessage(context: string) {
+  return `No data for selected data source. Select another to see ${context}.`;
+}
+
 export function getUrlForExploration(exploration: TraceExploration) {
   const params = sceneUtils.getUrlState(exploration);
   return getUrlForValues(params);

@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
   SceneComponentProps,
-  SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
@@ -11,11 +10,12 @@ import {
 } from '@grafana/scenes';
 import { LoadingState } from '@grafana/data';
 import { explorationDS } from 'utils/shared';
-import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { yBucketToDuration } from 'components/Explore/panels/histogram';
 import { AttributePanel, SkeletonComponent } from './AttributePanel';
+import { getNoDataMessage } from 'utils/utils';
+import { AttributePanelScene } from './AttributePanelScene';
 
 export interface DurationAttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -33,6 +33,8 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
 
     this.addActivationHandler(() => {
       const data = sceneGraph.getData(this);
+      const type = 'duration';
+      const title = 'Slow services';
 
       this._subs.add(
         data.subscribeToState((data) => {
@@ -41,10 +43,10 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
-                    new SceneFlexItem({
-                      body: new EmptyStateScene({
-                        imgWidth: 110,
-                      }),
+                    new AttributePanelScene({
+                      message: getNoDataMessage(title.toLowerCase()),
+                      title,
+                      type,
                     }),
                   ],
                 }),
@@ -63,15 +65,13 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
                 this.setState({
                   panel: new SceneFlexLayout({
                     children: [
-                      new SceneFlexItem({
-                        body: new AttributePanel({ query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}} | by (resource.service.name)`, title: 'Slow services', type: 'duration' })
-                      }),
+                      new AttributePanel({ query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}} | by (resource.service.name)`, title, type }),
                     ],
                   })
                 }); 
               }
             }
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else if (data.data?.state === LoadingState.Loading || data.data?.state === LoadingState.Streaming) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',
