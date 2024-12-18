@@ -172,6 +172,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: theme.spacing(2),
       padding: `${theme.spacing(0.75)} ${theme.spacing(2)}`,
 
       '&:hover': {
@@ -189,6 +190,7 @@ function getStyles(theme: GrafanaTheme2) {
     actionText: css({
       color: '#d5983c',
       padding: `0 ${theme.spacing(1)}`,
+      width: 'max-content',
     }),
     actionIcon: css({
       cursor: 'pointer',
