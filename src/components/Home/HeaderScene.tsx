@@ -44,7 +44,7 @@ export class HeaderScene extends SceneObjectBase {
                   navigate(EXPLORATIONS_ROUTE);
                 }}>
                 Let’s explore traces
-                <Icon className={styles.arrowIcon} name='arrow-right' size='lg' />
+                <Icon name='arrow-right' size='lg' />
               </Button>
               <LinkButton
                 icon="external-link-alt"
@@ -117,9 +117,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'flex-start',
       display: 'flex',
       gap: theme.spacing(2),
-    }),
-    arrowIcon: css({
-      marginheaderTitleContainer: theme.spacing(1),
     }),
     documentationLink: css({
       textDecoration: 'underline',
