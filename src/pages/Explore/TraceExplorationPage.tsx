@@ -44,7 +44,7 @@ export function TraceExplorationView({ exploration }: { exploration: TraceExplor
   }
 
   return (
-    <UrlSyncContextProvider scene={exploration} updateUrlOnInit={true} createBrowserHistorySteps={true}>
+    <UrlSyncContextProvider scene={exploration} updateUrlOnInit={true} createBrowserHistorySteps={false}>
       <exploration.Component model={exploration} />
     </UrlSyncContextProvider>
   );
