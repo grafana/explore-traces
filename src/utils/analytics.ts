@@ -17,12 +17,14 @@ export const reportAppInteraction = (
 
 export const USER_EVENTS_PAGES = {
   analyse_traces: 'analyse_traces',
+  home: 'home',
   common: 'common',
 } as const;
 
 export type UserEventPagesType = keyof typeof USER_EVENTS_PAGES;
 type UserEventActionType =
   | keyof (typeof USER_EVENTS_ACTIONS)['analyse_traces']
+  | keyof (typeof USER_EVENTS_ACTIONS)['home']
   | keyof (typeof USER_EVENTS_ACTIONS)['common'];
 
 export const USER_EVENTS_ACTIONS = {
@@ -36,6 +38,12 @@ export const USER_EVENTS_ACTIONS = {
     start_investigation: 'start_investigation',
     stop_investigation: 'stop_investigation',
     open_trace: 'open_trace',
+  },
+  [USER_EVENTS_PAGES.home]: {
+    homepage_initialized: 'homepage_initialized',
+    attribute_panel_item_clicked: 'attribute_panel_item_clicked',
+    explore_traces_clicked: 'explore_traces_clicked',
+    read_documentation_clicked: 'read_documentation_clicked',
   },
   [USER_EVENTS_PAGES.common]: {
     metric_changed: 'metric_changed',
