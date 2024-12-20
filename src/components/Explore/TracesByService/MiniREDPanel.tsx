@@ -81,6 +81,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
   }
 
   private _onActivate() {
+    const traceExploration = getTraceExplorationScene(this);
     this.setState({
       $data: new SceneDataTransformer({
         $data: new StepQueryRunner({
@@ -88,7 +89,7 @@ export class MiniREDPanel extends SceneObjectBase<MiniREDPanelState> {
           datasource: explorationDS,
           queries: [this.state.metric === 'duration' ? buildHistogramQuery() : rateByWithStatus(this.state.metric)],
         }),
-        transformations: [...exemplarsTransformations(this)],
+        transformations: [...exemplarsTransformations(traceExploration.state.locationService)],
       }),
       panel: this.getVizPanel(this.state.metric),
     });

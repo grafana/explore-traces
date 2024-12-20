@@ -26,6 +26,7 @@ import {
   getLatencyThresholdVariable,
   getMetricVariable,
   getTraceByServiceScene,
+  getTraceExplorationScene,
   shouldShowSelection,
 } from '../../../utils/utils';
 import { getHistogramVizPanel, yBucketToDuration } from '../panels/histogram';
@@ -176,6 +177,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
 
   private _onActivate() {
     const metric = getMetricVariable(this).state.value as MetricFunction;
+    const traceExploration = getTraceExplorationScene(this);
     this.setState({
       $data: new SceneDataTransformer({
         $data: new StepQueryRunner({
@@ -183,7 +185,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
           datasource: explorationDS,
           queries: [this.isDuration() ? buildHistogramQuery() : rateByWithStatus(metric)],
         }),
-        transformations: [...exemplarsTransformations(this)],
+        transformations: [...exemplarsTransformations(traceExploration.state.locationService)],
       }),
       panel: this.getVizPanel(),
     });

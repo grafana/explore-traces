@@ -40,7 +40,7 @@ export function buildNormalLayout(
         queries: [query],
       }),
       transformations: [
-        ...exemplarsTransformations(scene),
+        ...exemplarsTransformations(traceExploration.state.locationService),
         () => (source: Observable<DataFrame[]>) => {
           return source.pipe(
             map((data: DataFrame[]) => {

@@ -1,13 +1,12 @@
 import { map, Observable } from 'rxjs';
 import { DataFrame, DataTopic, Field } from '@grafana/data';
-import { CustomTransformerDefinition, SceneObject } from '@grafana/scenes';
-import { getTraceExplorationScene } from './utils';
+import { CustomTransformerDefinition } from '@grafana/scenes';
+import { LocationService } from '@grafana/runtime';
 
-export const exemplarsTransformations = (scene: SceneObject): CustomTransformerDefinition[] => [
+export const exemplarsTransformations = (locationService: LocationService): CustomTransformerDefinition[] => [
   {
     topic: DataTopic.Annotations,
     operator: () => (source: Observable<DataFrame[]>) => {
-      const traceExplorationScene = getTraceExplorationScene(scene);
       return source.pipe(
         map((data: DataFrame[]) => {
           return data.map((frame) => {
@@ -22,9 +21,15 @@ export const exemplarsTransformations = (scene: SceneObject): CustomTransformerD
                     url: '#${__value.raw}',
                     onClick: (event) => {
                       event.e.stopPropagation(); // Prevent the click event from propagating to the parent anchor
-                      const parentAnchorHref = event.e.target.parentElement.parentElement.href;
+                      const parentAnchorHref = event.e.target?.parentElement?.parentElement?.href;
+                      if (!parentAnchorHref || parentAnchorHref.indexOf('#') === -1) {
+                        return;
+                      }
                       const traceId = parentAnchorHref.split('#')[1];
-                      traceExplorationScene.state.locationService.partial({
+                      if (!traceId || traceId === '') {
+                        return;
+                      }
+                      locationService.partial({
                         traceId,
                       });
                     },
