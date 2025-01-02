@@ -4,16 +4,14 @@ import React from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import {
   SceneComponentProps,
-  sceneGraph,
   SceneObjectBase,
 } from '@grafana/scenes';
 import { Button, Icon, LinkButton, Stack, useStyles2, useTheme2 } from '@grafana/ui';
 
 import {
   EXPLORATIONS_ROUTE,
-  VAR_DATASOURCE,
 } from '../../utils/shared';
-import { getHomeScene } from '../../utils/utils';
+import { getDatasourceVariable, getHomeScene } from '../../utils/utils';
 import { useNavigate } from 'react-router-dom-v5-compat';
 import { Home } from 'pages/Home/Home';
 import { DarkModeRocket, LightModeRocket } from '../../utils/rockets';
@@ -27,7 +25,7 @@ export class HeaderScene extends SceneObjectBase {
     const styles = useStyles2(getStyles);
     const theme = useTheme2();
 
-    const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, home);
+    const dsVariable = getDatasourceVariable(home);
 
     return (
       <div className={styles.container}>

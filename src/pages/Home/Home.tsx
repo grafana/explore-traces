@@ -7,7 +7,6 @@ import {
   SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
-  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
@@ -25,6 +24,7 @@ import {
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
 import { DurationAttributePanel } from 'components/Home/DurationAttributePanel';
+import { getDatasourceVariable } from 'utils/utils';
 
 export interface HomeState extends SceneObjectState {
   controls: SceneObject[];
@@ -46,8 +46,7 @@ export class Home extends SceneObjectBase<HomeState> {
   }
 
   private _onActivate() {
-    const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
-    datasourceVar.subscribeToState((newState) => {
+    getDatasourceVariable(this).subscribeToState((newState) => {
       if (newState.value) {
         localStorage.setItem(DATASOURCE_LS_KEY, newState.value.toString());
       }
@@ -76,7 +75,7 @@ function buildPanels() {
         rowGap: 2,
         children: [
           new SceneCSSGridItem({
-            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error} | by (resource.service.name)', title: 'Errored services', type: 'errors' }),
+            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error}', title: 'Errored services', type: 'errors' }),
           }),
           new SceneCSSGridItem({
             body: new DurationAttributePanel({}),

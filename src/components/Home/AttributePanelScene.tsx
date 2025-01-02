@@ -43,9 +43,11 @@ function getStyles(theme: GrafanaTheme2) {
       backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
       borderTopLeftRadius: theme.spacing(0.5),
       borderTopRightRadius: theme.spacing(0.5),
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       fontSize: '1.3rem',
       padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
-      textAlign: 'center',
     }),
     titleText: css({
       marginLeft: theme.spacing(1),
