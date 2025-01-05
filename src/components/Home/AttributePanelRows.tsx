@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { DataFrame, dateTimeFormat, Field, GrafanaTheme2 } from "@grafana/data";
+import { DataFrame, dateTimeFormat, Field, GrafanaTheme2, urlUtil } from "@grafana/data";
 import { locationService } from "@grafana/runtime";
 import { Icon, useStyles2 } from "@grafana/ui";
 import React from "react";
@@ -64,13 +64,15 @@ export const AttributePanelRows = (props: Props) => {
       return ROUTES.Explore;
     }
 
-    const params = new URLSearchParams();
-    params.set('traceId', traceId);
-    params.set('spanId', spanIdField.values[index]);
-    params.set('var-filters', `resource.service.name|=|${traceServiceField.values[index]}`);
-    params.set('var-metric', type);
+    const params = {
+      traceId,
+      spanId: spanIdField.values[index],
+      'var-filters': `resource.service.name|=|${traceServiceField.values[index]}`,
+      'var-metric': type,
+    }
+    const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
 
-    return `${EXPLORATIONS_ROUTE}?${params.toString()}&var-filters=nestedSetParent|<|0`;
+    return `${url}&var-filters=nestedSetParent|<|0`;
   }
 
   if (message) {

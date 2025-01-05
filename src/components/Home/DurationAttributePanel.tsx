@@ -26,7 +26,7 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [{ refId: 'A', query: '{nestedSetParent<0} | histogram_over_time(duration)', queryType: 'traceql', tableType: 'spans', limit: 10, spss: 1 }],
+        queries: [{ refId: 'A', query: '{nestedSetParent<0} | histogram_over_time(duration)', queryType: 'traceql' }],
       }),
       ...state,
     });
