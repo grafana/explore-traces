@@ -61,7 +61,7 @@ export function newHome(initialDS?: string): Home {
 }
 
 export function getErrorMessage(data: SceneDataState) {
-  return data?.data?.error?.message ?? 'Data source error';
+  return data?.data?.error?.message ?? 'There are no Tempo data sources';
 }
 
 export function getNoDataMessage(context: string) {

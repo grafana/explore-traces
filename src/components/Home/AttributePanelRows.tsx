@@ -114,7 +114,7 @@ export const AttributePanelRows = (props: Props) => {
             <div key={index}>
               {index === 0 && (
                 <div className={styles.rowHeader}>
-                  <span>Trace Name</span>
+                  <span>Service</span>
                   <span className={styles.rowHeaderText}>{type === 'duration' ? 'Duration' : 'Since'}</span>
                 </div>
               )}

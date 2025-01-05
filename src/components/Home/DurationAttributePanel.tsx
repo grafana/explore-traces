@@ -14,7 +14,7 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesByServiceScene';
 import { yBucketToDuration } from 'components/Explore/panels/histogram';
 import { AttributePanel, SkeletonComponent } from './AttributePanel';
-import { getNoDataMessage } from 'utils/utils';
+import { getErrorMessage, getNoDataMessage } from 'utils/utils';
 import { AttributePanelScene } from './AttributePanelScene';
 
 export interface DurationAttributePanelState extends SceneObjectState {
@@ -31,10 +31,11 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
       ...state,
     });
 
+    const type = 'duration';
+    const title = 'Slow services';
+
     this.addActivationHandler(() => {
       const data = sceneGraph.getData(this);
-      const type = 'duration';
-      const title = 'Slow services';
 
       this._subs.add(
         data.subscribeToState((data) => {
@@ -83,6 +84,18 @@ export class DurationAttributePanel extends SceneObjectBase<DurationAttributePan
                   }),
                 ],
               }),
+            });
+          } else if (data.data?.state === LoadingState.Error) {
+            this.setState({
+              panel: new SceneFlexLayout({
+                children: [
+                  new AttributePanelScene({
+                    message: getErrorMessage(data),
+                    title,
+                    type
+                  }),
+                ],
+              })
             });
           }
         })
