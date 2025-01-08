@@ -16,70 +16,6 @@ export const AttributePanelRows = (props: Props) => {
   const { series, type, message } = props;
   const styles = useStyles2(getStyles);
 
-  const getLabel = (df: DataFrame) => {
-    const valuesField = df.fields.find((f) => f.name !== 'time');
-    const labels = valuesField?.labels;
-    return labels?.['resource.service.name'].slice(1, -1) ??  'Service name not found'; // remove quotes
-  }
-
-  const getLabelForDuration = (traceServiceField: Field | undefined, traceNameField: Field | undefined, index: number) => {
-    let label = '';
-    if (traceServiceField?.values[index]) {
-      label = traceServiceField.values[index];
-    }
-    if (traceNameField?.values[index]) {
-      label = label.length === 0 ? traceNameField.values[index] : `${label}: ${traceNameField.values[index]}`;
-    }
-    return label.length === 0 ? 'Trace service & name not found' : label;
-  }
-
-  const getUrl = (df: DataFrame) => {
-    const valuesField = df.fields.find((f) => f.name !== 'time');
-    const labels = valuesField?.labels;
-    const serviceName = labels?.['resource.service.name'].slice(1, -1) ??  'Service name not found'; // remove quotes
-
-    if (serviceName) {
-      const params = {
-        'var-filters': `resource.service.name|=|${serviceName}`,
-        'var-metric': type,
-      }
-      const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
-  
-      return `${url}&var-filters=nestedSetParent|<|0`;
-    }
-    return '';
-  }
-
-  const getUrlForDuration = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
-    if (!spanIdField || !spanIdField.values[index] || !traceServiceField || !traceServiceField.values[index]) {
-      console.error('SpanId or traceService not found');
-      return ROUTES.Explore;
-    }
-
-    const params = {
-      traceId,
-      spanId: spanIdField.values[index],
-      'var-filters': `resource.service.name|=|${traceServiceField.values[index]}`,
-      'var-metric': type,
-    }
-    const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
-
-    return `${url}&var-filters=nestedSetParent|<|0`;
-  }
-
-  const getTotalErrs = (df: DataFrame) => {
-    const valuesField = df.fields.find((f) => f.name !== 'time');
-    return valuesField?.values?.reduce((x, acc) => x + acc) ?? 1;
-  }
-
-  const getDuration = (durationField: Field | undefined, index: number) => {
-    if (!durationField || !durationField.values) {
-      return 'Durations not found';
-    }
-
-    return formatDuration(durationField.values[index] / 1000);
-  }
-
   if (message) {
     return (
       <div className={styles.container}>
@@ -97,6 +33,26 @@ export const AttributePanelRows = (props: Props) => {
 
   if (series && series.length > 0) {
     if (type === 'errors') {
+      const getLabel = (df: DataFrame) => {
+        const valuesField = df.fields.find((f) => f.name !== 'time');
+        return valuesField?.labels?.['resource.service.name'].slice(1, -1) /* remove quotes */ ??  'Service name not found';
+      }
+
+      const getUrl = (df: DataFrame) => {
+        const serviceName = getLabel(df);
+        const params = {
+          'var-filters': `resource.service.name|=|${serviceName}`,
+          'var-metric': type,
+        }
+        const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
+        return `${url}&var-filters=nestedSetParent|<|0`;
+      }
+
+      const getTotalErrs = (df: DataFrame) => {
+        const valuesField = df.fields.find((f) => f.name !== 'time');
+        return valuesField?.values?.reduce((x, acc) => x + acc) ?? 1;
+      }
+
       return (
         <div className={styles.container}>
           {series
@@ -108,8 +64,8 @@ export const AttributePanelRows = (props: Props) => {
                 index={index}
                 label={getLabel(df)}
                 labelTitle='Service'
-                text={getTotalErrs(df)}
-                textTitle='Total errors'
+                value={getTotalErrs(df)}
+                valueTitle='Total errors'
                 url={getUrl(df)}
               />
             </span>
@@ -118,15 +74,51 @@ export const AttributePanelRows = (props: Props) => {
       );
     }
 
-    const sortByField = series[0].fields.find((f) => f.name === 'duration');
-    if (sortByField && sortByField.values) {
-      const sortedByDuration = sortByField?.values.map((_, i) => i)?.sort((a, b) => sortByField?.values[b] - sortByField?.values[a]);
+    const durField = series[0].fields.find((f) => f.name === 'duration');
+    if (durField && durField.values) {
+      const sortedByDuration = durField?.values.map((_, i) => i)?.sort((a, b) => durField?.values[b] - durField?.values[a]);
       const sortedFields = series[0].fields.map((f) => {
         return {
           ...f,
           values: sortedByDuration?.map((i) => f.values[i]),
         };
       });
+
+      const getLabel = (traceServiceField: Field | undefined, traceNameField: Field | undefined, index: number) => {
+        let label = '';
+        if (traceServiceField?.values[index]) {
+          label = traceServiceField.values[index];
+        }
+        if (traceNameField?.values[index]) {
+          label = label.length === 0 ? traceNameField.values[index] : `${label}: ${traceNameField.values[index]}`;
+        }
+        return label.length === 0 ? 'Trace service & name not found' : label;
+      }
+
+      const getUrl = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
+        if (!spanIdField || !spanIdField.values[index] || !traceServiceField || !traceServiceField.values[index]) {
+          console.error('SpanId or traceService not found');
+          return ROUTES.Explore;
+        }
+
+        const params = {
+          traceId,
+          spanId: spanIdField.values[index],
+          'var-filters': `resource.service.name|=|${traceServiceField.values[index]}`,
+          'var-metric': type,
+        }
+        const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
+
+        return `${url}&var-filters=nestedSetParent|<|0`;
+      }
+
+      const getDuration = (durationField: Field | undefined, index: number) => {
+        if (!durationField || !durationField.values) {
+          return 'Duration not found';
+        }
+
+        return formatDuration(durationField.values[index] / 1000);
+      }
 
       const traceIdField = sortedFields.find((f) => f.name === 'traceIdHidden');
       const spanIdField = sortedFields.find((f) => f.name === 'spanID');
@@ -141,11 +133,11 @@ export const AttributePanelRows = (props: Props) => {
               <AttributePanelRow 
                 type={type} 
                 index={index}
-                label={getLabelForDuration(traceServiceField, traceNameField, index)}
+                label={getLabel(traceServiceField, traceNameField, index)}
                 labelTitle='Trace'
-                text={getDuration(durationField, index)}
-                textTitle='Duration'
-                url={getUrlForDuration(traceId, spanIdField, traceServiceField, index)}
+                value={getDuration(durationField, index)}
+                valueTitle='Duration'
+                url={getUrl(traceId, spanIdField, traceServiceField, index)}
               />
             </span>
           ))}
@@ -153,7 +145,7 @@ export const AttributePanelRows = (props: Props) => {
       );
     }
   }
-  return <></>;
+  return <div className={styles.container}>No series data</div>;
 }
 
 function getStyles(theme: GrafanaTheme2) {

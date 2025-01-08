@@ -11,13 +11,13 @@ type Props = {
   type: MetricFunction;
   label: string;
   labelTitle: string;
-  text: string;
-  textTitle: string;
+  value: string;
+  valueTitle: string;
   url: string;
 }
 
 export const AttributePanelRow = (props: Props) => {
-  const { index, type, label, labelTitle, text, textTitle, url } = props;
+  const { index, type, label, labelTitle, value, valueTitle, url } = props;
   const styles = useStyles2(getStyles);
 
   return (
@@ -25,7 +25,7 @@ export const AttributePanelRow = (props: Props) => {
       {index === 0 && (
         <div className={styles.rowHeader}>
           <span>{labelTitle}</span>
-          <span className={styles.rowHeaderText}>{textTitle}</span>
+          <span className={styles.valueTitle}>{valueTitle}</span>
         </div>
       )}
 
@@ -33,10 +33,10 @@ export const AttributePanelRow = (props: Props) => {
         className={styles.row} 
         key={index} 
         onClick={() => {
-          reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.attribute_panel_item_clicked, {
+          reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.panel_row_clicked, {
             type,
             index,
-            value: text
+            value
           });
           locationService.push(url);
         }}
@@ -45,7 +45,7 @@ export const AttributePanelRow = (props: Props) => {
         
         <div className={styles.action}>
           <span className={styles.actionText}>
-            {text} 
+            {value} 
           </span>
           <Icon 
             className={styles.actionIcon}
@@ -67,7 +67,7 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
       padding: `0 ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
     }),
-    rowHeaderText: css({
+    valueTitle: css({
       margin: '0 45px 0 0',
     }),
     row: css({

@@ -41,7 +41,7 @@ export const USER_EVENTS_ACTIONS = {
   },
   [USER_EVENTS_PAGES.home]: {
     homepage_initialized: 'homepage_initialized',
-    attribute_panel_item_clicked: 'attribute_panel_item_clicked',
+    panel_row_clicked: 'panel_row_clicked',
     explore_traces_clicked: 'explore_traces_clicked',
     read_documentation_clicked: 'read_documentation_clicked',
   },
