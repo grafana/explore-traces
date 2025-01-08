@@ -85,7 +85,7 @@ export const AttributePanelRows = (props: Props) => {
       <div className={styles.container}>
         <div className={styles.message}>
           <Icon 
-            className={styles.actionIcon}
+            className={styles.icon}
             name='exclamation-circle'
             size='xl'
           />
@@ -161,8 +161,7 @@ function getStyles(theme: GrafanaTheme2) {
     container: css({
       padding: `${theme.spacing(2)} 0`,
     }),
-    actionIcon: css({
-      cursor: 'pointer',
+    icon: css({
       margin: `0 ${theme.spacing(0.5)} 0 ${theme.spacing(1)}`,
     }),
     message: css({
