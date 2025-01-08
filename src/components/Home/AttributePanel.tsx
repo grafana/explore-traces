@@ -17,12 +17,17 @@ import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesBySe
 import { AttributePanelScene } from './AttributePanelScene';
 import Skeleton from 'react-loading-skeleton';
 import { getErrorMessage, getNoDataMessage } from 'utils/utils';
+import { yBucketToDuration } from 'components/Explore/panels/histogram';
 
 export interface AttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
-  query: string;
+  query: {
+    query: string;
+    step?: string;
+  };
   title: string;
   type: MetricFunction;
+  renderDurationPanel?: boolean;
 }
 
 export class AttributePanel extends SceneObjectBase<AttributePanelState> {
@@ -30,7 +35,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [{ refId: 'A', query: state.query, queryType: 'traceql', tableType: 'spans', limit: 10, spss: 1 }],
+        queries: [{ refId: 'A', queryType: 'traceql', tableType: 'spans', limit: 10, ...state.query }],
       }),
       ...state,
     });
@@ -55,17 +60,45 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                 }),
               });
             } else if (data.data.series.length > 0) {
-              this.setState({
-                panel: new SceneFlexLayout({
-                  children: [
-                    new AttributePanelScene({
-                      series: data.data.series,
-                      title: state.title,
-                      type: state.type
-                    }),
-                  ],
-                })
-              });
+              if (state.type === 'errors' || state.renderDurationPanel) {
+                this.setState({
+                  panel: new SceneFlexLayout({
+                    children: [
+                      new AttributePanelScene({
+                        series: data.data.series,
+                        title: state.title,
+                        type: state.type
+                      }),
+                    ],
+                  })
+                });
+              } else {
+                let yBuckets = data.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
+                if (yBuckets?.length) {
+                  const slowestBuckets = Math.floor(yBuckets.length / 4);
+                  let minBucket = yBuckets.length - slowestBuckets - 1;
+                  if (minBucket < 0) {
+                    minBucket = 0;
+                  }
+
+                  const minDuration = yBucketToDuration(minBucket - 1, yBuckets);
+                
+                  this.setState({
+                    panel: new SceneFlexLayout({
+                      children: [
+                        new AttributePanel({ 
+                          query: {
+                            query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}} | by (resource.service.name)`,
+                          },
+                          title: state.title, 
+                          type: state.type,
+                          renderDurationPanel: true,
+                        }),
+                      ],
+                    })
+                  }); 
+                }
+              }
             }
           } else if (data.data?.state === LoadingState.Error) {
             this.setState({

@@ -1,5 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
+// eslint-disable-next-line no-restricted-imports
+import { duration } from 'moment';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import {
@@ -7,12 +9,14 @@ import {
   SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
+  sceneGraph,
   SceneObject,
   SceneObjectBase,
   SceneObjectState,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
+  SceneTimeRangeLike,
   SceneVariableSet,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
@@ -23,13 +27,12 @@ import {
 } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
-import { DurationAttributePanel } from 'components/Home/DurationAttributePanel';
 import { getDatasourceVariable } from 'utils/utils';
 
 export interface HomeState extends SceneObjectState {
   controls: SceneObject[];
   initialDS?: string;
-  body: SceneCSSGridLayout;
+  body?: SceneCSSGridLayout;
 }
 
 export class Home extends SceneObjectBase<HomeState> {
@@ -38,7 +41,6 @@ export class Home extends SceneObjectBase<HomeState> {
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
-      body: buildPanels(),
       ...state,
     });
 
@@ -50,6 +52,54 @@ export class Home extends SceneObjectBase<HomeState> {
       if (newState.value) {
         localStorage.setItem(DATASOURCE_LS_KEY, newState.value.toString());
       }
+    });
+
+    const sceneTimeRange = sceneGraph.getTimeRange(this);
+    sceneTimeRange.subscribeToState((newState, prevState) => {
+      if (newState.value.from !== prevState.value.from || newState.value.to !== prevState.value.to) {
+        this.buildPanels(sceneTimeRange);
+      }
+    });
+    this.buildPanels(sceneTimeRange);
+  }
+
+  buildPanels(sceneTimeRange: SceneTimeRangeLike) {
+    const from = sceneTimeRange.state.value.from.unix();
+    const to = sceneTimeRange.state.value.to.unix();
+    const dur = duration(to - from, 's');
+    const durString = `${dur.asSeconds()}s`;
+
+    this.setState({
+      body: new SceneCSSGridLayout({
+        children: [
+          new SceneCSSGridLayout({
+            autoRows: 'min-content',
+            columnGap: 2,
+            rowGap: 2,
+            children: [
+              new SceneCSSGridItem({
+                body: new AttributePanel({
+                  query: {
+                    query: '{nestedSetParent < 0 && status = error} | count_over_time() by (resource.service.name)',
+                    step: durString
+                  },
+                  title: 'Errored services', 
+                  type: 'errors',
+                }),
+              }),
+              new SceneCSSGridItem({
+                body: new AttributePanel({ 
+                  query: {
+                    query: '{nestedSetParent<0} | histogram_over_time(duration)',
+                  },
+                  title: 'Slow traces', 
+                  type: 'duration', 
+                }),
+              }),
+            ],
+          }),
+        ],
+      }),
     });
   }
 
@@ -64,26 +114,6 @@ export class Home extends SceneObjectBase<HomeState> {
       </div>
     );
   };
-}
-
-function buildPanels() {
-  return new SceneCSSGridLayout({
-    children: [
-      new SceneCSSGridLayout({
-        autoRows: 'min-content',
-        columnGap: 2,
-        rowGap: 2,
-        children: [
-          new SceneCSSGridItem({
-            body: new AttributePanel({ query: '{nestedSetParent<0 && status=error}', title: 'Errored services', type: 'errors' }),
-          }),
-          new SceneCSSGridItem({
-            body: new DurationAttributePanel({}),
-          }),
-        ],
-      }),
-    ],
-  })
 }
 
 function getVariableSet(initialDS?: string) {
