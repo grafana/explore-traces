@@ -21,7 +21,7 @@ export class AttributePanelScene extends SceneObjectBase<AttributePanelSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.title}>
-          <Icon name={type === 'duration' ? 'clock-nine' : 'exclamation-circle'} size='lg' />
+          <Icon name={type === 'duration' ? 'clock-nine' : 'exclamation-triangle'} size='lg' />
           <span className={styles.titleText}>{title}</span>
         </div>
         <AttributePanelRows series={series} type={type} message={message} />
