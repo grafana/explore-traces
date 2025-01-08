@@ -1,11 +1,10 @@
 import { css } from "@emotion/css";
-import { DataFrame, dateTimeFormat, Field, GrafanaTheme2, urlUtil } from "@grafana/data";
-import { locationService } from "@grafana/runtime";
+import { DataFrame, Field, GrafanaTheme2, urlUtil } from "@grafana/data";
 import { Icon, useStyles2 } from "@grafana/ui";
 import React from "react";
-import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from "utils/analytics";
 import { formatDuration } from "utils/dates";
 import { EXPLORATIONS_ROUTE, MetricFunction, ROUTES } from "utils/shared";
+import { AttributePanelRow } from "./AttributePanelRow";
 
 type Props = {
   series?: DataFrame[];
@@ -17,7 +16,13 @@ export const AttributePanelRows = (props: Props) => {
   const { series, type, message } = props;
   const styles = useStyles2(getStyles);
 
-  const getLabel = (traceServiceField: Field | undefined, traceNameField: Field | undefined, index: number) => {
+  const getLabel = (df: DataFrame) => {
+    const valuesField = df.fields.find((f) => f.name !== 'time');
+    const labels = valuesField?.labels;
+    return labels?.['resource.service.name'].slice(1, -1) ??  'Service name not found'; // remove quotes
+  }
+
+  const getLabelForDuration = (traceServiceField: Field | undefined, traceNameField: Field | undefined, index: number) => {
     let label = '';
     if (traceServiceField?.values[index]) {
       label = traceServiceField.values[index];
@@ -28,37 +33,24 @@ export const AttributePanelRows = (props: Props) => {
     return label.length === 0 ? 'Trace service & name not found' : label;
   }
 
-  const getErrorTimeAgo = (timeField: Field | undefined, index: number) => {
-    if (!timeField || !timeField.values) {
-      return 'Times not found';
+  const getUrl = (df: DataFrame) => {
+    const valuesField = df.fields.find((f) => f.name !== 'time');
+    const labels = valuesField?.labels;
+    const serviceName = labels?.['resource.service.name'].slice(1, -1) ??  'Service name not found'; // remove quotes
+
+    if (serviceName) {
+      const params = {
+        'var-filters': `resource.service.name|=|${serviceName}`,
+        'var-metric': type,
+      }
+      const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
+  
+      return `${url}&var-filters=nestedSetParent|<|0`;
     }
-
-    const dateString = dateTimeFormat(timeField?.values[index]);
-
-    const now = new Date();
-    const date = new Date(dateString);
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // Difference in seconds
-
-    if (diff < 60) {
-      return `${diff}s`;
-    } else if (diff < 3600) {
-      return `${Math.floor(diff / 60)}m`;
-    } else if (diff < 86400) {
-      return `${Math.floor(diff / 3600)}h`;
-    } else {
-      return `${Math.floor(diff / 86400)}d`;
-    }
+    return '';
   }
 
-  const getDuration = (durationField: Field | undefined, index: number) => {
-    if (!durationField || !durationField.values) {
-      return 'Durations not found';
-    }
-
-    return formatDuration(durationField.values[index] / 1000);
-  }
-
-  const getUrl = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
+  const getUrlForDuration = (traceId: string, spanIdField: Field | undefined, traceServiceField: Field | undefined, index: number) => {
     if (!spanIdField || !spanIdField.values[index] || !traceServiceField || !traceServiceField.values[index]) {
       console.error('SpanId or traceService not found');
       return ROUTES.Explore;
@@ -73,6 +65,19 @@ export const AttributePanelRows = (props: Props) => {
     const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
 
     return `${url}&var-filters=nestedSetParent|<|0`;
+  }
+
+  const getTotalErrs = (df: DataFrame) => {
+    const valuesField = df.fields.find((f) => f.name !== 'time');
+    return valuesField?.values?.reduce((x, acc) => x + acc) ?? 1;
+  }
+
+  const getDuration = (durationField: Field | undefined, index: number) => {
+    if (!durationField || !durationField.values) {
+      return 'Durations not found';
+    }
+
+    return formatDuration(durationField.values[index] / 1000);
   }
 
   if (message) {
@@ -91,7 +96,29 @@ export const AttributePanelRows = (props: Props) => {
   }
 
   if (series && series.length > 0) {
-    const sortByField = series[0].fields.find((f) => f.name === (type === 'duration' ? 'duration' : 'time'));
+    if (type === 'errors') {
+      return (
+        <div className={styles.container}>
+          {series
+          .sort((a, b) => getTotalErrs(b) - getTotalErrs(a))
+          .slice(0, 10)?.map((df, index) => (
+            <span key={index}>
+              <AttributePanelRow 
+                type={type} 
+                index={index}
+                label={getLabel(df)}
+                labelTitle='Service'
+                text={getTotalErrs(df)}
+                textTitle='Total errors'
+                url={getUrl(df)}
+              />
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    const sortByField = series[0].fields.find((f) => f.name === 'duration');
     if (sortByField && sortByField.values) {
       const sortedByDuration = sortByField?.values.map((_, i) => i)?.sort((a, b) => sortByField?.values[b] - sortByField?.values[a]);
       const sortedFields = series[0].fields.map((f) => {
@@ -106,47 +133,21 @@ export const AttributePanelRows = (props: Props) => {
       const traceNameField = sortedFields.find((f) => f.name === 'traceName');
       const traceServiceField = sortedFields.find((f) => f.name === 'traceService');
       const durationField = sortedFields.find((f) => f.name === 'duration');
-      const timeField = sortedFields.find((f) => f.name === 'time');
 
       return (
         <div className={styles.container}>
           {traceIdField?.values?.map((traceId, index) => (
-            <div key={index}>
-              {index === 0 && (
-                <div className={styles.rowHeader}>
-                  <span>Service</span>
-                  <span className={styles.rowHeaderText}>{type === 'duration' ? 'Duration' : 'Since'}</span>
-                </div>
-              )}
-
-              <div 
-                className={styles.row} 
-                key={index} 
-                onClick={() => {
-                  reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.attribute_panel_item_clicked, {
-                    type,
-                    index,
-                    value: type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)
-                  });
-                  const url = getUrl(traceId, spanIdField, traceServiceField, index);
-                  locationService.push(url);
-                }}
-              >
-                <div className={'rowLabel'}>{getLabel(traceServiceField, traceNameField, index)}</div>
-                
-                <div className={styles.action}>
-                  <span className={styles.actionText}>
-                    {type === 'duration' ? getDuration(durationField, index) : getErrorTimeAgo(timeField, index)} 
-                  </span>
-                  <Icon 
-                    className={styles.actionIcon}
-                    name='arrow-right'
-                    title='View spans for this request'
-                    size='xl'
-                  />
-                </div>
-              </div>
-            </div>
+            <span key={index}>
+              <AttributePanelRow 
+                type={type} 
+                index={index}
+                label={getLabelForDuration(traceServiceField, traceNameField, index)}
+                labelTitle='Trace'
+                text={getDuration(durationField, index)}
+                textTitle='Duration'
+                url={getUrlForDuration(traceId, spanIdField, traceServiceField, index)}
+              />
+            </span>
           ))}
         </div>
       );
@@ -160,45 +161,10 @@ function getStyles(theme: GrafanaTheme2) {
     container: css({
       padding: `${theme.spacing(2)} 0`,
     }),
-    rowHeader: css({
-      color: theme.colors.text.secondary,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: `0 ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
-    }),
-    rowHeaderText: css({
-      margin: '0 45px 0 0',
-    }),
-    row: css({
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: theme.spacing(2),
-      padding: `${theme.spacing(0.75)} ${theme.spacing(2)}`,
-
-      '&:hover': {
-        backgroundColor: theme.isDark ? theme.colors.background.secondary : theme.colors.background.primary,
-        cursor: 'pointer',
-        '.rowLabel': {
-          textDecoration: 'underline',
-        }
-      },
-    }),
-    action: css({
-      display: 'flex',
-      alignItems: 'center',
-    }),
-    actionText: css({
-      color: '#d5983c',
-      padding: `0 ${theme.spacing(1)}`,
-      width: 'max-content',
-    }),
     actionIcon: css({
       cursor: 'pointer',
       margin: `0 ${theme.spacing(0.5)} 0 ${theme.spacing(1)}`,
     }),
-
     message: css({
       display: 'flex',
       gap: theme.spacing(1.5),
