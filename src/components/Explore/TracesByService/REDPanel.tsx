@@ -9,7 +9,7 @@ import {
   SceneObjectBase,
   SceneObjectState,
 } from '@grafana/scenes';
-import { arrayToDataFrame, GrafanaTheme2, LoadingState } from '@grafana/data';
+import { arrayToDataFrame, DataFrame, GrafanaTheme2, LoadingState } from '@grafana/data';
 import { ComparisonSelection, EMPTY_STATE_ERROR_MESSAGE, explorationDS, MetricFunction } from 'utils/shared';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
@@ -73,7 +73,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
             } else {
               let yBuckets: number[] | undefined = [];
               if (this.isDuration()) {
-                yBuckets = data.state.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
+                yBuckets = getYBuckets(data.state.data?.series || []);
                 if (parent.state.selection && newData.data?.state === LoadingState.Done) {
                   // set selection annotation if it exists
                   const annotations = this.buildSelectionAnnotation(parent.state);
@@ -89,14 +89,8 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
                 }
 
                 if (yBuckets?.length) {
-                  const slowestBuckets = Math.floor(yBuckets.length / 4);
-                  let minBucket = yBuckets.length - slowestBuckets - 1;
-                  if (minBucket < 0) {
-                    minBucket = 0;
-                  }
-
+                  const { minDuration, minBucket } = getMinimumsForDuration(yBuckets);
                   const selection: ComparisonSelection = { type: 'auto' };
-                  const minDuration = yBucketToDuration(minBucket - 1, yBuckets);
 
                   getLatencyThresholdVariable(this).changeValueTo(minDuration);
                   getLatencyPartialThresholdVariable(this).changeValueTo(
@@ -291,6 +285,23 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
         <panel.Component model={panel} />
       </div>
     );
+  };
+}
+
+export const getYBuckets = (series: DataFrame[]) => {
+  return series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
+}
+
+export const getMinimumsForDuration = (yBuckets: number[]) => {
+  const slowestBuckets = Math.floor(yBuckets.length / 4);
+  let minBucket = yBuckets.length - slowestBuckets - 1;
+  if (minBucket < 0) {
+    minBucket = 0;
+  }
+
+  return { 
+    minDuration: yBucketToDuration(minBucket - 1, yBuckets), 
+    minBucket
   };
 }
 

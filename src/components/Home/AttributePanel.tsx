@@ -17,7 +17,7 @@ import { MINI_PANEL_HEIGHT } from 'components/Explore/TracesByService/TracesBySe
 import { AttributePanelScene } from './AttributePanelScene';
 import Skeleton from 'react-loading-skeleton';
 import { getErrorMessage, getNoDataMessage } from 'utils/utils';
-import { yBucketToDuration } from 'components/Explore/panels/histogram';
+import { getMinimumsForDuration, getYBuckets } from 'components/Explore/TracesByService/REDPanel';
 
 export interface AttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
@@ -73,16 +73,10 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                   })
                 });
               } else {
-                let yBuckets = data.data?.series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
+                let yBuckets = getYBuckets(data.data?.series ?? []);
                 if (yBuckets?.length) {
-                  const slowestBuckets = Math.floor(yBuckets.length / 4);
-                  let minBucket = yBuckets.length - slowestBuckets - 1;
-                  if (minBucket < 0) {
-                    minBucket = 0;
-                  }
-
-                  const minDuration = yBucketToDuration(minBucket - 1, yBuckets);
-                
+                  const { minDuration } = getMinimumsForDuration(yBuckets);
+                  
                   this.setState({
                     panel: new SceneFlexLayout({
                       children: [
