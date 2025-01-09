@@ -35,7 +35,7 @@ export const AttributePanelRows = (props: Props) => {
     if (type === 'errors') {
       const getLabel = (df: DataFrame) => {
         const valuesField = df.fields.find((f) => f.name !== 'time');
-        return valuesField?.labels?.['resource.service.name'].slice(1, -1) /* remove quotes */ ??  'Service name not found';
+        return valuesField?.labels?.['resource.service.name'].replace(/"/g, '') ??  'Service name not found';
       }
 
       const getUrl = (df: DataFrame) => {
