@@ -4,7 +4,7 @@ import { Button, Stack, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { getFiltersVariable } from '../../../utils/utils';
-import { addToFilters } from '../actions/AddToFiltersAction';
+import { addToFilters, filterExistsForKey } from '../actions/AddToFiltersAction';
 import { computeHighestDifference } from '../../../utils/comparison';
 
 export interface HighestDifferencePanelState extends SceneObjectState {
@@ -50,6 +50,7 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
     const { maxDifference, maxDifferenceIndex, panel } = model.useState();
     const styles = useStyles2(getStyles);
     const value = model.getValue();
+    const filterExists = filterExistsForKey(getFiltersVariable(model), model.state.frame.name ?? '');
 
     return (
       <div className={styles.container}>
@@ -58,15 +59,17 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
           <div className={styles.differenceContainer}>
             <Stack gap={1} justifyContent={'space-between'} alignItems={'center'}>
               <div className={styles.title}>Highest difference</div>
-              <Button
-                size="sm"
-                variant="primary"
-                icon={'search-plus'}
-                fill="text"
-                onClick={() => model.onAddToFilters()}
-              >
-                Add to filters
-              </Button>
+              {!filterExists && (
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon={'search-plus'}
+                  fill="text"
+                  onClick={() => model.onAddToFilters()}
+                >
+                  Add to filters
+                </Button>
+              )}
             </Stack>
 
             <div className={styles.differenceValue}>
