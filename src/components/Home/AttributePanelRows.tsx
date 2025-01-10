@@ -50,7 +50,12 @@ export const AttributePanelRows = (props: Props) => {
 
       const getTotalErrs = (df: DataFrame) => {
         const valuesField = df.fields.find((f) => f.name !== 'time');
-        return valuesField?.values?.reduce((x, acc) => x + acc) ?? 1;
+        return valuesField?.values?.reduce((x, acc) => {
+          if (typeof x === 'number' && !isNaN(x)) {
+            return x + acc
+          }
+          return acc
+        }) ?? 1;
       }
 
       return (
