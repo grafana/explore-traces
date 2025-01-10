@@ -4,7 +4,7 @@
 
 ### Features
 
-* **Support for exemplars:** Quickly jump to the relevant data points or logs for deeper troubleshooting with newly added support for exemplars, directly on your metrics graph. By clicking on a point of interest on the graph—like a spike or anomaly—you can quickly jump to the relevant traces for deeper troubleshooting and dramatically reduce the time it takes to root cause an issue. ([#278](https://github.com/grafana/explore-traces/pull/278))
+* **Support for exemplars:** Quickly jump to the relevant data points or logs for deeper troubleshooting with newly added support for exemplars, directly on your metrics graph. By clicking on a point of interest on the graph—like a spike or anomaly—you can quickly jump to the relevant traces for deeper troubleshooting and dramatically reduce the time it takes to root cause an issue. ([#278](https://github.com/grafana/explore-traces/pull/278)) Requires Grafana >= 11.5.0
 * **Open traces in Explore:** When viewing trace spans, now you can easily open the full trace in Explore. This provides a streamlined way to pivot between trace analysis and the broader Grafana Explore experience without losing context. ([#267](https://github.com/grafana/explore-traces/pull/267))
 
 ### Enhancements
