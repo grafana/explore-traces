@@ -29,14 +29,13 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   const [keyQuery, setKeyQuery] = useState<string>('');
   const [valueQuery, setValueQuery] = useState<string>('');
 
-  const key = filter.key !== '' ? state?.keys?.find((key) => key.value === filter.key) ?? toOption(filter.key) : null;
+  const key = filter.key !== '' ? (state?.keys?.find((key) => key.value === filter.key) ?? toOption(filter.key)) : null;
   const value = filter.value !== '' ? toOption(filter.value) : null;
   const exploration = getTraceExplorationScene(model);
   const { value: metric } = exploration.getMetricVariable().useState();
 
   const operators = useMemo(() => {
-    const operators = model._getOperators();
-    return operators;
+    return model._getOperators();
   }, [model]);
 
   useEffect(() => {
@@ -114,6 +113,7 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
       }}
       onCloseMenu={() => setValueQuery('')}
       virtualized
+      allowCustomValue
     />
   );
 
@@ -145,15 +145,17 @@ export function FilterRenderer({ filter, model, isWip }: Props) {
   );
 }
 
-export const formatKeys = (keys: Array<SelectableValue<string>>, filters: AdHocVariableFilter[], metric: VariableValue) => {
+export const formatKeys = (
+  keys: Array<SelectableValue<string>>,
+  filters: AdHocVariableFilter[],
+  metric: VariableValue
+) => {
   // Ensure we always have the same order of keys
   const resourceAttributes = keys.filter((k) => k.value?.includes(RESOURCE_ATTR));
   const spanAttributes = keys.filter((k) => k.value?.includes(SPAN_ATTR));
   const intrinsicAttributes = keys.filter((k) => {
     let checks =
-      !k.value?.includes(RESOURCE_ATTR) &&
-      !k.value?.includes(SPAN_ATTR) &&
-      ignoredAttributes.indexOf(k.value!) === -1;
+      !k.value?.includes(RESOURCE_ATTR) && !k.value?.includes(SPAN_ATTR) && ignoredAttributes.indexOf(k.value!) === -1;
 
     // if filters (primary signal) has kind key selected, then don't add kind to intrinsicAttributes
     // as you would overwrite it in the query if it's selected in the drop down

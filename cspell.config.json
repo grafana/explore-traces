@@ -46,6 +46,7 @@
     "queryless",
     "unroute",
     "gdev",
-    "lokiexplore"
+    "lokiexplore",
+    "viewports"
   ]
 }
