@@ -1,5 +1,12 @@
 # Changelog
 
+
+## [0.2.2](https://github.com/grafana/explore-traces/compare/v0.2.0...v0.2.2) (2025-01-13)
+
+### Enhancements
+
+* **Custom values in filters bar:** The filters bar now allows custom values which can be used to build regular expressions or input values missing from the dropdown options. ([#288](https://github.com/grafana/explore-traces/pull/252))
+
 ## [0.2.0](https://github.com/grafana/explore-traces/compare/v0.1.3...v0.2.0) (2025-01-10)
 
 ### Features
