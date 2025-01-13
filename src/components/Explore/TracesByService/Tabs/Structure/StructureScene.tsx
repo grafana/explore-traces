@@ -299,7 +299,6 @@ export class StructureTabScene extends SceneObjectBase<ServicesTabSceneState> {
 
         <div className={styles.actionContainer}>
           Read more about
-
           <div className={styles.action}>
             <LinkButton
               icon="external-link-alt"
