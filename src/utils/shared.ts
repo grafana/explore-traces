@@ -1,12 +1,17 @@
 import { BusEventWithPayload, DataFrame } from '@grafana/data';
+import pluginJson from '../plugin.json';
 
 export type MetricFunction = 'rate' | 'errors' | 'duration';
 
 export enum ROUTES {
   Explore = 'explore',
+  Home = 'home',
 }
 
-export const EXPLORATIONS_ROUTE = '/a/grafana-exploretraces-app/explore';
+export const PLUGIN_ID = pluginJson.id;
+export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
+export const EXPLORATIONS_ROUTE = `${PLUGIN_BASE_URL}/${ROUTES.Explore}`;
+
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
