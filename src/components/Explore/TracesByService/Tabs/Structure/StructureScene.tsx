@@ -393,6 +393,21 @@ const getStyles = (theme: GrafanaTheme2) => {
       'div[data-testid="span-detail-component"] > :nth-child(4) > :nth-child(1)': {
         display: 'none',
       },
+
+      // Hide span details row
+      '.span-detail-row': {
+        display: 'none',
+      },
+
+      // Remove cursor pointer as soan details is hidden
+      'div[data-testid="TimelineRowCell"]': {
+        'button[role="switch"]': {
+          cursor: 'text',
+        }
+      },
+      'div[data-testid="span-view"]': {
+        cursor: 'text !important',
+      },
     }),
     longText: css({
       maxWidth: '800px',
