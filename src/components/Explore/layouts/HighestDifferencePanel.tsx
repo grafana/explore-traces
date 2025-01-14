@@ -50,7 +50,8 @@ export class HighestDifferencePanel extends SceneObjectBase<HighestDifferencePan
     const { maxDifference, maxDifferenceIndex, panel } = model.useState();
     const styles = useStyles2(getStyles);
     const value = model.getValue();
-    const filterExists = filterExistsForKey(getFiltersVariable(model), model.state.frame.name ?? '');
+    const key = model.state.frame.name ?? '';
+    const filterExists = filterExistsForKey(getFiltersVariable(model), key, value.replace(/"/g, ''));
 
     return (
       <div className={styles.container}>
