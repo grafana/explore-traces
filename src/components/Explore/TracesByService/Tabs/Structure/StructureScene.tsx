@@ -399,7 +399,7 @@ const getStyles = (theme: GrafanaTheme2) => {
         display: 'none',
       },
 
-      // Remove cursor pointer as soan details is hidden
+      // Remove cursor pointer as span details is hidden
       'div[data-testid="TimelineRowCell"]': {
         'button[role="switch"]': {
           cursor: 'text',
