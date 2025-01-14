@@ -55,7 +55,7 @@ export const AttributePanelRows = (props: Props) => {
             return x + acc
           }
           return acc
-        }) ?? 1;
+        }, 0) ?? 1;
       }
 
       return (
