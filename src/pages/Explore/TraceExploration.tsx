@@ -23,6 +23,7 @@ import {
 import {
   LocationService,
   config,
+  locationService,
   // @ts-ignore
   sidecarServiceSingleton_EXPERIMENTAL,
 } from '@grafana/runtime';
@@ -189,6 +190,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!signal || this.state.primarySignal === signal) {
       return;
     }
+
+    locationService.partial({ 'primarySignal': signal });
     this.setState({ primarySignal: signal });
   };
 
@@ -197,6 +200,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!metric || variable.getValue() === metric) {
       return;
     }
+
+    locationService.partial({ 'var-metric': metric });
     variable.changeValueTo(metric);
   };
 

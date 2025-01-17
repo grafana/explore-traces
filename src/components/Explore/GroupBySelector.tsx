@@ -8,6 +8,7 @@ import { ALL, ignoredAttributes, maxOptions, MetricFunction, RESOURCE_ATTR, SPAN
 import { AttributesBreakdownScene } from './TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
 import { AttributesComparisonScene } from './TracesByService/Tabs/Comparison/AttributesComparisonScene';
 import { getFiltersVariable, getMetricVariable } from 'utils/utils';
+import { locationService } from '@grafana/runtime';
 
 type Props = {
   options: Array<SelectableValue<string>>;
@@ -122,7 +123,11 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
           value={value && getModifiedSelectOptions(otherAttrOptions).some((x) => x.value === value) ? value : null} // remove value from select when radio button clicked
           placeholder={'Other attributes'}
           options={getModifiedSelectOptions(otherAttrOptions)}
-          onChange={(selected) => onChange(selected?.value ?? defaultOnChangeValue)}
+          onChange={(selected) => {
+            const newSelected = selected?.value ?? defaultOnChangeValue;
+            locationService.partial({ 'var-groupBy': newSelected });
+            onChange(newSelected);
+          }}
           className={styles.select}
           isClearable
           onInputChange={(value: string, { action }: InputActionMeta) => {
