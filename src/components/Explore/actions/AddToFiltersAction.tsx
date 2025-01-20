@@ -37,7 +37,8 @@ export class AddToFiltersAction extends SceneObjectBase<AddToFiltersActionState>
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersAction>) => {
     const key = model.state?.labelKey ?? '';
-    const value = model.state?.frame.fields.filter(x => x.type !== 'time')[0].labels?.[key] ?? '';
+    const field = model.state?.frame.fields.filter(x => x.type !== 'time');
+    const value = field?.[0]?.labels?.[key] ?? '';
     const filterExists = filterExistsForKey(getFiltersVariable(model), key, value.replace(/"/g, ''));
 
     if (!filterExists) {
