@@ -23,7 +23,6 @@ import {
 import {
   LocationService,
   config,
-  locationService,
   // @ts-ignore
   sidecarServiceSingleton_EXPERIMENTAL,
 } from '@grafana/runtime';
@@ -40,7 +39,7 @@ import {
   VAR_LATENCY_THRESHOLD,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getTraceExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
+import { getTraceExplorationScene, getFilterSignature, getFiltersVariable, getTraceByServiceSceneAsDescendent } from '../../utils/utils';
 import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
@@ -191,8 +190,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       return;
     }
 
-    locationService.partial({ 'primarySignal': signal });
-    this.setState({ primarySignal: signal });
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ primarySignal: signal });
+    });
   };
 
   public onChangeMetricFunction = (metric: string) => {
@@ -201,8 +201,9 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       return;
     }
 
-    locationService.partial({ 'var-metric': metric });
-    variable.changeValueTo(metric);
+    getTraceByServiceSceneAsDescendent(this)._urlSync.performBrowserHistoryAction(() => {
+      variable.changeValueTo(metric);
+    });
   };
 
   public getMetricFunction() {

@@ -57,7 +57,7 @@ export interface TraceSceneState extends SceneObjectState {
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection'] });
+  public _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection', 'metric'] });
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
@@ -76,6 +76,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     this._subs.add(
       metricVariable.subscribeToState((newState, prevState) => {
         if (newState.value !== prevState.value) {
+          this.setState({ metric: newState.value as MetricFunction });
           const selection = getDefaultSelectionForMetric(newState.value as MetricFunction);
           if (selection) {
             this.setState({ selection });
@@ -155,6 +156,7 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   getUrlState() {
     return {
       actionView: this.state.actionView,
+      metric: this.state.metric,
       selection: this.state.selection ? JSON.stringify(this.state.selection) : undefined,
     };
   }

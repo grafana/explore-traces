@@ -2,7 +2,6 @@ import { getTraceByServiceScene, shouldShowSelection } from '../../../utils/util
 import { ComparisonSelection } from '../../../utils/shared';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { PanelBuilders, SceneFlexItem, SceneFlexLayout, SceneObject } from '@grafana/scenes';
-import { locationService } from '@grafana/runtime';
 
 export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
   const parent = getTraceByServiceScene(scene);
@@ -23,7 +22,6 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         const rawSelection = args[0];
         // @ts-ignore
         const newSelection: ComparisonSelection = { type: 'manual', raw: rawSelection };
-        locationService.partial({ 'selection': newSelection });
 
         newSelection.timeRange = {
           from: Math.round((rawSelection.x?.from || 0) / 1000),
@@ -39,7 +37,9 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         const yTo = yBucketToDuration(args[0].y?.to || 0, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };
 
-        parent.setState({ selection: newSelection });
+        parent._urlSync.performBrowserHistoryAction(() => {
+          parent.setState({ selection: newSelection });
+        });
         if (!shouldShowSelection(parent.state.actionView)) {
           parent.setActionView('comparison');
         }

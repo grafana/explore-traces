@@ -125,7 +125,6 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
           options={getModifiedSelectOptions(otherAttrOptions)}
           onChange={(selected) => {
             const newSelected = selected?.value ?? defaultOnChangeValue;
-            locationService.partial({ 'var-groupBy': newSelected });
             onChange(newSelected);
           }}
           className={styles.select}
