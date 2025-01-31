@@ -8,7 +8,6 @@ import { ALL, ignoredAttributes, maxOptions, MetricFunction, RESOURCE_ATTR, SPAN
 import { AttributesBreakdownScene } from './TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
 import { AttributesComparisonScene } from './TracesByService/Tabs/Comparison/AttributesComparisonScene';
 import { getFiltersVariable, getMetricVariable } from 'utils/utils';
-import { locationService } from '@grafana/runtime';
 
 type Props = {
   options: Array<SelectableValue<string>>;
