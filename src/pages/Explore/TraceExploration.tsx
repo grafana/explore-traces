@@ -250,7 +250,7 @@ export class TraceExplorationScene extends SceneObjectBase {
           <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
         </div>
         {drawerScene && traceId && (
-          <Drawer title={`View trace ${traceId}`} size={'lg'} onClose={() => traceExploration.closeDrawer()}>
+          <Drawer size={'lg'} onClose={() => traceExploration.closeDrawer()}>
             <drawerScene.Component model={drawerScene} />
           </Drawer>
         )}

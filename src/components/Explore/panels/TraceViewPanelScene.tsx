@@ -63,12 +63,17 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
 
   public static Component = ({ model }: SceneComponentProps<TraceViewPanelScene>) => {
     const { panel } = model.useState();
+    const styles = useStyles2(getStyles);
 
     if (!panel) {
       return;
     }
 
-    return <panel.Component model={panel} />;
+    return (
+      <div className={styles.panelContainer}>
+        <panel.Component model={panel} />
+      </div>
+    );
   };
 }
 
@@ -141,9 +146,17 @@ const SkeletonComponent = () => {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({
+    panelContainer: css({
+      display: 'flex',
       height: '100%',
-      width: '100%',
+
+      '& .show-on-hover': {
+        display: 'none',
+      },
+    }),
+    container: css({
+      height: 'calc(100% - 32px)',
+      width: 'calc(100% - 32px)',
       position: 'absolute',
       backgroundColor: theme.colors.background.primary,
       border: `1px solid ${theme.colors.border.weak}`,
