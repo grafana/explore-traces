@@ -6,11 +6,9 @@ import {
   CustomVariable,
   DataSourceVariable,
   SceneComponentProps,
-  SceneFlexItem,
   sceneGraph,
   SceneObject,
   SceneObjectBase,
-  SceneObjectRef,
   SceneObjectState,
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
@@ -18,20 +16,13 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
-  SplitLayout,
 } from '@grafana/scenes';
-import {
-  LocationService,
-  config,
-  // @ts-ignore
-  sidecarServiceSingleton_EXPERIMENTAL,
-} from '@grafana/runtime';
-import { Badge, Button, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
+import { LocationService } from '@grafana/runtime';
+import { Badge, Button, Drawer, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 
 import { TracesByServiceScene } from '../../components/Explore/TracesByService/TracesByServiceScene';
 import {
   DATASOURCE_LS_KEY,
-  DetailsSceneUpdated,
   MetricFunction,
   VAR_DATASOURCE,
   VAR_GROUPBY,
@@ -40,22 +31,19 @@ import {
   VAR_METRIC,
 } from '../../utils/shared';
 import { getTraceExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
-import { DetailsScene } from '../../components/Explore/TracesByService/DetailsScene';
+import { TraceDrawerScene } from '../../components/Explore/TracesByService/TraceDrawerScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
 import { VariableHide } from '@grafana/schema';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
-import pluginJson from '../../plugin.json';
 
 export interface TraceExplorationState extends SceneObjectState {
   topScene?: SceneObject;
   controls: SceneObject[];
 
-  splitBody: SplitLayout;
-  singleBody: SceneObject;
+  body: SceneObject;
 
-  detailsScene?: SceneObjectRef<DetailsScene>;
-  showDetails?: boolean;
+  drawerScene?: TraceDrawerScene;
   primarySignal?: string;
 
   // details scene
@@ -82,9 +70,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.initialFilters),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
-      singleBody: new TraceExplorationScene({}),
-      splitBody: buildSplitLayout(),
-      detailsScene: new DetailsScene({}).getRef(),
+      body: new TraceExplorationScene({}),
+      drawerScene: new TraceDrawerScene({}),
       primarySignal: state.primarySignal ?? primarySignalOptions[0].value,
       ...state,
     });
@@ -97,9 +84,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       this.setState({ topScene: getTopScene(this.getMetricVariable().getValue() as MetricFunction) });
     }
 
-    // Some scene elements publish this
-    this.subscribeToEvent(DetailsSceneUpdated, this._handleDetailsSceneUpdated.bind(this));
-
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
     datasourceVar.subscribeToState((newState) => {
       if (newState.value) {
@@ -107,13 +91,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       }
     });
     this.subscribeToState((newState, oldState) => {
-      if (newState.showDetails !== oldState.showDetails) {
-        if (newState.showDetails) {
-          this.setSecondaryScene(this.state.detailsScene?.resolve());
-        } else {
-          this.setSecondaryScene(undefined);
-        }
-      }
       if (newState.primarySignal && newState.primarySignal !== oldState.primarySignal) {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
       }
@@ -137,18 +114,6 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     filtersVar.setState({ filters });
   }
 
-  private _handleDetailsSceneUpdated(evt: DetailsSceneUpdated) {
-    const showDetails = evt.payload.showDetails ?? false;
-    const stateUpdate: Partial<TraceExplorationState> = { showDetails };
-
-    if (!showDetails) {
-      stateUpdate.traceId = undefined;
-      stateUpdate.spanId = undefined;
-    }
-
-    this.setState(stateUpdate);
-  }
-
   getUrlState() {
     return { primarySignal: this.state.primarySignal, traceId: this.state.traceId, spanId: this.state.spanId };
   }
@@ -157,12 +122,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     const stateUpdate: Partial<TraceExplorationState> = {};
 
     if (values.traceId || values.spanId) {
-      stateUpdate.showDetails = true;
       stateUpdate.traceId = values.traceId ? (values.traceId as string) : undefined;
       stateUpdate.spanId = values.spanId ? (values.spanId as string) : undefined;
-
-      const detailsScene = this.state.detailsScene?.resolve();
-      this.setSecondaryScene(detailsScene);
     }
 
     if (values.primarySignal && values.primarySignal !== this.state.primarySignal) {
@@ -204,40 +165,22 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     return this.getMetricVariable().getValue() as MetricFunction;
   }
 
-  static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
-    const { singleBody, splitBody } = model.useState();
-    const styles = useStyles2(getStyles);
+  public closeDrawer() {
+    this.setState({ traceId: undefined, spanId: undefined });
+  }
 
-    // The API looks a bit weird because duh we are opened if we are here, but this specifically means we are in a
-    // sidecar with some other app. In that case we don't want to show additional split layout as there is not much
-    // space and 3 splits is a bit too much.
-    const body: SceneObject =
-      config.featureToggles.appSidecar && sidecarServiceSingleton_EXPERIMENTAL?.isAppOpened(pluginJson.id)
-        ? singleBody
-        : splitBody;
+  static Component = ({ model }: SceneComponentProps<TraceExploration>) => {
+    const { body } = model.useState();
+    const styles = useStyles2(getStyles);
 
     return <div className={styles.bodyContainer}> {body && <body.Component model={body} />} </div>;
   };
-
-  // Because we have two modes of how to present the secondary scene depending on sidecar we need to set it 2 ways.
-  // This could have been easier but we have to keep the split scene in memory to no trigger unmount (this is a bit
-  // different from react where components can be returned from a function without triggering unmount) and use
-  // `setState` to change the secondary scene. We could also just keep the splitScene and not use the secondary prop
-  // for the sidecar use case but splitScene adds some css that makes responsive sizing in sidecar complicated.
-  private setSecondaryScene(scene?: SceneObject) {
-    this.state.splitBody.setState({ secondary: scene });
-    if (scene) {
-      this.setState({ singleBody: scene });
-    } else {
-      this.setState({ singleBody: new TraceExplorationScene({}) });
-    }
-  }
 }
 
 export class TraceExplorationScene extends SceneObjectBase {
   static Component = ({ model }: SceneComponentProps<TraceExplorationScene>) => {
     const traceExploration = getTraceExplorationScene(model);
-    const { controls, topScene } = traceExploration.useState();
+    const { controls, topScene, drawerScene, traceId } = traceExploration.useState();
     const styles = useStyles2(getStyles);
     const [menuVisible, setMenuVisible] = React.useState(false);
 
@@ -272,39 +215,46 @@ export class TraceExplorationScene extends SceneObjectBase {
     );
 
     return (
-      <div className={styles.container}>
-        <div className={styles.headerContainer}>
-          <Stack gap={2} justifyContent={'space-between'} wrap={'wrap'}>
-            {dsVariable && (
-              <Stack gap={1} alignItems={'center'}>
-                <div className={styles.datasourceLabel}>Data source</div>
-                <dsVariable.Component model={dsVariable} />
-              </Stack>
-            )}
-            <div className={styles.controls}>
-              <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
-                <span className={styles.preview}>
-                  <Badge text="&nbsp;Preview" color="blue" icon="rocket" />
-                </span>
-              </Tooltip>
+      <>
+        <div className={styles.container}>
+          <div className={styles.headerContainer}>
+            <Stack gap={2} justifyContent={'space-between'} wrap={'wrap'}>
+              {dsVariable && (
+                <Stack gap={1} alignItems={'center'}>
+                  <div className={styles.datasourceLabel}>Data source</div>
+                  <dsVariable.Component model={dsVariable} />
+                </Stack>
+              )}
+              <div className={styles.controls}>
+                <Tooltip content={<PreviewTooltip text={compositeVersion} />} interactive>
+                  <span className={styles.preview}>
+                    <Badge text="&nbsp;Preview" color="blue" icon="rocket" />
+                  </span>
+                </Tooltip>
 
-              <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
-                <Button variant="secondary" icon="info-circle">
-                  Need help
-                  <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size="lg" />
-                </Button>
-              </Dropdown>
-              {controls.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
+                <Dropdown overlay={menu} onVisibleChange={() => setMenuVisible(!menuVisible)}>
+                  <Button variant="secondary" icon="info-circle">
+                    Need help
+                    <Icon className={styles.helpIcon} name={menuVisible ? 'angle-up' : 'angle-down'} size="lg" />
+                  </Button>
+                </Dropdown>
+                {controls.map((control) => (
+                  <control.Component key={control.state.key} model={control} />
+                ))}
+              </div>
+            </Stack>
+            <div className={styles.filters}>
+              {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
             </div>
-          </Stack>
-          <div className={styles.filters}>
-            {filtersVariable && <filtersVariable.Component model={filtersVariable} />}
           </div>
+          <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
         </div>
-        <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-      </div>
+        {drawerScene && traceId && (
+          <Drawer title={`View trace ${traceId}`} size={'lg'} onClose={() => traceExploration.closeDrawer()}>
+            <drawerScene.Component model={drawerScene} />
+          </Drawer>
+        )}
+      </>
     );
   };
 }
@@ -318,16 +268,6 @@ const PreviewTooltip = ({ text }: { text: string }) => {
     </Stack>
   );
 };
-
-function buildSplitLayout() {
-  return new SplitLayout({
-    direction: 'row',
-    initialSize: 0.6,
-    primary: new SceneFlexItem({
-      body: new TraceExplorationScene({}),
-    }),
-  });
-}
 
 function getTopScene(metric?: MetricFunction) {
   return new TracesByServiceScene({ metric });

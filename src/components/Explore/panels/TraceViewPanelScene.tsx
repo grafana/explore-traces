@@ -5,10 +5,9 @@ import {
   SceneObjectBase,
   SceneComponentProps,
   PanelBuilders,
-  SceneFlexItem,
-  SceneFlexLayout,
   SceneQueryRunner,
   sceneGraph,
+  SceneObject,
 } from '@grafana/scenes';
 import { LoadingState, GrafanaTheme2 } from '@grafana/data';
 import { explorationDS } from 'utils/shared';
@@ -16,10 +15,9 @@ import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateSc
 import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { useStyles2 } from '@grafana/ui';
-import { CloseTraceViewAction } from '../actions/CloseTraceViewAction';
 
 export interface TracePanelState extends SceneObjectState {
-  panel?: SceneFlexLayout;
+  panel?: SceneObject;
   traceId: string;
   spanId?: string;
 }
@@ -41,24 +39,12 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
         data.subscribeToState((data) => {
           if (data.data?.state === LoadingState.Done) {
             this.setState({
-              panel: new SceneFlexLayout({
-                direction: 'row',
-                children: [
-                  new SceneFlexItem({
-                    body: this.getVizPanel().build(),
-                  }),
-                ],
-              }),
+              panel: this.getVizPanel().build(),
             });
           } else if (data.data?.state === LoadingState.Loading) {
             this.setState({
-              panel: new SceneFlexLayout({
-                direction: 'row',
-                children: [
-                  new LoadingStateScene({
-                    component: SkeletonComponent,
-                  }),
-                ],
+              panel: new LoadingStateScene({
+                component: SkeletonComponent,
               }),
             });
           }
@@ -68,7 +54,7 @@ export class TraceViewPanelScene extends SceneObjectBase<TracePanelState> {
   }
 
   private getVizPanel() {
-    const panel = PanelBuilders.traces().setTitle('Trace').setHeaderActions(new CloseTraceViewAction({}));
+    const panel = PanelBuilders.traces().setHoverHeader(true);
     if (this.state.spanId) {
       panel.setOption('focusedSpanId' as any, this.state.spanId as any);
     }
