@@ -6,7 +6,7 @@ import { IconButton } from '@grafana/ui';
 
 import Logo from '../../../../src/img/logo.svg';
 import React from 'react';
-import { VAR_DATASOURCE_EXPR } from 'utils/shared';
+import { VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from 'utils/shared';
 
 export const investigationPluginId = 'grafana-explorations-app';
 export const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
@@ -58,7 +58,7 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
     if (isQueryRunner(queryRunner)) {
       const queries = queryRunner.state.queries.map((q) => ({
         ...q,
-        query: `{nestedSetParent<0 && ${this.state.labelKey}=${this.state.labelValue} && ${this.state.labelKey} != nil} | rate() by(${this.state.labelKey})`
+        query: sceneGraph.interpolate(this, q.query.replace(VAR_FILTERS_EXPR, `${VAR_FILTERS_EXPR} && ${this.state.labelKey}=${this.state.labelValue}`)),
       }));
 
       if (JSON.stringify(queries) !== JSON.stringify(this.state.queries)) {
