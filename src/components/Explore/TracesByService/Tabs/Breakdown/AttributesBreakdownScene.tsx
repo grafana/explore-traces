@@ -36,6 +36,7 @@ import {
 } from 'utils/utils';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../../../utils/analytics';
 import { AttributesDescription } from './AttributesDescription';
+import { AddToInvestigationButton } from 'components/Explore/actions/AddToInvestigationButton';
 
 export interface AttributesBreakdownSceneState extends SceneObjectState {
   body?: SceneObject;
@@ -84,9 +85,19 @@ export class AttributesBreakdownScene extends SceneObjectBase<AttributesBreakdow
   }
 
   private setBody = (variable: CustomVariable) => {
+    const getLabelValue = (df: DataFrame) => {
+      const valuesField = df.fields.find((f) => f.name !== 'time');
+      const label = valuesField?.labels?.[variable.getValueText()] ??  'Label not found';
+      return label;
+    }
+
     this.setState({
       body: buildNormalLayout(this, variable, (frame: DataFrame) => [
         new AddToFiltersAction({ frame, labelKey: variable.getValueText(), onClick: this.onAddToFiltersClick }),
+        new AddToInvestigationButton({ 
+          labelKey: variable.getValueText(), 
+          labelValue: getLabelValue(frame) 
+        }),
       ]),
     });
   };
