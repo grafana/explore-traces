@@ -8,13 +8,14 @@ import Logo from '../../../../src/img/logo.svg';
 import React from 'react';
 import { VAR_DATASOURCE_EXPR } from 'utils/shared';
 
-export const explorationsPluginId = 'grafana-explorations-app';
+export const investigationPluginId = 'grafana-explorations-app';
 export const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
+export const addToInvestigationButtonLabel = 'add panel to investigation';
 
 export interface AddToInvestigationButtonState extends SceneObjectState {
   dsUid?: string;
-  labelKey: string;
-  labelValue: string | number;
+  labelKey?: string;
+  labelValue?: string;
   context?: ExtensionContext;
   queries: DataQuery[];
 }
@@ -92,7 +93,7 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
   public static Component = ({ model }: SceneComponentProps<AddToInvestigationButton>) => {
     const { context } = model.useState();
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
-    const link = links.find((link) => link.pluginId === explorationsPluginId);
+    const link = links.find((link) => link.pluginId === investigationPluginId);
 
     if (!link) {
       return null;
@@ -103,6 +104,7 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
         tooltip={link.description}
         key={link.id}
         name={link.icon ?? 'panel-add'}
+        aria-label={addToInvestigationButtonLabel} // this is overriden by the `tooltip`
         onClick={(e) => {
           if (link.onClick) {
             link.onClick(e);
