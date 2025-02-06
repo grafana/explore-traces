@@ -5,6 +5,7 @@ import React from "react";
 import { formatDuration } from "utils/dates";
 import { EXPLORATIONS_ROUTE, MetricFunction, ROUTES } from "utils/shared";
 import { AttributePanelRow } from "./AttributePanelRow";
+import { getLabelKey, getLabelValue } from "utils/utils";
 
 type Props = {
   series?: DataFrame[];
@@ -33,15 +34,12 @@ export const AttributePanelRows = (props: Props) => {
 
   if (series && series.length > 0) {
     if (type === 'errors') {
-      const getLabel = (df: DataFrame) => {
-        const valuesField = df.fields.find((f) => f.name !== 'time');
-        return valuesField?.labels?.['resource.service.name'].replace(/"/g, '') ??  'Service name not found';
-      }
-
       const getUrl = (df: DataFrame) => {
-        const serviceName = getLabel(df);
+        const labelKey = getLabelKey(df);
+        const labelValue = getLabelValue(df);
+
         const params = {
-          'var-filters': `resource.service.name|=|${serviceName}`,
+          'var-filters': `${labelKey}|=|${labelValue}`,
           'var-metric': type,
         }
         const url = urlUtil.renderUrl(EXPLORATIONS_ROUTE, params);
@@ -67,8 +65,8 @@ export const AttributePanelRows = (props: Props) => {
               <AttributePanelRow 
                 type={type} 
                 index={index}
-                label={getLabel(df)}
-                labelTitle='Service'
+                label={getLabelValue(df)}
+                labelTitle={getLabelKey(df)}
                 value={getTotalErrs(df)}
                 valueTitle='Total errors'
                 url={getUrl(df)}

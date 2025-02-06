@@ -11,14 +11,14 @@ import { Button, Icon, LinkButton, Stack, useStyles2, useTheme2 } from '@grafana
 import {
   EXPLORATIONS_ROUTE,
 } from '../../utils/shared';
-import { getDatasourceVariable, getHomeScene } from '../../utils/utils';
+import { getDatasourceVariable, getHomeFilterVariable, getHomeScene } from '../../utils/utils';
 import { useNavigate } from 'react-router-dom-v5-compat';
-import { Home } from 'pages/Home/Home';
 import { DarkModeRocket, LightModeRocket } from '../../utils/rockets';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
+import { Home } from 'pages/Home/Home';
 
 export class HeaderScene extends SceneObjectBase {
-  static Component = ({ model }: SceneComponentProps<Home>) => {
+  public static Component = ({ model }: SceneComponentProps<Home>) => {
     const home = getHomeScene(model);
     const navigate = useNavigate();
     const { controls } = home.useState();
@@ -26,6 +26,7 @@ export class HeaderScene extends SceneObjectBase {
     const theme = useTheme2();
 
     const dsVariable = getDatasourceVariable(home);
+    const filterVariable = getHomeFilterVariable(home);
 
     return (
       <div className={styles.container}>
@@ -66,16 +67,27 @@ export class HeaderScene extends SceneObjectBase {
         </div>
 
         <Stack gap={2}>
-          {dsVariable && (
-            <Stack gap={1} alignItems={'center'}>
-              <div className={styles.datasourceLabel}>Data source</div>
-              <dsVariable.Component model={dsVariable} />
-            </Stack>
-          )}
-          <div className={styles.controls}>
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
+          <div className={styles.variablesAndControls}>
+            <div className={styles.variables}>
+              {dsVariable && (
+                <Stack gap={1} alignItems={'center'}>
+                  <div className={styles.label}>Data source</div>
+                  <dsVariable.Component model={dsVariable} />
+                </Stack>
+              )}
+              {filterVariable && (
+                <Stack gap={1} alignItems={'center'}>
+                  <div className={styles.label}>Filter</div>
+                  <filterVariable.Component model={filterVariable} />
+                </Stack>
+              )}
+            </div>
+
+            <div className={styles.controls}>
+              {controls?.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
+            </div>
           </div>
         </Stack>
       </div>
@@ -130,8 +142,19 @@ function getStyles(theme: GrafanaTheme2) {
       }
     }),
 
-    datasourceLabel: css({
+    label: css({
       fontSize: '12px',
+    }),
+    variablesAndControls: css({
+      alignItems: 'center',
+      gap: theme.spacing(2),
+      display: 'flex',
+      justifyContent: 'space-between',
+      width: '100%',
+    }),
+    variables: css({
+      display: 'flex',
+      gap: theme.spacing(2),
     }),
     controls: css({
       display: 'flex',

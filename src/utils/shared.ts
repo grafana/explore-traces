@@ -23,6 +23,7 @@ export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
+export const VAR_HOME_FILTER = 'homeFilter';
 export const VAR_GROUPBY = 'groupBy';
 export const VAR_METRIC = 'metric';
 export const VAR_LATENCY_THRESHOLD = 'latencyThreshold';
@@ -36,6 +37,8 @@ export const RESOURCE = 'Resource';
 export const SPAN = 'Span';
 export const RESOURCE_ATTR = 'resource.';
 export const SPAN_ATTR = 'span.';
+export const EVENT_ATTR = 'event.';
+export const EVENT_INTRINSIC = 'event:';
 
 export const radioAttributesResource = [
   // https://opentelemetry.io/docs/specs/semconv/resource/
@@ -74,6 +77,16 @@ export const ignoredAttributes = [
   'trace:duration',
   'trace:id',
   'traceDuration',
+];
+export const ignoredAttributesHomeFilter = [
+  'status',
+  'span:status',
+  'rootName', 
+  'rootService',
+  'rootServiceName', 
+  'trace:rootName', 
+  'trace:rootService',
+  'trace:rootServiceName'
 ];
 // Limit maximum options in select dropdowns for performance reasons
 export const maxOptions = 1000;

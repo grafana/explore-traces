@@ -3,7 +3,7 @@ import React from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { duration } from 'moment';
 
-import { GrafanaTheme2 } from '@grafana/data';
+import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
   DataSourceVariable,
   SceneComponentProps,
@@ -23,23 +23,27 @@ import { useStyles2 } from '@grafana/ui';
 
 import {
   DATASOURCE_LS_KEY,
+  RESOURCE_ATTR,
+  SPAN_ATTR,
   VAR_DATASOURCE,
 } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
-import { getDatasourceVariable } from 'utils/utils';
+import { getDatasourceVariable, getHomeFilterVariable, isNumber } from 'utils/utils';
+import { HomeFilterVariable } from 'components/Home/HomeFilterVariable';
 
 export interface HomeState extends SceneObjectState {
-  controls: SceneObject[];
+  controls?: SceneObject[];
   initialDS?: string;
+  initialFilters: AdHocVariableFilter[];
   body?: SceneCSSGridLayout;
 }
 
 export class Home extends SceneObjectBase<HomeState> {
-  public constructor(state: Partial<HomeState>) {
+  public constructor(state: HomeState) {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
-      $variables: state.$variables ?? getVariableSet(state.initialDS),
+      $variables: state.$variables ?? getVariableSet(state.initialFilters, state.initialDS),
       controls: state.controls ?? [new SceneTimePicker({}), new SceneRefreshPicker({})],
       ...state,
     });
@@ -54,20 +58,28 @@ export class Home extends SceneObjectBase<HomeState> {
       }
     });
 
+    getHomeFilterVariable(this).subscribeToState((newState) => {
+      if (newState.filters.length > 0) {
+        this.buildPanels(sceneTimeRange, newState.filters[0]);
+      }
+    });
+
+    const filterVariable = getHomeFilterVariable(this);
     const sceneTimeRange = sceneGraph.getTimeRange(this);
     sceneTimeRange.subscribeToState((newState, prevState) => {
       if (newState.value.from !== prevState.value.from || newState.value.to !== prevState.value.to) {
-        this.buildPanels(sceneTimeRange);
+        this.buildPanels(sceneTimeRange, filterVariable.state.filters[0]);
       }
     });
-    this.buildPanels(sceneTimeRange);
+    this.buildPanels(sceneTimeRange, filterVariable.state.filters[0]);
   }
 
-  buildPanels(sceneTimeRange: SceneTimeRangeLike) {
+  buildPanels(sceneTimeRange: SceneTimeRangeLike, filter: AdHocVariableFilter) {
     const from = sceneTimeRange.state.value.from.unix();
     const to = sceneTimeRange.state.value.to.unix();
     const dur = duration(to - from, 's');
     const durString = `${dur.asSeconds()}s`;
+    const renderedFilter = this.renderFilter(filter);
 
     this.setState({
       body: new SceneCSSGridLayout({
@@ -80,20 +92,21 @@ export class Home extends SceneObjectBase<HomeState> {
               new SceneCSSGridItem({
                 body: new AttributePanel({
                   query: {
-                    query: '{nestedSetParent < 0 && status = error} | count_over_time() by (resource.service.name)',
+                    query: `{nestedSetParent < 0 && status = error ${renderedFilter}} | count_over_time() by (${filter.key})`,
                     step: durString
                   },
-                  title: 'Errored services', 
+                  title: 'Errors', 
                   type: 'errors',
                 }),
               }),
               new SceneCSSGridItem({
                 body: new AttributePanel({ 
                   query: {
-                    query: '{nestedSetParent<0} | histogram_over_time(duration)',
+                    query: `{nestedSetParent<0 ${renderedFilter}} | histogram_over_time(duration)`,
                   },
                   title: 'Slow traces', 
-                  type: 'duration', 
+                  type: 'duration',
+                  filter: renderedFilter,
                 }),
               }),
             ],
@@ -101,6 +114,21 @@ export class Home extends SceneObjectBase<HomeState> {
         ],
       }),
     });
+  }
+  
+  renderFilter(filter: AdHocVariableFilter) {
+    let val = filter.value;
+    if (val === undefined || val === null || val === '') {
+      return '';
+    }
+  
+    if (!isNumber.test(val) && (filter.key.includes(RESOURCE_ATTR) || filter.key.includes(SPAN_ATTR))) {
+      if (typeof val === 'string' && !val.startsWith('"') && !val.endsWith('"')) {
+        val = `"${val}"`;
+      }
+    }
+  
+    return `&& ${filter.key}${filter.operator}${val}`;
   }
 
   static Component = ({ model }: SceneComponentProps<Home>) => {
@@ -116,7 +144,7 @@ export class Home extends SceneObjectBase<HomeState> {
   };
 }
 
-function getVariableSet(initialDS?: string) {
+function getVariableSet(initialFilters: AdHocVariableFilter[], initialDS?: string) {
   return new SceneVariableSet({
     variables: [
       new DataSourceVariable({
@@ -124,6 +152,9 @@ function getVariableSet(initialDS?: string) {
         label: 'Data source',
         value: initialDS,
         pluginId: 'tempo',
+      }),
+      new HomeFilterVariable({
+        initialFilters,
       }),
     ],
   });

@@ -6,7 +6,7 @@ import { Home } from './Home';
 
 const HomePage = () => {
   const initialDs = localStorage.getItem(DATASOURCE_LS_KEY) || '';
-  const [home] = useState(newHome(initialDs));
+  const [home] = useState(newHome([{ key: 'resource.service.name', operator: '=', value: '' }], initialDs));
 
   return <HomeView home={home} />;
 };

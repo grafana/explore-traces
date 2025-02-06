@@ -44,6 +44,7 @@ export const USER_EVENTS_ACTIONS = {
     panel_row_clicked: 'panel_row_clicked',
     explore_traces_clicked: 'explore_traces_clicked',
     read_documentation_clicked: 'read_documentation_clicked',
+    filter_changed: 'filter_changed',
   },
   [USER_EVENTS_PAGES.common]: {
     metric_changed: 'metric_changed',

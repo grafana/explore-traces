@@ -18,6 +18,7 @@ import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
   VAR_GROUPBY,
+  VAR_HOME_FILTER,
   VAR_LATENCY_PARTIAL_THRESHOLD,
   VAR_LATENCY_THRESHOLD,
   VAR_METRIC,
@@ -27,6 +28,7 @@ import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesB
 import { ActionViewType } from '../components/Explore/TracesByService/Tabs/TabsBarScene';
 import { LocationService } from '@grafana/runtime';
 import { Home } from 'pages/Home/Home';
+import { HomeFilterVariable } from 'components/Home/HomeFilterVariable';
 
 export function getTraceExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
@@ -53,9 +55,10 @@ export function newTracesExploration(
   });
 }
 
-export function newHome(initialDS?: string): Home {
+export function newHome(initialFilters: AdHocVariableFilter[], initialDS?: string): Home {
   return new Home({
     initialDS,
+    initialFilters,
     $timeRange: new SceneTimeRange({ from: 'now-30m', to: 'now' }),
   });
 }
@@ -65,7 +68,7 @@ export function getErrorMessage(data: SceneDataState) {
 }
 
 export function getNoDataMessage(context: string) {
-  return `No data for selected data source. Select another to see ${context}.`;
+  return `No data for selected data source and filter. Select another to see ${context}.`;
 }
 
 export function getUrlForExploration(exploration: TraceExploration) {
@@ -87,6 +90,21 @@ export const getFilterSignature = (filter: AdHocVariableFilter) => {
 
 export function getAttributesAsOptions(attributes: string[]) {
   return attributes.map((attribute) => ({ label: attribute, value: attribute }));
+}
+
+export function getLabelKey(frame: DataFrame) {
+  const labels = frame.fields.find((f) => f.type === 'number')?.labels;
+
+  if (!labels) {
+    return 'No labels';
+  }
+
+  const keys = Object.keys(labels);
+  if (keys.length === 0) {
+    return 'No labels';
+  }
+
+  return keys[0].replace(/"/g, '');
 }
 
 export function getLabelValue(frame: DataFrame, labelName?: string) {
@@ -144,6 +162,14 @@ export function getFiltersVariable(scene: SceneObject): AdHocFiltersVariable {
   return variable;
 }
 
+export function getHomeFilterVariable(scene: SceneObject): HomeFilterVariable {
+  const variable = sceneGraph.lookupVariable(VAR_HOME_FILTER, scene);
+  if (!(variable instanceof HomeFilterVariable)) {
+    throw new Error('Home filter variable not found');
+  }
+  return variable;
+}
+
 export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
   const variable = sceneGraph.lookupVariable(VAR_DATASOURCE, scene);
   if (!(variable instanceof DataSourceVariable)) {
@@ -163,3 +189,5 @@ export function getMetricValue(scene: SceneObject) {
 export function fieldHasEmptyValues(data: SceneDataState) {
   return data?.data?.series[0].fields?.some((v) => v.values.every((e) => e === undefined)) ?? false;
 }
+
+export const isNumber = /^-?\d+\.?\d*$/;
