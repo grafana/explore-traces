@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "app",
+  "name": "Explore Traces",
+  "id": "grafana-exploretraces-app",
+  "preload": true,
+  "autoEnabled": true,
+  "info": {
+    "keywords": ["app", "tempo", "traces", "explore"],
+    "description": "Grafana app plugin that allows users for a query-less way to navigate and visualize trace data stored in Tempo.",
+    "author": {
+      "name": "Grafana"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [
+      {
+        "name": "histogram-breakdown",
+        "path": "img/histogram-breakdown.png"
+      },
+      {
+        "name": "errors-metric-flow",
+        "path": "img/errors-metric-flow.png"
+      },
+      {
+        "name": "errors-root-cause",
+        "path": "img/errors-root-cause.png"
+      }
+    ],
+    "version": "0.2.3",
+    "updated": "2025-02-06",
+    "links": [
+      {
+        "name": "Github",
+        "url": "https://github.com/grafana/explore-traces"
+      },
+      {
+        "name": "Report bug",
+        "url": "https://github.com/grafana/explore-traces/issues/new"
+      }
+    ]
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "Explore",
+      "path": "/a/grafana-exploretraces-app/",
+      "action": "datasources:explore",
+      "addToNav": true,
+      "defaultNav": true
+    }
+  ],
+  "dependencies": {
+    "grafanaDependency": ">=11.3.0",
+    "plugins": []
+  },
+  "extensions": {
+    "addedLinks": [
+      {
+        "targets": ["grafana-lokiexplore-app/toolbar-open-related/v1"],
+        "title": "open traces",
+        "description": "Open traces"
+      }
+    ]
+  }
+}
