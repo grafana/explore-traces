@@ -189,5 +189,3 @@ export function getMetricValue(scene: SceneObject) {
 export function fieldHasEmptyValues(data: SceneDataState) {
   return data?.data?.series[0].fields?.some((v) => v.values.every((e) => e === undefined)) ?? false;
 }
-
-export const isNumber = /^-?\d+\.?\d*$/;

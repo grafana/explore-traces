@@ -23,14 +23,12 @@ import { useStyles2 } from '@grafana/ui';
 
 import {
   DATASOURCE_LS_KEY,
-  RESOURCE_ATTR,
-  SPAN_ATTR,
   VAR_DATASOURCE,
 } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
-import { getDatasourceVariable, getHomeFilterVariable, isNumber } from 'utils/utils';
-import { HomeFilterVariable } from 'components/Home/HomeFilterVariable';
+import { getDatasourceVariable, getHomeFilterVariable } from 'utils/utils';
+import { HomeFilterVariable, renderFilter } from 'components/Home/HomeFilterVariable';
 
 export interface HomeState extends SceneObjectState {
   controls?: SceneObject[];
@@ -79,7 +77,7 @@ export class Home extends SceneObjectBase<HomeState> {
     const to = sceneTimeRange.state.value.to.unix();
     const dur = duration(to - from, 's');
     const durString = `${dur.asSeconds()}s`;
-    const renderedFilter = this.renderFilter(filter);
+    const renderedFilter = renderFilter(filter);
 
     this.setState({
       body: new SceneCSSGridLayout({
@@ -114,21 +112,6 @@ export class Home extends SceneObjectBase<HomeState> {
         ],
       }),
     });
-  }
-  
-  renderFilter(filter: AdHocVariableFilter) {
-    let val = filter.value;
-    if (val === undefined || val === null || val === '') {
-      return '';
-    }
-  
-    if (!isNumber.test(val) && (filter.key.includes(RESOURCE_ATTR) || filter.key.includes(SPAN_ATTR))) {
-      if (typeof val === 'string' && !val.startsWith('"') && !val.endsWith('"')) {
-        val = `"${val}"`;
-      }
-    }
-  
-    return `&& ${filter.key}${filter.operator}${val}`;
   }
 
   static Component = ({ model }: SceneComponentProps<Home>) => {
