@@ -39,15 +39,17 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
       }),
       ...state,
     });
-    
 
     this.addActivationHandler(() => {
       const data = sceneGraph.getData(this);
 
       this._subs.add(
         data.subscribeToState((data) => {
-          if (data.data?.state === LoadingState.Done) {
-            if (data.data.series.length === 0 || data.data.series[0].length === 0) {
+          if (data.data?.state === LoadingState.Done || data.data?.state === LoadingState.Streaming) {
+            if (
+              data.data?.state === LoadingState.Done &&
+              (data.data.series.length === 0 || data.data.series[0].length === 0)
+            ) {
               this.setState({
                 panel: new SceneFlexLayout({
                   children: [
@@ -67,30 +69,30 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                       new AttributePanelScene({
                         series: data.data.series,
                         title: state.title,
-                        type: state.type
+                        type: state.type,
                       }),
                     ],
-                  })
+                  }),
                 });
               } else {
                 let yBuckets = getYBuckets(data.data?.series ?? []);
                 if (yBuckets?.length) {
                   const { minDuration } = getMinimumsForDuration(yBuckets);
-                  
+
                   this.setState({
                     panel: new SceneFlexLayout({
                       children: [
-                        new AttributePanel({ 
+                        new AttributePanel({
                           query: {
                             query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}}`,
                           },
-                          title: state.title, 
+                          title: state.title,
                           type: state.type,
                           renderDurationPanel: true,
                         }),
                       ],
-                    })
-                  }); 
+                    }),
+                  });
                 }
               }
             }
@@ -104,9 +106,9 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                     type: state.type,
                   }),
                 ],
-              })
+              }),
             });
-          } else if (data.data?.state === LoadingState.Loading || data.data?.state === LoadingState.Streaming) {
+          } else if (data.data?.state === LoadingState.Loading) {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',
@@ -166,7 +168,7 @@ export const SkeletonComponent = () => {
             </div>
             <div className={styles.rowRight}>
               <Skeleton count={1} />
-              </div>
+            </div>
           </div>
         ))}
       </div>
