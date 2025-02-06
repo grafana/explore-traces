@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.3](https://github.com/grafana/explore-traces/compare/v0.2.2...v0.2.3) (2025-02-06)
+
+### Enhancements
+
+* **Open trace in drawer:** The traces now open in a drawer which should improve the experience of analysing the details of a trace. ([#325](https://github.com/grafana/explore-traces/pull/325))
+
+### Bug Fixes
+
+* Fixes crash on main metric panel ([#317](https://github.com/grafana/explore-traces/pull/317))
 
 ## [0.2.2](https://github.com/grafana/explore-traces/compare/v0.2.0...v0.2.2) (2025-01-13)
 
