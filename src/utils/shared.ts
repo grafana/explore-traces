@@ -88,14 +88,6 @@ export interface ComparisonSelection {
   query?: string;
 }
 
-export interface DetailsSceneUpdatedPayload {
-  showDetails?: boolean;
-}
-
-export class DetailsSceneUpdated extends BusEventWithPayload<DetailsSceneUpdatedPayload> {
-  public static type = 'details-scene-updated';
-}
-
 export interface EventTimeseriesDataReceivedPayload {
   series?: DataFrame[];
 }
