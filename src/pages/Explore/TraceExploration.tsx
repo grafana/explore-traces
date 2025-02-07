@@ -201,9 +201,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       return;
     }
 
-    getTraceByServiceSceneAsDescendent(this)._urlSync.performBrowserHistoryAction(() => {
-      variable.changeValueTo(metric);
-    });
+    getTraceByServiceSceneAsDescendent(this).onUserUpdateMetric(variable, metric);
   };
 
   public getMetricFunction() {

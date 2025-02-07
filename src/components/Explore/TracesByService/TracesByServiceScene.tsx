@@ -10,6 +10,7 @@ import {
 } from '@grafana/data';
 import {
   behaviors,
+  CustomVariable,
   SceneComponentProps,
   SceneDataTransformer,
   SceneFlexItem,
@@ -57,7 +58,7 @@ export interface TraceSceneState extends SceneObjectState {
 }
 
 export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
-  public _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection', 'metric'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'selection', 'metric'] });
 
   public constructor(state: MakeOptional<TraceSceneState, 'body'>) {
     super({
@@ -179,6 +180,18 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
         this.setState({ selection: newSelection });
       }
     }
+  }
+
+  onUserUpdateSelection(newSelection: ComparisonSelection) {
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ selection: newSelection });
+    });
+  }
+
+  onUserUpdateMetric(variable: CustomVariable, metric: string) {
+    this._urlSync.performBrowserHistoryAction(() => {
+      variable.changeValueTo(metric);
+    });
   }
 
   public setActionView(actionView?: ActionViewType) {
