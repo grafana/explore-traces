@@ -151,13 +151,15 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
         parent.subscribeToState((newState, prevState) => {
           if (data.state.data?.state === LoadingState.Done) {
             if (!isEqual(newState.selection, prevState.selection) || newState.actionView !== prevState.actionView) {
-              const annotations = this.buildSelectionAnnotation(newState);
-              data.setState({
-                data: {
-                  ...data.state.data!,
-                  annotations: annotations,
-                },
-              });
+              if (this.isDuration()) {
+                const annotations = this.buildSelectionAnnotation(newState);
+                data.setState({
+                  data: {
+                    ...data.state.data!,
+                    annotations: annotations,
+                  },
+                });
+              }
             }
           }
         })
@@ -225,6 +227,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
         time: xSel?.from || 0,
         xMin: xSel?.from || 0,
         xMax: xSel?.to || 0,
+        timeEnd: xSel?.to || 0,
         yMin: ySel?.from,
         yMax: ySel?.to,
         isRegion: true,
@@ -299,7 +302,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
 
 export const getYBuckets = (series: DataFrame[]) => {
   return series.map((s) => parseFloat(s.fields[1].name)).sort((a, b) => a - b);
-}
+};
 
 export const getMinimumsForDuration = (yBuckets: number[]) => {
   const slowestBuckets = Math.floor(yBuckets.length / 4);
@@ -308,11 +311,11 @@ export const getMinimumsForDuration = (yBuckets: number[]) => {
     minBucket = 0;
   }
 
-  return { 
-    minDuration: yBucketToDuration(minBucket - 1, yBuckets), 
-    minBucket
+  return {
+    minDuration: yBucketToDuration(minBucket - 1, yBuckets),
+    minBucket,
   };
-}
+};
 
 function getStyles(theme: GrafanaTheme2) {
   return {

@@ -1,25 +1,18 @@
 import React from 'react';
 
-import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
-  SceneFlexItem,
-  SceneFlexLayout,
-} from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, SceneObject } from '@grafana/scenes';
 import { EmptyStateScene } from 'components/states/EmptyState/EmptyStateScene';
 import { TraceViewPanelScene } from '../panels/TraceViewPanelScene';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from '../../../utils/analytics';
 import { getTraceExplorationScene } from '../../../utils/utils';
 
 export interface DetailsSceneState extends SceneObjectState {
-  body: SceneFlexLayout;
+  body?: SceneObject;
 }
 
-export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
+export class TraceDrawerScene extends SceneObjectBase<DetailsSceneState> {
   constructor(state: Partial<DetailsSceneState>) {
     super({
-      body: new SceneFlexLayout({ children: [] }),
       ...state,
     });
 
@@ -46,28 +39,22 @@ export class DetailsScene extends SceneObjectBase<DetailsSceneState> {
     const traceExploration = getTraceExplorationScene(this);
 
     if (traceExploration.state.traceId) {
-      this.state.body.setState({
-        children: [
-          new TraceViewPanelScene({
-            traceId: traceExploration.state.traceId,
-            spanId: traceExploration.state.spanId,
-          }),
-        ],
+      this.setState({
+        body: new TraceViewPanelScene({
+          traceId: traceExploration.state.traceId,
+          spanId: traceExploration.state.spanId,
+        }),
       });
     } else {
-      this.state.body.setState({
-        children: [
-          new SceneFlexItem({
-            body: new EmptyStateScene({
-              message: 'No trace selected',
-            }),
-          }),
-        ],
+      this.setState({
+        body: new EmptyStateScene({
+          message: 'No trace selected',
+        }),
       });
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<DetailsScene>) => {
+  public static Component = ({ model }: SceneComponentProps<TraceDrawerScene>) => {
     const { body } = model.useState();
     return body && <body.Component model={body} />;
   };
