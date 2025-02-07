@@ -32,6 +32,12 @@ export function HomeFilter(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const updateValues = useCallback(async (key: string) => {
+    setState((prev) => ({ ...prev, isValuesLoading: true, values: [] }));
+    const values = await model._getValuesFor({ key, operator: '=', value: '' });
+    setState((prev) => ({ ...prev, isValuesLoading: false, values }));
+  }, [model]);
+
   useEffect(() => {
     updateKeys();
   }, [dsVariable, updateKeys]);
@@ -71,7 +77,9 @@ export function HomeFilter(props: Props) {
           reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.filter_changed, {
             type: 'key'
           });
-          model._updateFilter(filters[0], { key: v?.value ?? '', value: '' })
+          const newKey = v?.value ?? '';
+          model._updateFilter(filters[0], { key: newKey, value: '' });
+          updateValues(newKey);
         }}
         isLoading={state.isKeysLoading}
         virtualized
@@ -90,9 +98,9 @@ export function HomeFilter(props: Props) {
         }}
         isLoading={state.isValuesLoading}
         onOpenMenu={async () => {
-          setState({ ...state, isValuesLoading: true, values: [] });
-          const values = await model._getValuesFor(filters[0]);
-          setState({ ...state, isValuesLoading: false, values });
+          if (!state.values) {
+            updateValues(filters[0].key);
+          }
         }}
         virtualized
         isClearable
