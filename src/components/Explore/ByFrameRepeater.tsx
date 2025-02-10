@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DataFrame, FieldType, GrafanaTheme2, LoadingState, PanelData } from '@grafana/data';
+import { DataFrame, FieldType, GrafanaTheme2, LoadingState, PanelData, sortDataFrame } from '@grafana/data';
 import {
   SceneComponentProps,
   SceneCSSGridLayout,
@@ -157,7 +157,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
       const frames = groupedData[key].sort((a, b) => a.name?.localeCompare(b.name!) || 0);
       const mainFrame = cloneDataFrame(frames[0]);
       frames.slice(1, frames.length).forEach((frame) => mainFrame.fields.push(frame.fields[1]));
-      newSeries.push(mainFrame);
+      newSeries.push(sortDataFrame(mainFrame, 0));
     }
     return newSeries;
   }
