@@ -81,7 +81,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
   public _onActivate() {
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopScene(this.getMetricVariable().getValue() as MetricFunction) });
+      this.setState({ topScene: getTopScene() });
     }
 
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
@@ -269,8 +269,8 @@ const PreviewTooltip = ({ text }: { text: string }) => {
   );
 };
 
-function getTopScene(metric?: MetricFunction) {
-  return new TracesByServiceScene({ metric });
+function getTopScene() {
+  return new TracesByServiceScene({});
 }
 
 function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {
