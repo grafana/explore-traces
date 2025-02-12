@@ -227,6 +227,7 @@ export class REDPanel extends SceneObjectBase<RateMetricsPanelState> {
         time: xSel?.from || 0,
         xMin: xSel?.from || 0,
         xMax: xSel?.to || 0,
+        timeEnd: xSel?.to || 0,
         yMin: ySel?.from,
         yMax: ySel?.to,
         isRegion: true,
