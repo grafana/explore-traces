@@ -1,11 +1,8 @@
 import { TimeRange } from '@grafana/data';
-import { usePluginLinks } from '@grafana/runtime';
-import { SceneComponentProps, sceneGraph, SceneObject, SceneObjectBase, SceneObjectState, SceneQueryRunner } from '@grafana/scenes';
+import { sceneGraph, SceneObject, SceneObjectBase, SceneObjectState, SceneQueryRunner } from '@grafana/scenes';
 import { DataQuery, DataSourceRef } from '@grafana/schema';
-import { IconButton } from '@grafana/ui';
 
 import Logo from '../../../../src/img/logo.svg';
-import React from 'react';
 import { VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from 'utils/shared';
 
 export const investigationPluginId = 'grafana-explorations-app';
@@ -88,30 +85,6 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
     if (JSON.stringify(ctx) !== JSON.stringify(this.state.context)) {
       this.setState({ context: ctx });
     }
-  };
-
-  public static Component = ({ model }: SceneComponentProps<AddToInvestigationButton>) => {
-    const { context } = model.useState();
-    const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
-    const link = links.find((link) => link.pluginId === investigationPluginId);
-
-    if (!link) {
-      return null;
-    }
-
-    return (
-      <IconButton
-        tooltip={link.description}
-        key={link.id}
-        name={link.icon ?? 'panel-add'}
-        aria-label={addToInvestigationButtonLabel} // this is overriden by the `tooltip`
-        onClick={(e) => {
-          if (link.onClick) {
-            link.onClick(e);
-          }
-        }}
-      />
-    );
   };
 }
 

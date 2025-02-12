@@ -35,7 +35,7 @@ export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
   // and avoid invalid queries like '{ && key=value }'
   return expr.length ? expr : 'true';
 }
-const isNumber = /^-?\d+\.?\d*$/;
+export const isNumber = /^-?\d+\.?\d*$/;
 
 function renderFilter(filter: AdHocVariableFilter) {
   let val = filter.value;

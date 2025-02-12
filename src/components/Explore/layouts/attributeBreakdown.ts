@@ -21,6 +21,8 @@ import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { syncYAxis } from '../behaviors/syncYaxis';
 import { exemplarsTransformations } from '../../../utils/exemplars';
+import { PanelMenu } from '../panels/PanelMenu';
+import { isNumber } from '../filters/FilterByVariable';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -93,6 +95,13 @@ export function buildNormalLayout(
   });
 }
 
+const formatLabelValue = (value: string) => {
+  if (!isNumber.test(value) && typeof value === 'string' && !value.startsWith('"') && !value.endsWith('"')) {
+    return `"${value}"`;
+  }
+  return value;
+}
+
 export function getLayoutChild(
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
@@ -102,6 +111,7 @@ export function getLayoutChild(
   return (data: PanelData, frame: DataFrame) => {
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
+      .setMenu(new PanelMenu({ labelKey: variable.getValueText(), labelValue: formatLabelValue(getLabelValue(frame)) }))
       .setData(
         new SceneDataNode({
           data: {
