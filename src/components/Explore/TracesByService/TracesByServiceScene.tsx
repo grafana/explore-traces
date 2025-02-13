@@ -77,7 +77,6 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     this._subs.add(
       metricVariable.subscribeToState((newState, prevState) => {
         if (newState.value !== prevState.value) {
-          this.setState({ metric: newState.value as MetricFunction });
           const selection = getDefaultSelectionForMetric(newState.value as MetricFunction);
           if (selection) {
             this.setState({ selection });
@@ -155,9 +154,12 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
   }
 
   getUrlState() {
+    const traceExploration = getTraceExplorationScene(this);
+    const metric = traceExploration.getMetricVariable().getValue();
+
     return {
       actionView: this.state.actionView,
-      metric: this.state.metric,
+      metric: metric as MetricFunction,
       selection: this.state.selection ? JSON.stringify(this.state.selection) : undefined,
     };
   }
