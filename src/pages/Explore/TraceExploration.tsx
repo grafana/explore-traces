@@ -30,7 +30,7 @@ import {
   VAR_LATENCY_THRESHOLD,
   VAR_METRIC,
 } from '../../utils/shared';
-import { getTraceExplorationScene, getFilterSignature, getFiltersVariable, getTraceByServiceSceneAsDescendent } from '../../utils/utils';
+import { getTraceExplorationScene, getFilterSignature, getFiltersVariable } from '../../utils/utils';
 import { TraceDrawerScene } from '../../components/Explore/TracesByService/TraceDrawerScene';
 import { FilterByVariable } from 'components/Explore/filters/FilterByVariable';
 import { getSignalForKey, primarySignalOptions } from './primary-signals';
@@ -42,6 +42,7 @@ export interface TraceExplorationState extends SceneObjectState {
   controls: SceneObject[];
 
   body: SceneObject;
+  metric?: MetricFunction;
 
   drawerScene?: TraceDrawerScene;
   primarySignal?: string;
@@ -63,7 +64,7 @@ const commitSha = process.env.COMMIT_SHA;
 const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId', 'metric'] });
 
   public constructor(state: { locationService: LocationService } & Partial<TraceExplorationState>) {
     super({
@@ -95,6 +96,15 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
         this.updateFiltersWithPrimarySignal(newState.primarySignal, oldState.primarySignal);
       }
     });
+
+    const metricVariable = this.getMetricVariable();
+    this._subs.add(
+      metricVariable.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.setState({ metric: newState.value as MetricFunction });
+        }
+      })
+    );
   }
 
   public updateFiltersWithPrimarySignal(newSignal?: string, oldSignal?: string) {
@@ -115,7 +125,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
   }
 
   getUrlState() {
-    return { primarySignal: this.state.primarySignal, traceId: this.state.traceId, spanId: this.state.spanId };
+    return { primarySignal: this.state.primarySignal, traceId: this.state.traceId, spanId: this.state.spanId, metric: this.state.metric };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -162,8 +172,14 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
       return;
     }
 
-    getTraceByServiceSceneAsDescendent(this).onUserUpdateMetric(variable, metric);
+    this.onUserUpdateMetric(variable, metric);
   };
+  
+  onUserUpdateMetric(variable: CustomVariable, metric: string) {
+    this._urlSync.performBrowserHistoryAction(() => {
+      variable.changeValueTo(metric);
+    });
+  }
 
   public getMetricFunction() {
     return this.getMetricVariable().getValue() as MetricFunction;

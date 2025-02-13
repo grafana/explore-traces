@@ -40,16 +40,6 @@ export function getTraceByServiceScene(model: SceneObject): TracesByServiceScene
   return sceneGraph.getAncestor(model, TracesByServiceScene);
 }
 
-export function getTraceByServiceSceneAsDescendent(model: SceneObject): TracesByServiceScene {
-  const scenes = sceneGraph.findDescendents(model, TracesByServiceScene);
-
-  if (!scenes || scenes.length < 1 || !(scenes[0] instanceof TracesByServiceScene)) {
-    throw new Error('TracesByServiceScene not found');
-  }
-
-  return scenes[0];
-}
-
 export function newTracesExploration(
   locationService: LocationService,
   initialDS?: string,
