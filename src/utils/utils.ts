@@ -163,3 +163,12 @@ export function getMetricValue(scene: SceneObject) {
 export function fieldHasEmptyValues(data: SceneDataState) {
   return data?.data?.series[0].fields?.some((v) => v.values.every((e) => e === undefined)) ?? false;
 }
+
+export const isNumber = /^-?\d+\.?\d*$/;
+
+export const formatLabelValue = (value: string) => {
+  if (!isNumber.test(value) && typeof value === 'string' && !value.startsWith('"') && !value.endsWith('"')) {
+    return `"${value}"`;
+  }
+  return value;
+}

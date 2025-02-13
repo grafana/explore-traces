@@ -4,7 +4,7 @@ import React from "react";
 import { AddToInvestigationButton } from "../actions/AddToInvestigationButton";
 import { config, getPluginLinkExtensions } from "@grafana/runtime";
 import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from "utils/analytics";
-import { VAR_DATASOURCE_EXPR } from "utils/shared";
+import { getDataSource, getTraceExplorationScene } from "utils/utils";
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const extensionPointId = 'grafana-explore-metrics/exploration/v1';
@@ -13,7 +13,7 @@ const ADD_TO_INVESTIGATION_MENU_GROUP_TEXT = 'Investigations';
 
 interface PanelMenuState extends SceneObjectState {
   body?: VizPanelMenu;
-  labelKey?: string;
+  query?: string;
   labelValue?: string;
   addToInvestigationButton?: AddToInvestigationButton;
 }
@@ -42,7 +42,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       });
 
       const addToInvestigationButton = new AddToInvestigationButton({
-        labelKey: this.state.labelKey,
+        query: this.state.query,
         labelValue: this.state.labelValue,
       })
       this._subs.add(
@@ -83,12 +83,13 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 }
 
 const getExploreHref = (model: SceneObject<PanelMenuState>) => {
-  const datasource = sceneGraph.interpolate(model, VAR_DATASOURCE_EXPR);
+  const traceExploration = getTraceExplorationScene(model);
+  const datasource = getDataSource(traceExploration);
   const timeRange = sceneGraph.getTimeRange(model).state.value;
   const exploreState = JSON.stringify({
     ['traces-explore']: {
       range: toURLRange(timeRange.raw),
-      queries: [{ refId: 'A', datasource, query: `{${model.state.labelKey}=${model.state.labelValue}}`}],
+      queries: [{ refId: 'A', datasource, query: model.state.query}],
     },
   });
   const subUrl = config.appSubUrl ?? '';

@@ -3,7 +3,7 @@ import { sceneGraph, SceneObject, SceneObjectBase, SceneObjectState, SceneQueryR
 import { DataQuery, DataSourceRef } from '@grafana/schema';
 
 import Logo from '../../../../src/img/logo.svg';
-import { VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from 'utils/shared';
+import { VAR_DATASOURCE_EXPR } from 'utils/shared';
 
 export const investigationPluginId = 'grafana-explorations-app';
 export const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
@@ -11,7 +11,7 @@ export const addToInvestigationButtonLabel = 'add panel to investigation';
 
 export interface AddToInvestigationButtonState extends SceneObjectState {
   dsUid?: string;
-  labelKey?: string;
+  query?: string;
   labelValue?: string;
   context?: ExtensionContext;
   queries: DataQuery[];
@@ -55,7 +55,7 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
     if (isQueryRunner(queryRunner)) {
       const queries = queryRunner.state.queries.map((q) => ({
         ...q,
-        query: sceneGraph.interpolate(this, q.query.replace(VAR_FILTERS_EXPR, `${VAR_FILTERS_EXPR} && ${this.state.labelKey}=${this.state.labelValue}`)),
+        query: this.state.query,
       }));
 
       if (JSON.stringify(queries) !== JSON.stringify(this.state.queries)) {
@@ -79,7 +79,7 @@ export class AddToInvestigationButton extends SceneObjectBase<AddToInvestigation
       datasource: { uid: dsUid },
       url: window.location.href,
       id: `${JSON.stringify(queries)}`,
-      title: `${labelValue}`.replace(/"/g, ''),
+      title: `${labelValue}`,
       logoPath: Logo,
     };
     if (JSON.stringify(ctx) !== JSON.stringify(this.state.context)) {

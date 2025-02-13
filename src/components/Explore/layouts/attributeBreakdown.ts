@@ -6,13 +6,14 @@ import {
   SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObject,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
+import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction, VAR_FILTERS_EXPR } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
+import { formatLabelValue, getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
 import { rateByWithStatus } from '../queries/rateByWithStatus';
@@ -22,7 +23,6 @@ import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { syncYAxis } from '../behaviors/syncYaxis';
 import { exemplarsTransformations } from '../../../utils/exemplars';
 import { PanelMenu } from '../panels/PanelMenu';
-import { isNumber } from '../filters/FilterByVariable';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -95,23 +95,18 @@ export function buildNormalLayout(
   });
 }
 
-const formatLabelValue = (value: string) => {
-  if (!isNumber.test(value) && typeof value === 'string' && !value.startsWith('"') && !value.endsWith('"')) {
-    return `"${value}"`;
-  }
-  return value;
-}
-
 export function getLayoutChild(
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
   metric: string,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
-) {
+) {  
   return (data: PanelData, frame: DataFrame) => {
+    const query = `{${sceneGraph.interpolate(variable, `${VAR_FILTERS_EXPR} && ${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`)}}`;
+
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
-      .setMenu(new PanelMenu({ labelKey: variable.getValueText(), labelValue: formatLabelValue(getLabelValue(frame)) }))
+      .setMenu(new PanelMenu({ query, labelValue: getLabelValue(frame) }))
       .setData(
         new SceneDataNode({
           data: {
