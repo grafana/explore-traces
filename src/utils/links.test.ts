@@ -36,7 +36,7 @@ describe('contextToLink', () => {
     const result = getLink(mockContext);
     expect(result).toBeDefined();
     expect(result?.path).toContain('var-ds=test-uid');
-    expect(result?.path).toContain('var-filters=resource.service.name%7C%3D%7Cblue');
+    expect(result?.path).toContain('var-filters=resource.service.name%7C%3D%7Cgrafana');
     expect(result?.path).toContain('var-filters=span.http.status_code%7C%3D%7C200');
   });
 
