@@ -11,12 +11,12 @@ import {
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
-import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction, VAR_FILTERS_EXPR } from '../../../utils/shared';
+import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
 import { formatLabelValue, getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
-import { rateByWithStatus } from '../queries/rateByWithStatus';
+import { generateMetricsQuery, metricByWithStatus } from '../queries/generateMetricsQuery';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
@@ -31,7 +31,7 @@ export function buildNormalLayout(
 ) {
   const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
-  const query = rateByWithStatus(metric, variable.getValueText());
+  const query = metricByWithStatus(metric, variable.getValueText());
 
   return new LayoutSwitcher({
     $behaviors: [syncYAxis()],
@@ -98,11 +98,18 @@ export function buildNormalLayout(
 export function getLayoutChild(
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
-  metric: string,
+  metric: MetricFunction,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
-) {  
+) {
   return (data: PanelData, frame: DataFrame) => {
-    const query = `{${sceneGraph.interpolate(variable, `${VAR_FILTERS_EXPR} && ${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`)}}`;
+    const query = sceneGraph.interpolate(
+      variable,
+      generateMetricsQuery({
+        metric,
+        extraFilters: `${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`,
+        groupByStatus: true,
+      })
+    );
 
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))

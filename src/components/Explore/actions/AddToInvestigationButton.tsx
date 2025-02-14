@@ -5,10 +5,6 @@ import { DataQuery, DataSourceRef } from '@grafana/schema';
 import Logo from '../../../../src/img/logo.svg';
 import { VAR_DATASOURCE_EXPR } from 'utils/shared';
 
-export const investigationPluginId = 'grafana-explorations-app';
-export const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
-export const addToInvestigationButtonLabel = 'add panel to investigation';
-
 export interface AddToInvestigationButtonState extends SceneObjectState {
   dsUid?: string;
   query?: string;

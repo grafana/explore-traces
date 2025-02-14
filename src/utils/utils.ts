@@ -3,6 +3,7 @@ import {
   AdHocFiltersVariable,
   CustomVariable,
   DataSourceVariable,
+  SceneDataQuery,
   SceneDataState,
   sceneGraph,
   SceneObject,
@@ -96,7 +97,7 @@ export function getLabelValue(frame: DataFrame, labelName?: string) {
     return 'No labels';
   }
 
-  const keys = Object.keys(labels);
+  const keys = Object.keys(labels).filter((k) => k !== 'p'); // remove the percentile label
   if (keys.length === 0) {
     return 'No labels';
   }
@@ -152,6 +153,12 @@ export function getDatasourceVariable(scene: SceneObject): DataSourceVariable {
   return variable;
 }
 
+export function getCurrentStep(scene: SceneObject): number | undefined {
+  const data = sceneGraph.getData(scene).state.data;
+  const targetQuery = data?.request?.targets[0];
+  return targetQuery ? (targetQuery as SceneDataQuery).step : undefined;
+}
+
 export function shouldShowSelection(tab?: ActionViewType): boolean {
   return tab === 'comparison' || tab === 'traceList';
 }
@@ -171,4 +178,4 @@ export const formatLabelValue = (value: string) => {
     return `"${value}"`;
   }
   return value;
-}
+};

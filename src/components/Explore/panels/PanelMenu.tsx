@@ -1,10 +1,17 @@
-import { PanelMenuItem, toURLRange, urlUtil } from "@grafana/data";
-import { SceneObjectBase, VizPanelMenu, SceneObject, SceneComponentProps, sceneGraph, SceneObjectState } from "@grafana/scenes";
-import React from "react";
-import { AddToInvestigationButton } from "../actions/AddToInvestigationButton";
-import { config, getPluginLinkExtensions } from "@grafana/runtime";
-import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from "utils/analytics";
-import { getDataSource, getTraceExplorationScene } from "utils/utils";
+import { PanelMenuItem, toURLRange, urlUtil } from '@grafana/data';
+import {
+  SceneObjectBase,
+  VizPanelMenu,
+  SceneObject,
+  SceneComponentProps,
+  sceneGraph,
+  SceneObjectState,
+} from '@grafana/scenes';
+import React from 'react';
+import { AddToInvestigationButton } from '../actions/AddToInvestigationButton';
+import { config, getPluginLinkExtensions } from '@grafana/runtime';
+import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from 'utils/analytics';
+import { getCurrentStep, getDataSource, getTraceExplorationScene } from 'utils/utils';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
@@ -44,7 +51,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       const addToInvestigationButton = new AddToInvestigationButton({
         query: this.state.query,
         labelValue: this.state.labelValue,
-      })
+      });
       this._subs.add(
         addToInvestigationButton?.subscribeToState(() => {
           subscribeToAddToExploration(this);
@@ -63,6 +70,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       this.state.body.addItem(item);
     }
   }
+
   setItems(items: PanelMenuItem[]): void {
     if (this.state.body) {
       this.state.body.setItems(items);
@@ -73,9 +81,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     const { body } = model.useState();
 
     if (body) {
-      return (
-        <body.Component model={body} />
-      );
+      return <body.Component model={body} />;
     }
 
     return <></>;
@@ -86,10 +92,12 @@ const getExploreHref = (model: SceneObject<PanelMenuState>) => {
   const traceExploration = getTraceExplorationScene(model);
   const datasource = getDataSource(traceExploration);
   const timeRange = sceneGraph.getTimeRange(model).state.value;
+  const step = getCurrentStep(model);
+
   const exploreState = JSON.stringify({
     ['traces-explore']: {
       range: toURLRange(timeRange.raw),
-      queries: [{ refId: 'A', datasource, query: model.state.query}],
+      queries: [{ refId: 'A', datasource, query: model.state.query, step }],
     },
   });
   const subUrl = config.appSubUrl ?? '';
@@ -99,7 +107,7 @@ const getExploreHref = (model: SceneObject<PanelMenuState>) => {
 
 const onExploreClick = () => {
   reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.open_in_explore_clicked);
-}
+};
 
 const getInvestigationLink = (addToExplorations: AddToInvestigationButton) => {
   const links = getPluginLinkExtensions({
@@ -116,7 +124,10 @@ const onAddToInvestigationClick = (event: React.MouseEvent, addToInvestigationBu
     link.onClick(event);
   }
 
-  reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.add_to_investigation_clicked);
+  reportAppInteraction(
+    USER_EVENTS_PAGES.analyse_traces,
+    USER_EVENTS_ACTIONS.analyse_traces.add_to_investigation_clicked
+  );
 };
 
 function subscribeToAddToExploration(menu: PanelMenu) {
