@@ -7,7 +7,7 @@ import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from "ut
 import { getDataSource, getTraceExplorationScene } from "utils/utils";
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
-const extensionPointId = 'grafana-explore-metrics/exploration/v1';
+const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
 const ADD_TO_INVESTIGATION_MENU_GROUP_TEXT = 'Investigations';
 
