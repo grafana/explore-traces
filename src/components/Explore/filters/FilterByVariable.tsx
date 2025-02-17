@@ -6,6 +6,7 @@ import { VariableHide } from '@grafana/schema';
 
 import { FilterSetRenderer } from './FilterSetRenderer';
 import { VAR_FILTERS, explorationDS } from 'utils/shared';
+import { isNumber } from 'utils/utils';
 
 export type FilterByVariableState = ConstructorParameters<typeof AdHocFiltersVariable>[0] & {
   initialFilters?: AdHocVariableFilter[];
@@ -35,8 +36,6 @@ export function renderTraceQLLabelFilters(filters: AdHocVariableFilter[]) {
   // and avoid invalid queries like '{ && key=value }'
   return expr.length ? expr : 'true';
 }
-
-export const isNumber = /^-?\d+\.?\d*$/;
 
 function renderFilter(filter: AdHocVariableFilter) {
   let val = filter.value;

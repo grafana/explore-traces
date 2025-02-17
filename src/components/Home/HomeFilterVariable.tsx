@@ -6,7 +6,7 @@ import { VariableHide } from '@grafana/schema';
 
 import { RESOURCE_ATTR, SPAN_ATTR, VAR_HOME_FILTER, explorationDS } from 'utils/shared';
 import { HomeFilter } from './HomeFilter';
-import { isNumber } from 'components/Explore/filters/FilterByVariable';
+import { isNumber } from 'utils/utils';
 
 export type HomeFilterVariableState = ConstructorParameters<typeof AdHocFiltersVariable>[0] & {
   initialFilters: AdHocVariableFilter[];
