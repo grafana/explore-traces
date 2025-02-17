@@ -1,5 +1,11 @@
 import { renderTraceQLLabelFilters } from "./FilterByVariable";
 
+jest.mock('../../../utils/utils', () => ({
+  isNumber: {
+    test: jest.fn().mockReturnValue(false),
+  },
+}));
+
 describe('renderTraceQLLabelFilters', () => {
   it('should render empty expression from no filters', () => {
     const expression = renderTraceQLLabelFilters([]);

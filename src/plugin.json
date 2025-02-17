@@ -63,6 +63,11 @@
         "title": "open traces",
         "description": "Open traces"
       }
+    ],
+    "extensionPoints": [
+      {
+        "id": "grafana-exploretraces-app/exploration/v1"
+      }
     ]
   }
 }
