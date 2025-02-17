@@ -29,7 +29,6 @@ import { TracesByServiceScene } from 'components/Explore/TracesByService/TracesB
 import { ActionViewType } from '../components/Explore/TracesByService/Tabs/TabsBarScene';
 import { LocationService } from '@grafana/runtime';
 import { Home } from 'pages/Home/Home';
-import { HomeFilterVariable } from 'components/Home/HomeFilterVariable';
 
 export function getTraceExplorationScene(model: SceneObject): TraceExploration {
   return sceneGraph.getAncestor(model, TraceExploration);
@@ -163,9 +162,9 @@ export function getFiltersVariable(scene: SceneObject): AdHocFiltersVariable {
   return variable;
 }
 
-export function getHomeFilterVariable(scene: SceneObject): HomeFilterVariable {
+export function getHomeFilterVariable(scene: SceneObject): AdHocFiltersVariable {
   const variable = sceneGraph.lookupVariable(VAR_HOME_FILTER, scene);
-  if (!(variable instanceof HomeFilterVariable)) {
+  if (!(variable instanceof AdHocFiltersVariable)) {
     throw new Error('Home filter variable not found');
   }
   return variable;

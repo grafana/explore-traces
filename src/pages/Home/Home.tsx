@@ -5,6 +5,7 @@ import { duration } from 'moment';
 
 import { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
+  AdHocFiltersVariable,
   DataSourceVariable,
   SceneComponentProps,
   SceneCSSGridItem,
@@ -23,12 +24,15 @@ import { useStyles2 } from '@grafana/ui';
 
 import {
   DATASOURCE_LS_KEY,
+  explorationDS,
   VAR_DATASOURCE,
+  VAR_HOME_FILTER,
 } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
 import { getDatasourceVariable, getHomeFilterVariable } from 'utils/utils';
-import { HomeFilterVariable, renderFilter } from 'components/Home/HomeFilterVariable';
+import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from 'utils/analytics';
+import { getTagKeysProvider, renderTraceQLLabelFilters } from './utils';
 
 export interface HomeState extends SceneObjectState {
   controls?: SceneObject[];
@@ -50,34 +54,45 @@ export class Home extends SceneObjectBase<HomeState> {
   }
 
   private _onActivate() {
+    const sceneTimeRange = sceneGraph.getTimeRange(this);
+    const filterVariable = getHomeFilterVariable(this);
+    filterVariable.setState({
+      getTagKeysProvider: getTagKeysProvider,
+    });
+
     getDatasourceVariable(this).subscribeToState((newState) => {
       if (newState.value) {
         localStorage.setItem(DATASOURCE_LS_KEY, newState.value.toString());
       }
     });
 
-    getHomeFilterVariable(this).subscribeToState((newState) => {
-      if (newState.filters.length > 0) {
-        this.buildPanels(sceneTimeRange, newState.filters[0]);
+    getHomeFilterVariable(this).subscribeToState((newState, prevState) => {
+      if (newState.filters !== prevState.filters) {
+        this.buildPanels(sceneTimeRange, newState.filters);
+
+        const newFilters = newState.filters.filter((f) => !prevState.filters.find((pf) => pf.key === f.key));
+        if (newFilters.length > 0) {
+          reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.filter_changed, {
+            key: newFilters[0].key,
+          });
+        }
       }
     });
 
-    const filterVariable = getHomeFilterVariable(this);
-    const sceneTimeRange = sceneGraph.getTimeRange(this);
     sceneTimeRange.subscribeToState((newState, prevState) => {
       if (newState.value.from !== prevState.value.from || newState.value.to !== prevState.value.to) {
-        this.buildPanels(sceneTimeRange, filterVariable.state.filters[0]);
+        this.buildPanels(sceneTimeRange, filterVariable.state.filters);
       }
     });
-    this.buildPanels(sceneTimeRange, filterVariable.state.filters[0]);
+    this.buildPanels(sceneTimeRange, filterVariable.state.filters);
   }
 
-  buildPanels(sceneTimeRange: SceneTimeRangeLike, filter: AdHocVariableFilter) {
+  buildPanels(sceneTimeRange: SceneTimeRangeLike, filters: AdHocVariableFilter[]) {
     const from = sceneTimeRange.state.value.from.unix();
     const to = sceneTimeRange.state.value.to.unix();
     const dur = duration(to - from, 's');
     const durString = `${dur.asSeconds()}s`;
-    const renderedFilter = renderFilter(filter);
+    const renderedFilters = renderTraceQLLabelFilters(filters);
 
     this.setState({
       body: new SceneCSSGridLayout({
@@ -90,21 +105,21 @@ export class Home extends SceneObjectBase<HomeState> {
               new SceneCSSGridItem({
                 body: new AttributePanel({
                   query: {
-                    query: `{nestedSetParent < 0 && status = error ${renderedFilter}} | count_over_time() by (${filter.key})`,
+                    query: `{nestedSetParent < 0 && status = error ${renderedFilters}} | count_over_time() by (resource.service.name)`,
                     step: durString
                   },
-                  title: 'Errors', 
+                  title: 'Errored services', 
                   type: 'errors',
                 }),
               }),
               new SceneCSSGridItem({
                 body: new AttributePanel({ 
                   query: {
-                    query: `{nestedSetParent<0 ${renderedFilter}} | histogram_over_time(duration)`,
+                    query: `{nestedSetParent<0 ${renderedFilters}} | histogram_over_time(duration)`,
                   },
                   title: 'Slow traces', 
                   type: 'duration',
-                  filter: renderedFilter,
+                  filter: renderedFilters,
                 }),
               }),
             ],
@@ -136,8 +151,12 @@ function getVariableSet(initialFilters: AdHocVariableFilter[], initialDS?: strin
         value: initialDS,
         pluginId: 'tempo',
       }),
-      new HomeFilterVariable({
-        initialFilters,
+      new AdHocFiltersVariable({
+        name: VAR_HOME_FILTER,
+        datasource: explorationDS,
+        layout: 'combobox',
+        filters: initialFilters,
+        allowCustomValue: false,
       }),
     ],
   });

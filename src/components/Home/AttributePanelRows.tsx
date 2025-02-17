@@ -66,7 +66,7 @@ export const AttributePanelRows = (props: Props) => {
                 type={type} 
                 index={index}
                 label={getLabelValue(df)}
-                labelTitle={getLabelKey(df)}
+                labelTitle={'Service'}
                 value={getTotalErrs(df)}
                 valueTitle='Total errors'
                 url={getUrl(df)}

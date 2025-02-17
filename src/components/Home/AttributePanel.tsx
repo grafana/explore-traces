@@ -83,7 +83,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                       children: [
                         new AttributePanel({ 
                           query: {
-                            query: `{nestedSetParent<0 && duration > ${minDuration} ${state.filter ? state.filter : ''}}`,
+                            query: `{nestedSetParent<0 && duration > ${minDuration} ${state.filter ?? ''}}`,
                           },
                           title: state.title, 
                           type: state.type,
