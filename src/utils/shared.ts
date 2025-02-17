@@ -13,6 +13,7 @@ export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
 export const EXPLORATIONS_ROUTE = `${PLUGIN_BASE_URL}/${ROUTES.Explore}`;
 
 export const DATASOURCE_LS_KEY = 'grafana.explore.traces.datasource';
+export const HOMEPAGE_FILTERS_LS_KEY = 'grafana.explore.traces.homepage.filters';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 

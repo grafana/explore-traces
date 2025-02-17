@@ -25,6 +25,7 @@ import { useStyles2 } from '@grafana/ui';
 import {
   DATASOURCE_LS_KEY,
   explorationDS,
+  HOMEPAGE_FILTERS_LS_KEY,
   VAR_DATASOURCE,
   VAR_HOME_FILTER,
 } from '../../utils/shared';
@@ -70,8 +71,12 @@ export class Home extends SceneObjectBase<HomeState> {
       if (newState.filters !== prevState.filters) {
         this.buildPanels(sceneTimeRange, newState.filters);
 
+        // save the filters to local storage
+        localStorage.setItem(HOMEPAGE_FILTERS_LS_KEY, JSON.stringify(newState.filters));
+
         const newFilters = newState.filters.filter((f) => !prevState.filters.find((pf) => pf.key === f.key));
         if (newFilters.length > 0) {
+          console.log(newFilters);
           reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.filter_changed, {
             key: newFilters[0].key,
           });
