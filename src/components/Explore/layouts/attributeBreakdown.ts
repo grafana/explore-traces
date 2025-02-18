@@ -124,18 +124,18 @@ export function getLayoutChild(
       return existingGridItem;
     }
 
-      const query = sceneGraph.interpolate(
-          variable,
-          generateMetricsQuery({
-              metric,
-              extraFilters: `${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`,
-              groupByStatus: true,
-          })
-      );
+    const query = sceneGraph.interpolate(
+      variable,
+      generateMetricsQuery({
+        metric,
+        extraFilters: `${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`,
+        groupByStatus: true,
+      })
+    );
 
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
-        .setMenu(new PanelMenu({ query, labelValue: getLabelValue(frame) }))
+      .setMenu(new PanelMenu({ query, labelValue: getLabelValue(frame) }))
       .setData(dataNode);
 
     const actions = actionsFn(frame);
