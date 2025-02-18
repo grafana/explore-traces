@@ -6,21 +6,23 @@ import {
   SceneDataTransformer,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObject,
   VizPanelState,
 } from '@grafana/scenes';
 import { LayoutSwitcher } from '../LayoutSwitcher';
 import { explorationDS, GRID_TEMPLATE_COLUMNS, MetricFunction } from '../../../utils/shared';
 import { ByFrameRepeater } from '../ByFrameRepeater';
-import { getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
+import { formatLabelValue, getLabelValue, getTraceExplorationScene } from '../../../utils/utils';
 import { map, Observable } from 'rxjs';
 import { DataFrame, PanelData, reduceField, ReducerID } from '@grafana/data';
-import { rateByWithStatus } from '../queries/rateByWithStatus';
+import { generateMetricsQuery, metricByWithStatus } from '../queries/generateMetricsQuery';
 import { barsPanelConfig } from '../panels/barsPanel';
 import { linesPanelConfig } from '../panels/linesPanel';
 import { StepQueryRunner } from '../queries/StepQueryRunner';
 import { syncYAxis } from '../behaviors/syncYaxis';
 import { exemplarsTransformations } from '../../../utils/exemplars';
+import { PanelMenu } from '../panels/PanelMenu';
 
 export function buildNormalLayout(
   scene: SceneObject,
@@ -29,7 +31,7 @@ export function buildNormalLayout(
 ) {
   const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
-  const query = rateByWithStatus(metric, variable.getValueText());
+  const query = metricByWithStatus(metric, variable.getValueText());
   const panels: Record<string, SceneCSSGridItem> = {};
 
   return new LayoutSwitcher({
@@ -98,7 +100,7 @@ export function getLayoutChild(
   panels: Record<string, SceneCSSGridItem>,
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
-  metric: string,
+  metric: MetricFunction,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
@@ -122,8 +124,18 @@ export function getLayoutChild(
       return existingGridItem;
     }
 
+      const query = sceneGraph.interpolate(
+          variable,
+          generateMetricsQuery({
+              metric,
+              extraFilters: `${variable.getValueText()}=${formatLabelValue(getLabelValue(frame))}`,
+              groupByStatus: true,
+          })
+      );
+
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
+        .setMenu(new PanelMenu({ query, labelValue: getLabelValue(frame) }))
       .setData(dataNode);
 
     const actions = actionsFn(frame);

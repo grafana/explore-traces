@@ -47,6 +47,8 @@
     "unroute",
     "gdev",
     "lokiexplore",
-    "viewports"
+    "viewports",
+    "overriden",
+    "analysing"
   ]
 }
