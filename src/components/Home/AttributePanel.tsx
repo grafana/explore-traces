@@ -9,7 +9,7 @@ import {
   SceneQueryRunner,
 } from '@grafana/scenes';
 import { GrafanaTheme2, LoadingState } from '@grafana/data';
-import { explorationDS, MetricFunction } from 'utils/shared';
+import { explorationDS } from 'utils/shared';
 import { LoadingStateScene } from 'components/states/LoadingState/LoadingStateScene';
 import { useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
@@ -19,6 +19,8 @@ import Skeleton from 'react-loading-skeleton';
 import { getErrorMessage, getNoDataMessage } from 'utils/utils';
 import { getMinimumsForDuration, getYBuckets } from 'components/Explore/TracesByService/REDPanel';
 
+export type HomepagePanelType = 'errored-services' | 'slowest-services' | 'slowest-traces';
+
 export interface AttributePanelState extends SceneObjectState {
   panel?: SceneFlexLayout;
   query: {
@@ -26,7 +28,7 @@ export interface AttributePanelState extends SceneObjectState {
     step?: string;
   };
   title: string;
-  type: MetricFunction;
+  type: HomepagePanelType;
   renderDurationPanel?: boolean;
 }
 
@@ -62,7 +64,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                 }),
               });
             } else if (data.data.series.length > 0) {
-              if (state.type === 'errors' || state.renderDurationPanel) {
+              if (state.type !== 'slowest-traces' || state.renderDurationPanel) {
                 this.setState({
                   panel: new SceneFlexLayout({
                     children: [
@@ -74,7 +76,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                     ],
                   }),
                 });
-              } else {
+              } else if (data.data?.state === LoadingState.Done) {
                 let yBuckets = getYBuckets(data.data?.series ?? []);
                 if (yBuckets?.length) {
                   const { minDuration } = getMinimumsForDuration(yBuckets);
@@ -108,7 +110,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                 ],
               }),
             });
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else {
             this.setState({
               panel: new SceneFlexLayout({
                 direction: 'column',

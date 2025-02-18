@@ -78,7 +78,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
                 }),
               ],
             });
-          } else if (data.data?.state === LoadingState.Loading) {
+          } else {
             this.state.body.setState({
               children: [
                 new SceneCSSGridLayout({
