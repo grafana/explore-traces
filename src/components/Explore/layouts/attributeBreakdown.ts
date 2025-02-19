@@ -32,6 +32,7 @@ export function buildNormalLayout(
   const traceExploration = getTraceExplorationScene(scene);
   const metric = traceExploration.getMetricVariable().getValue() as MetricFunction;
   const query = metricByWithStatus(metric, variable.getValueText());
+  const panels: Record<string, SceneCSSGridItem> = {};
 
   return new LayoutSwitcher({
     $behaviors: [syncYAxis()],
@@ -79,7 +80,7 @@ export function buildNormalLayout(
           children: [],
         }),
         groupBy: true,
-        getLayoutChild: getLayoutChild(getLabelValue, variable, metric, actionsFn),
+        getLayoutChild: getLayoutChild(panels, getLabelValue, variable, metric, actionsFn),
       }),
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
@@ -89,19 +90,40 @@ export function buildNormalLayout(
           children: [],
         }),
         groupBy: true,
-        getLayoutChild: getLayoutChild(getLabelValue, variable, metric, actionsFn),
+        getLayoutChild: getLayoutChild(panels, getLabelValue, variable, metric, actionsFn),
       }),
     ],
   });
 }
 
 export function getLayoutChild(
+  panels: Record<string, SceneCSSGridItem>,
   getTitle: (df: DataFrame, labelName: string) => string,
   variable: CustomVariable,
   metric: MetricFunction,
   actionsFn: (df: DataFrame) => VizPanelState['headerActions']
 ) {
   return (data: PanelData, frame: DataFrame) => {
+    const existingGridItem = frame.name ? panels[frame.name] : undefined;
+
+    const dataNode = new SceneDataNode({
+      data: {
+        ...data,
+        annotations: data.annotations?.filter((a) => a.refId === frame.refId),
+        series: [
+          {
+            ...frame,
+            fields: frame.fields.sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0),
+          },
+        ],
+      },
+    });
+
+    if (existingGridItem) {
+      existingGridItem.state.body?.setState({ $data: dataNode });
+      return existingGridItem;
+    }
+
     const query = sceneGraph.interpolate(
       variable,
       generateMetricsQuery({
@@ -114,27 +136,20 @@ export function getLayoutChild(
     const panel = (metric === 'duration' ? linesPanelConfig().setUnit('s') : barsPanelConfig())
       .setTitle(getTitle(frame, variable.getValueText()))
       .setMenu(new PanelMenu({ query, labelValue: getLabelValue(frame) }))
-      .setData(
-        new SceneDataNode({
-          data: {
-            ...data,
-            annotations: data.annotations?.filter((a) => a.refId === frame.refId),
-            series: [
-              {
-                ...frame,
-                fields: frame.fields.sort((a, b) => a.labels?.status?.localeCompare(b.labels?.status || '') || 0),
-              },
-            ],
-          },
-        })
-      );
+      .setData(dataNode);
 
     const actions = actionsFn(frame);
     if (actions) {
       panel.setHeaderActions(actions);
     }
-    return new SceneCSSGridItem({
+
+    const gridItem = new SceneCSSGridItem({
       body: panel.build(),
     });
+    if (frame.name) {
+      panels[frame.name] = gridItem;
+    }
+
+    return gridItem;
   };
 }

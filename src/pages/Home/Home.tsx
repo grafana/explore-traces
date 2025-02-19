@@ -21,10 +21,7 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 
-import {
-  DATASOURCE_LS_KEY,
-  VAR_DATASOURCE,
-} from '../../utils/shared';
+import { DATASOURCE_LS_KEY, VAR_DATASOURCE } from '../../utils/shared';
 import { AttributePanel } from 'components/Home/AttributePanel';
 import { HeaderScene } from 'components/Home/HeaderScene';
 import { getDatasourceVariable } from 'utils/utils';
@@ -81,19 +78,29 @@ export class Home extends SceneObjectBase<HomeState> {
                 body: new AttributePanel({
                   query: {
                     query: '{nestedSetParent < 0 && status = error} | count_over_time() by (resource.service.name)',
-                    step: durString
+                    step: durString,
                   },
-                  title: 'Errored services', 
-                  type: 'errors',
+                  title: 'Errored services',
+                  type: 'errored-services',
                 }),
               }),
               new SceneCSSGridItem({
-                body: new AttributePanel({ 
+                body: new AttributePanel({
+                  query: {
+                    query: '{nestedSetParent < 0} | quantile_over_time(duration, 0.9) by (resource.service.name)',
+                    step: durString,
+                  },
+                  title: 'Slow services',
+                  type: 'slowest-services',
+                }),
+              }),
+              new SceneCSSGridItem({
+                body: new AttributePanel({
                   query: {
                     query: '{nestedSetParent<0} | histogram_over_time(duration)',
                   },
-                  title: 'Slow traces', 
-                  type: 'duration', 
+                  title: 'Slow traces',
+                  type: 'slowest-traces',
                 }),
               }),
             ],

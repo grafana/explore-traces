@@ -2,18 +2,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AttributePanelRows } from './AttributePanelRows';
 import { DataFrame, Field } from '@grafana/data';
-import { MetricFunction } from 'utils/shared';
 
 describe('AttributePanelRows', () => {
-  const createField = (name: string, values: any[], labels: Record<string, string> = {}) => ({
-    name,
-    values,
-    labels,
-  }) as Field;
+  const createField = (name: string, values: any[], labels: Record<string, string> = {}) =>
+    ({
+      name,
+      values,
+      labels,
+    }) as Field;
 
-  const createDataFrame = (fields: Field[]) => ({
-    fields,
-  }) as DataFrame;
+  const createDataFrame = (fields: Field[]) =>
+    ({
+      fields,
+    }) as DataFrame;
 
   const dummySeries = [
     createDataFrame([
@@ -38,17 +39,17 @@ describe('AttributePanelRows', () => {
 
   it('renders message if provided', () => {
     const msg = 'No data available.';
-    render(<AttributePanelRows series={[]} type={'errors' as MetricFunction} message={msg} />);
+    render(<AttributePanelRows series={[]} type={'errored-services'} message={msg} />);
     expect(screen.getByText(msg)).toBeInTheDocument();
   });
 
   it('renders an empty container if no series or message is provided', () => {
-    render(<AttributePanelRows series={[]} type={'errors' as MetricFunction} />);
+    render(<AttributePanelRows series={[]} type={'errored-services'} />);
     expect(screen.getByText('No series data')).toBeInTheDocument();
   });
 
   it('renders error rows sorted by total errors when type is "errors"', () => {
-    render(<AttributePanelRows series={dummySeries} type={'errors' as MetricFunction} />);
+    render(<AttributePanelRows series={dummySeries} type={'errored-services'} />);
 
     expect(screen.getAllByText('Total errors').length).toBe(1);
 
@@ -58,7 +59,7 @@ describe('AttributePanelRows', () => {
   });
 
   it('renders duration rows sorted by duration when type is not "errors"', () => {
-    render(<AttributePanelRows series={dummyDurationSeries} type={'duration' as MetricFunction} />);
+    render(<AttributePanelRows series={dummyDurationSeries} type={'slowest-traces'} />);
 
     expect(screen.getAllByText('Duration').length).toBe(1);
 
