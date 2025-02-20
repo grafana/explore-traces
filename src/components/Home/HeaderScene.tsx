@@ -35,13 +35,13 @@ export class HeaderScene extends SceneObjectBase {
             <h2 className={styles.title}>Start your traces exploration!</h2>
           </div>
           <div>
-            <p>Explore and visualize your trace data without writing a query.</p>
+            <p>Drilldown and visualize your trace data without writing a query.</p>
             <div className={styles.headerActions}>
               <Button variant='primary' onClick={() => {
                   reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.explore_traces_clicked);
                   navigate(EXPLORATIONS_ROUTE);
                 }}>
-                Let’s explore traces
+                Let’s start
                 <Icon name='arrow-right' size='lg' />
               </Button>
               <LinkButton
