@@ -2,7 +2,7 @@
 description: Learn about concepts basic to tracing.
 canonical: https://grafana.com/docs/grafana/latest/explore/simplified-exploration/traces/concepts/
 keywords:
-  - Explore Traces
+  - Traces Drilldown
   - Concepts
 title: Concepts
 menuTitle: Concepts
@@ -16,17 +16,18 @@ Traces record the details of a request to help understand why an issue is or was
 
 Tracing is best used for analyzing the performance of your system, identifying bottlenecks, monitoring latency, and providing a complete picture of how requests are processed.
 
-To use the Explore Traces app, you should understand these concepts:
+To use the Grafana Traces Drilldown app, you should understand these concepts:
 
-- [Rate, error, and duration metrics](#rate-error-and-duration-metrics)
-- [Traces and spans](#traces-and-spans)
-- [Trace structure](#trace-structure)
+- [Concepts](#concepts)
+  - [Rate, error, and duration metrics](#rate-error-and-duration-metrics)
+  - [Traces and spans](#traces-and-spans)
+  - [Trace structure](#trace-structure)
 
-{{< docs/public-preview product="Explore Traces" >}}
+{{< docs/public-preview product="Traces Drilldown" >}}
 
 ## Rate, error, and duration metrics
 
-The Explore Traces app lets you explore rate, error, and duration (RED) metrics generated from your traces by Tempo.
+The Traces Drilldown app lets you explore rate, error, and duration (RED) metrics generated from your traces by Tempo.
 
 | Useful for investigating | Metric | Meaning |
 |---|---|---|
