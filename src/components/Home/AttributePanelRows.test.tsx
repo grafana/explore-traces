@@ -4,12 +4,13 @@ import { AttributePanelRows } from './AttributePanelRows';
 import { DataFrame, Field } from '@grafana/data';
 
 describe('AttributePanelRows', () => {
-  const createField = (name: string, values: any[], labels: Record<string, string> = {}) => ({
-    name,
-    values,
-    labels,
+  const createField = (name: string, values: any[], labels: Record<string, string> = {}, type?: string) =>
+    ({
+      name,
+      values,
+      labels,
       type,
-  }) as Field;
+    }) as Field;
 
   const createDataFrame = (fields: Field[]) =>
     ({
