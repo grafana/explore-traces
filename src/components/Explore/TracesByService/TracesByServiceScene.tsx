@@ -328,7 +328,7 @@ function getStyles(theme: GrafanaTheme2) {
 const MAIN_PANEL_HEIGHT = 240;
 export const MINI_PANEL_HEIGHT = (MAIN_PANEL_HEIGHT - 8) / 2;
 
-function buildQuery(type: MetricFunction, select: VariableValue, selection?: ComparisonSelection) {
+export function buildQuery(type: MetricFunction, select: VariableValue, selection?: ComparisonSelection) {
   const columns = select?.toString();
   const selectQuery = columns !== '' ? ` | select(${columns})` : '';
   let typeQuery = '';
