@@ -27,7 +27,7 @@ Expand your observability journey and learn about [the Drilldown apps suite](htt
 
 ## Before you begin
 
-To use Grafana     Traces Drilldown with Grafana Cloud, you need:
+To use Grafana Traces Drilldown with Grafana Cloud, you need:
 
 - A Grafana Cloud account
 - A Grafana stack in Grafana Cloud with a configured Tempo data source

@@ -150,7 +150,7 @@ The behavior of the comparison also differs depending upon the RED metric you've
 For example, if you're viewing **Error** metrics, the comparison shows the attribute values that correlate with errors.
 However, if you're viewing **Duration** metrics, the comparison shows the attributes that correlate with high latency.
 
-![Comparison view](/media/docs/explore-traces/explore-traces-rate-comparison.png)
+![Comparison view](/media/docs/explore-traces/explore-traces-rate-comparison-v2.4.png)
 
 ### Structure
 
@@ -194,3 +194,21 @@ This time range can be any 24-hour period in your configured trace data retentio
 The default is 30 days.
 
 For more information about the time range picker, refer to [Use dashboards](https://grafana.com/docs/grafana/latest/dashboards/use-dashboards/#set-dashboard-time-range).
+
+## View exemplars
+
+An exemplar is a specific trace representative of measurement taken in a given time interval. While metrics excel at giving you an aggregated view of your system, traces give you a fine grained view of a single request; exemplars are a way to link the two.
+
+Use exemplars to help isolate problems within your data distribution by pinpointing query traces exhibiting high latency within a time interval.
+Once you localize the latency problem to a few exemplar traces, you can combine it with additional system based information or location properties to perform a root cause analysis faster, leading to quick resolutions to performance issues.
+
+For more information, refer to [Introduction to exemplars](https://grafana.com/docs/grafana/<GRAFANA+VERSION>/fundamentals/exemplars/).
+
+In Traces Drilldown, exemplar data is represented by a small diamond next to the bar graphs.
+You can view the exemplar information by hovering the cursor over over the small diamond.
+
+![A small diamond next to the bar graph indicates that exemplar data is available.](/media/docs/explore-traces/explore-traces-exemplar-v2.4.png)
+
+Select **View trace** to open a slide-out trace panel.
+
+![Selecting View trace reveals a slide-out panel with the full trace information.](/media/docs/explore-traces/explore-traces-exemplars-trace-v2.4.png)
