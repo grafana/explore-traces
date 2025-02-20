@@ -30,6 +30,7 @@ export interface AttributePanelState extends SceneObjectState {
   title: string;
   type: HomepagePanelType;
   renderDurationPanel?: boolean;
+  filter?: string;
 }
 
 export class AttributePanel extends SceneObjectBase<AttributePanelState> {
@@ -37,7 +38,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
     super({
       $data: new SceneQueryRunner({
         datasource: explorationDS,
-        queries: [{ refId: 'A', queryType: 'traceql', tableType: 'spans', limit: 10, ...state.query }],
+        queries: [{ refId: 'A', queryType: 'traceql', tableType: 'spans', limit: 10, ...state.query, exemplars: 0 }],
       }),
       ...state,
     });
@@ -86,7 +87,7 @@ export class AttributePanel extends SceneObjectBase<AttributePanelState> {
                       children: [
                         new AttributePanel({
                           query: {
-                            query: `{nestedSetParent<0 && kind=server && duration > ${minDuration}}`,
+                            query: `{nestedSetParent<0 && duration > ${minDuration} ${state.filter ?? ''}}`,
                           },
                           title: state.title,
                           type: state.type,

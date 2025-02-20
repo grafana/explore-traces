@@ -4,11 +4,12 @@ import { AttributePanelRows } from './AttributePanelRows';
 import { DataFrame, Field } from '@grafana/data';
 
 describe('AttributePanelRows', () => {
-  const createField = (name: string, values: any[], labels: Record<string, string> = {}) =>
+  const createField = (name: string, values: any[], labels: Record<string, string> = {}, type?: string) =>
     ({
       name,
       values,
       labels,
+      type,
     }) as Field;
 
   const createDataFrame = (fields: Field[]) =>
@@ -19,11 +20,11 @@ describe('AttributePanelRows', () => {
   const dummySeries = [
     createDataFrame([
       createField('time', []),
-      createField('Test service 1', [10, 20], { 'resource.service.name': '"Test service 1"' }),
+      createField('Test service 1', [10, 20], { 'resource.service.name': '"Test service 1"' }, 'number'),
     ]),
     createDataFrame([
       createField('time', []),
-      createField('Test service 2', [15, 5], { 'resource.service.name': '"Test service 2"' }),
+      createField('Test service 2', [15, 5], { 'resource.service.name': '"Test service 2"' }, 'number'),
     ]),
   ];
 
