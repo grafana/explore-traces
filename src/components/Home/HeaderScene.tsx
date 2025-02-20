@@ -12,10 +12,10 @@ import {
   EXPLORATIONS_ROUTE,
 } from '../../utils/shared';
 import { getDatasourceVariable, getHomeFilterVariable, getHomeScene } from '../../utils/utils';
-import { useNavigate } from 'react-router-dom-v5-compat';
 import { DarkModeRocket, LightModeRocket } from '../../utils/rockets';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'utils/analytics';
 import { Home } from 'pages/Home/Home';
+import { useNavigate } from 'react-router-dom';
 
 export class HeaderScene extends SceneObjectBase {
   public static Component = ({ model }: SceneComponentProps<Home>) => {
