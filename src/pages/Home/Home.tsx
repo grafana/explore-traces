@@ -76,7 +76,6 @@ export class Home extends SceneObjectBase<HomeState> {
 
         const newFilters = newState.filters.filter((f) => !prevState.filters.find((pf) => pf.key === f.key));
         if (newFilters.length > 0) {
-          console.log(newFilters);
           reportAppInteraction(USER_EVENTS_PAGES.home, USER_EVENTS_ACTIONS.home.filter_changed, {
             key: newFilters[0].key,
           });
@@ -134,7 +133,7 @@ export class Home extends SceneObjectBase<HomeState> {
                   },
                   title: 'Slow traces',
                   type: 'slowest-traces',
-                    filter: renderedFilters,
+                  filter: renderedFilters,
                 }),
               }),
             ],
