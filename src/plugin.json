@@ -60,8 +60,8 @@
     "exposedComponents": [
       {
         "id": "grafana-exploretraces-app/open-in-explore-traces-button/v1",
-        "title": "Open in Explore Traces button",
-        "description": "A button that opens a traces view in the Explore Traces app."
+        "title": "Open in Traces drilldown button",
+        "description": "A button that opens a traces view in the Traces drilldown app."
       }
     ],
     "addedLinks": [

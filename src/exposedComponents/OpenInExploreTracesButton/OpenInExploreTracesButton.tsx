@@ -1,11 +1,10 @@
 import { useReturnToPrevious } from '@grafana/runtime';
 import { LinkButton } from '@grafana/ui';
 import React, { useMemo } from 'react';
-import { OpenInExploreTracesButtonProps } from './types';
+import { OpenInExploreTracesButtonProps } from '../types';
 import pluginJson from '../../plugin.json';
 
-
-export default function OpenInExploreLogsButton({
+export default function OpenInExploreTracesButton({
   datasourceUid,
   matchers,
   from,
@@ -51,7 +50,7 @@ export default function OpenInExploreLogsButton({
       href={href}
       onClick={() => setReturnToPrevious(returnToPreviousSource || 'previous')}
     >
-      Open in Explore Traces
+      Open in Traces drilldown
     </LinkButton>
   );
 }
