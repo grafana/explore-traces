@@ -24,6 +24,7 @@ export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_GROUPBY = 'groupBy';
+export const VAR_SPAN_LIST_COLUMNS = 'spanListColumns';
 export const VAR_METRIC = 'metric';
 export const VAR_LATENCY_THRESHOLD = 'latencyThreshold';
 export const VAR_LATENCY_THRESHOLD_EXPR = '${latencyThreshold}';
