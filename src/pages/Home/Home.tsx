@@ -111,18 +111,18 @@ export class Home extends SceneObjectBase<HomeState> {
                 body: new AttributePanel({
                   query: {
                     query: `{nestedSetParent < 0 && status = error ${renderedFilters}} | count_over_time() by (resource.service.name)`,
-                    step: durString
+                    step: durString,
                   },
-                  title: 'Errored services', 
+                  title: 'Errored services',
                   type: 'errors',
                 }),
               }),
               new SceneCSSGridItem({
-                body: new AttributePanel({ 
+                body: new AttributePanel({
                   query: {
                     query: `{nestedSetParent<0 ${renderedFilters}} | histogram_over_time(duration)`,
                   },
-                  title: 'Slow traces', 
+                  title: 'Slow traces',
                   type: 'duration',
                   filter: renderedFilters,
                 }),
@@ -161,7 +161,7 @@ function getVariableSet(initialFilters: AdHocVariableFilter[], initialDS?: strin
         datasource: explorationDS,
         layout: 'combobox',
         filters: initialFilters,
-        allowCustomValue: false,
+        allowCustomValue: true,
       }),
     ],
   });
