@@ -1,6 +1,6 @@
 ---
 cascade:
-  FULL_PRODUCT_NAME: Grafana Explore Traces
+  FULL_PRODUCT_NAME: Grafana Traces Drilldown
   PRODUCT_NAME: Explore Traces
 description: Learn about traces and how you can use them to understand and troubleshoot
   your application and services.
