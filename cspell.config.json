@@ -49,6 +49,8 @@
     "lokiexplore",
     "viewports",
     "Descendents",
-    "analysing"
+    "overriden",
+    "analysing",
+    "Drilldown"
   ]
 }

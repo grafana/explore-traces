@@ -16,6 +16,9 @@ jest.mock('../../../utils/utils', () => ({
       useState: jest.fn().mockReturnValue('rate'),
     }),
   }),
+  isNumber: {
+    test: jest.fn().mockReturnValue(false),
+  },
 }));
 
 describe('FilterSetRenderer', () => {
