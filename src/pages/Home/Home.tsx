@@ -114,7 +114,17 @@ export class Home extends SceneObjectBase<HomeState> {
                     step: durString,
                   },
                   title: 'Errored services',
-                  type: 'errors',
+                  type: 'errored-services',
+                }),
+              }),
+              new SceneCSSGridItem({
+                body: new AttributePanel({
+                  query: {
+                    query: '{nestedSetParent < 0} | quantile_over_time(duration, 0.9) by (resource.service.name)',
+                    step: durString,
+                  },
+                  title: 'Slow services',
+                  type: 'slowest-services',
                 }),
               }),
               new SceneCSSGridItem({
@@ -123,8 +133,8 @@ export class Home extends SceneObjectBase<HomeState> {
                     query: `{nestedSetParent<0 ${renderedFilters}} | histogram_over_time(duration)`,
                   },
                   title: 'Slow traces',
-                  type: 'duration',
-                  filter: renderedFilters,
+                  type: 'slowest-traces',
+                    filter: renderedFilters,
                 }),
               }),
             ],

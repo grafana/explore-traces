@@ -14,7 +14,7 @@ import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from 'ut
 import { getCurrentStep, getDataSource, getTraceExplorationScene } from 'utils/utils';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
-const extensionPointId = 'grafana-exploretraces-app/exploration/v1';
+const extensionPointId = 'grafana-exploretraces-app/investigation/v1';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
 const ADD_TO_INVESTIGATION_MENU_GROUP_TEXT = 'Investigations';
 
@@ -54,7 +54,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       });
       this._subs.add(
         addToInvestigationButton?.subscribeToState(() => {
-          subscribeToAddToExploration(this);
+          subscribeToAddToInvestigation(this);
         })
       );
       this.setState({
@@ -109,10 +109,10 @@ const onExploreClick = () => {
   reportAppInteraction(USER_EVENTS_PAGES.analyse_traces, USER_EVENTS_ACTIONS.analyse_traces.open_in_explore_clicked);
 };
 
-const getInvestigationLink = (addToExplorations: AddToInvestigationButton) => {
+const getInvestigationLink = (addToInvestigations: AddToInvestigationButton) => {
   const links = getPluginLinkExtensions({
     extensionPointId,
-    context: addToExplorations.state.context,
+    context: addToInvestigations.state.context,
   });
 
   return links.extensions[0];
@@ -130,15 +130,15 @@ const onAddToInvestigationClick = (event: React.MouseEvent, addToInvestigationBu
   );
 };
 
-function subscribeToAddToExploration(menu: PanelMenu) {
+function subscribeToAddToInvestigation(menu: PanelMenu) {
   const addToInvestigationButton = menu.state.addToInvestigationButton;
   if (addToInvestigationButton) {
     const link = getInvestigationLink(addToInvestigationButton);
     const existingMenuItems = menu.state.body?.state.items ?? [];
-    const existingAddToExplorationLink = existingMenuItems.find((item) => item.text === ADD_TO_INVESTIGATION_MENU_TEXT);
+    const existingAddToInvestigationLink = existingMenuItems.find((item) => item.text === ADD_TO_INVESTIGATION_MENU_TEXT);
 
     if (link) {
-      if (!existingAddToExplorationLink) {
+      if (!existingAddToInvestigationLink) {
         menu.state.body?.addItem({
           text: ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT,
           type: 'divider',
@@ -153,7 +153,7 @@ function subscribeToAddToExploration(menu: PanelMenu) {
           onClick: (e) => onAddToInvestigationClick(e, addToInvestigationButton),
         });
       } else {
-        if (existingAddToExplorationLink) {
+        if (existingAddToInvestigationLink) {
           menu.state.body?.setItems(
             existingMenuItems.filter(
               (item) =>
