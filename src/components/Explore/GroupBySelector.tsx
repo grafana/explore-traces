@@ -13,7 +13,7 @@ type Props = {
   options: Array<SelectableValue<string>>;
   radioAttributes: string[];
   value?: string;
-  onChange: (label: string) => void;
+  onChange: (label: string, ignore?: boolean) => void;
   showAll?: boolean;
   model: AttributesBreakdownScene | AttributesComparisonScene;
 };
@@ -104,7 +104,7 @@ export function GroupBySelector({ options, radioAttributes, value, onChange, sho
     const defaultValue = radioAttributes[0] ?? options[0]?.value;
     if (defaultValue) {
       if (!showAll && (!value || value === ALL)) {
-        onChange(defaultValue);
+        onChange(defaultValue, true);
       }
     }
   });
