@@ -178,6 +178,12 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     }
   }
 
+  onUserUpdateSelection(newSelection: ComparisonSelection) {
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ selection: newSelection });
+    });
+  }
+
   public setActionView(actionView?: ActionViewType) {
     const { body } = this.state;
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);

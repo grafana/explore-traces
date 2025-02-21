@@ -63,7 +63,7 @@ const commitSha = process.env.COMMIT_SHA;
 const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId', 'metric'] });
 
   public constructor(state: { locationService: LocationService } & Partial<TraceExplorationState>) {
     super({
@@ -150,7 +150,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!signal || this.state.primarySignal === signal) {
       return;
     }
-    this.setState({ primarySignal: signal });
+
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ primarySignal: signal });
+    });
   };
 
   public onChangeMetricFunction = (metric: string) => {
@@ -158,7 +161,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!metric || variable.getValue() === metric) {
       return;
     }
-    variable.changeValueTo(metric);
+
+    variable.changeValueTo(metric, undefined, true);
   };
 
   public getMetricFunction() {
