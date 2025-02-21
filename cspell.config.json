@@ -10,6 +10,7 @@
     "src/dashboards/*.json",
     "**/testdata/**/*.json",
     "**/testdata/**/*.jsonc",
+    "src/utils/links.test.ts",
     "vendor/**",
     "cspell.config.json",
     "package.json",

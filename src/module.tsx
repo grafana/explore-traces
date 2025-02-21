@@ -4,6 +4,7 @@ import { AppPlugin } from '@grafana/data';
 // @ts-ignore new API that is not yet in stable release
 import { sidecarServiceSingleton_EXPERIMENTAL } from '@grafana/runtime';
 import pluginJson from './plugin.json';
+import { linkConfigs } from 'utils/links';
 
 const App = lazy(() => import('./components/App/App'));
 const AppConfig = lazy(() => import('./components/AppConfig/AppConfig'));
@@ -23,3 +24,7 @@ export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
     sidecarServiceSingleton_EXPERIMENTAL?.openAppV3({ pluginId: pluginJson.id, path: '/explore' }, helpers.context);
   },
 });
+
+for (const linkConfig of linkConfigs) {
+  plugin.addLink(linkConfig);
+}
