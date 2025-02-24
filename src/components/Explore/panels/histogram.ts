@@ -37,7 +37,7 @@ export function getHistogramVizPanel(scene: SceneObject, yBuckets: number[]) {
         const yTo = yBucketToDuration(args[0].y?.to || 0, yBuckets);
         newSelection.duration = { from: yFrom, to: yTo };
 
-        parent.setState({ selection: newSelection });
+        parent.onUserUpdateSelection(newSelection);
         if (!shouldShowSelection(parent.state.actionView)) {
           parent.setActionView('comparison');
         }

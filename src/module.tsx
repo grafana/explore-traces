@@ -20,6 +20,6 @@ export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
   icon: 'align-left',
   targets: 'grafana-lokiexplore-app/toolbar-open-related/v1',
   onClick: (e, helpers) => {
-    sidecarServiceSingleton_EXPERIMENTAL?.openApp(pluginJson.id, helpers.context);
+    sidecarServiceSingleton_EXPERIMENTAL?.openAppV3({ pluginId: pluginJson.id, path: '/explore' }, helpers.context);
   },
 });

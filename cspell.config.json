@@ -48,7 +48,9 @@
     "gdev",
     "lokiexplore",
     "viewports",
+    "Descendents",
     "overriden",
-    "analysing"
+    "analysing",
+    "Drilldown"
   ]
 }

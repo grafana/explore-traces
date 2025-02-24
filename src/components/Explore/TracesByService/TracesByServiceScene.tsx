@@ -50,7 +50,6 @@ import { map, Observable } from 'rxjs';
 
 export interface TraceSceneState extends SceneObjectState {
   body: SceneFlexLayout;
-  metric?: MetricFunction;
   actionView?: ActionViewType;
 
   attributes?: string[];
@@ -186,6 +185,12 @@ export class TracesByServiceScene extends SceneObjectBase<TraceSceneState> {
     }
   }
 
+  onUserUpdateSelection(newSelection: ComparisonSelection) {
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ selection: newSelection });
+    });
+  }
+
   public setActionView(actionView?: ActionViewType) {
     const { body } = this.state;
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
@@ -247,7 +252,9 @@ const MetricTypeTooltip = () => {
   return (
     <Stack direction={'column'} gap={1}>
       <div className={styles.tooltip.title}>RED metrics for traces</div>
-      <span className={styles.tooltip.subtitle}>Explore rate, errors, and duration (RED) metrics generated from traces by Tempo.</span>
+      <span className={styles.tooltip.subtitle}>
+        Explore rate, errors, and duration (RED) metrics generated from traces by Tempo.
+      </span>
       <div className={styles.tooltip.text}>
         <div>
           <span className={styles.tooltip.emphasize}>Rate</span> - Spans per second that match your filter, useful to
@@ -310,9 +317,9 @@ function getStyles(theme: GrafanaTheme2) {
         label: 'text',
         color: theme.colors.text.secondary,
 
-        'div': {
+        div: {
           marginBottom: theme.spacing.x0_5,
-        }
+        },
       }),
       emphasize: css({
         label: 'emphasize',

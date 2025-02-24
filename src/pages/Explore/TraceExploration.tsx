@@ -64,7 +64,7 @@ const commitSha = process.env.COMMIT_SHA;
 const compositeVersion = `v${version} - ${buildTime?.split('T')[0]} (${commitSha})`;
 
 export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['primarySignal', 'traceId', 'spanId', 'metric'] });
 
   public constructor(state: { locationService: LocationService } & Partial<TraceExplorationState>) {
     super({
@@ -82,7 +82,7 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
 
   public _onActivate() {
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopScene(this.getMetricVariable().getValue() as MetricFunction) });
+      this.setState({ topScene: getTopScene() });
     }
 
     const datasourceVar = sceneGraph.lookupVariable(VAR_DATASOURCE, this) as DataSourceVariable;
@@ -151,7 +151,10 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!signal || this.state.primarySignal === signal) {
       return;
     }
-    this.setState({ primarySignal: signal });
+
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState({ primarySignal: signal });
+    });
   };
 
   public onChangeMetricFunction = (metric: string) => {
@@ -159,7 +162,8 @@ export class TraceExploration extends SceneObjectBase<TraceExplorationState> {
     if (!metric || variable.getValue() === metric) {
       return;
     }
-    variable.changeValueTo(metric);
+
+    variable.changeValueTo(metric, undefined, true);
   };
 
   public getMetricFunction() {
@@ -270,8 +274,8 @@ const PreviewTooltip = ({ text }: { text: string }) => {
   );
 };
 
-function getTopScene(metric?: MetricFunction) {
-  return new TracesByServiceScene({ metric });
+function getTopScene() {
+  return new TracesByServiceScene({});
 }
 
 function getVariableSet(initialDS?: string, initialFilters?: AdHocVariableFilter[]) {

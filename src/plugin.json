@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Explore Traces",
+  "name": "Grafana Traces Drilldown",
   "id": "grafana-exploretraces-app",
   "preload": true,
   "autoEnabled": true,
@@ -60,13 +60,13 @@
     "addedLinks": [
       {
         "targets": ["grafana-lokiexplore-app/toolbar-open-related/v1"],
-        "title": "open traces",
+        "title": "traces",
         "description": "Open traces"
       }
     ],
     "extensionPoints": [
       {
-        "id": "grafana-exploretraces-app/exploration/v1"
+        "id": "grafana-exploretraces-app/investigation/v1"
       }
     ]
   }
