@@ -50,7 +50,7 @@ export default function OpenInExploreTracesButton({
       href={href}
       onClick={() => setReturnToPrevious(returnToPreviousSource || 'previous')}
     >
-      Open in Traces drilldown
+      Open in Traces Drilldown
     </LinkButton>
   );
 }

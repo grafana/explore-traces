@@ -8,7 +8,7 @@ function SuspendedOpenInExploreTracesButton(props: OpenInExploreTracesButtonProp
     <Suspense
       fallback={
         <LinkButton variant="secondary" disabled>
-          Open in Traces drilldown
+          Open in Traces Drilldown
         </LinkButton>
       }
     >
@@ -20,7 +20,7 @@ function SuspendedOpenInExploreTracesButton(props: OpenInExploreTracesButtonProp
 export const exposedComponents = [
   {
     id: 'grafana-exploretraces-app/open-in-explore-traces-button/v1',
-    title: 'Open in Traces drilldown button',
+    title: 'Open in Traces Drilldown button',
     description: 'A button that opens a traces view in the Traces drilldown app.',
     component: SuspendedOpenInExploreTracesButton,
   },
