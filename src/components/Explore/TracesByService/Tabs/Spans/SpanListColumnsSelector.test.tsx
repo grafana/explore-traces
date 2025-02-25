@@ -17,36 +17,20 @@ describe('SpanListColumnsSelector', () => {
     jest.clearAllMocks();
   });
 
-  it('should display "Show these extra columns" label', () => {
-    render(
-      <SpanListColumnsSelector
-        options={mockOptions}
-        onChange={mockOnChange} 
-      />
-    );
+  it('should display "Add extra columns" label', () => {
+    render(<SpanListColumnsSelector options={mockOptions} onChange={mockOnChange} />);
 
-    expect(screen.getByText('Show these extra columns')).toBeInTheDocument();
+    expect(screen.getByText('Add extra columns')).toBeInTheDocument();
   });
 
   it('should show placeholder text when no value is selected', () => {
-    render(
-      <SpanListColumnsSelector
-        options={mockOptions}
-        onChange={mockOnChange}
-      />
-    );
+    render(<SpanListColumnsSelector options={mockOptions} onChange={mockOnChange} />);
 
-    expect(screen.getByText('Please select')).toBeInTheDocument();
+    expect(screen.getByText('Select an attribute')).toBeInTheDocument();
   });
 
   it('should display pre-selected values', async () => {
-    render(
-      <SpanListColumnsSelector
-        options={mockOptions}
-        onChange={mockOnChange}
-        value="Duration,Tags"
-      />
-    );
+    render(<SpanListColumnsSelector options={mockOptions} onChange={mockOnChange} value="Duration,Tags" />);
 
     expect(screen.getByText('Duration')).toBeInTheDocument();
     expect(screen.getByText('Tags')).toBeInTheDocument();
@@ -54,13 +38,8 @@ describe('SpanListColumnsSelector', () => {
 
   it('should allow selecting multiple options', async () => {
     const user = userEvent.setup();
-    
-    render(
-      <SpanListColumnsSelector
-        options={mockOptions}
-        onChange={mockOnChange}
-      />
-    );
+
+    render(<SpanListColumnsSelector options={mockOptions} onChange={mockOnChange} />);
 
     // Open the combobox
     const combobox = screen.getByRole('combobox');
@@ -69,26 +48,21 @@ describe('SpanListColumnsSelector', () => {
     // Select first option
     const durationOption = screen.getByText('Duration');
     await user.click(durationOption);
-    
-    expect(mockOnChange).toHaveBeenCalledWith('Duration');
+
+    expect(mockOnChange).toHaveBeenCalledWith('duration');
 
     // Select second option
     await user.click(combobox);
     const tagsOption = screen.getByText('Tags');
     await user.click(tagsOption);
 
-    expect(mockOnChange).toHaveBeenCalledWith('Duration,Tags');
+    expect(mockOnChange).toHaveBeenCalledWith('duration,tags');
   });
 
   it('should display all available options when clicking the combobox', async () => {
     const user = userEvent.setup();
 
-    render(
-      <SpanListColumnsSelector
-        options={mockOptions}
-        onChange={mockOnChange}
-      />
-    );
+    render(<SpanListColumnsSelector options={mockOptions} onChange={mockOnChange} />);
 
     const combobox = screen.getByRole('combobox');
     await user.click(combobox);
@@ -99,4 +73,4 @@ describe('SpanListColumnsSelector', () => {
       }
     });
   });
-}); 
+});
