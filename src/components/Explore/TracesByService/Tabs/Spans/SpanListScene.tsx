@@ -18,7 +18,12 @@ import { css } from '@emotion/css';
 import Skeleton from 'react-loading-skeleton';
 import { Icon, Link, TableCellDisplayMode, TableCustomCellOptions, useStyles2, useTheme2 } from '@grafana/ui';
 import { map, Observable } from 'rxjs';
-import { getDataSource, getSpanListColumnsVariable, getTraceByServiceScene, getTraceExplorationScene } from '../../../../../utils/utils';
+import {
+  getDataSource,
+  getSpanListColumnsVariable,
+  getTraceByServiceScene,
+  getTraceExplorationScene,
+} from '../../../../../utils/utils';
 import { EMPTY_STATE_ERROR_MESSAGE, EMPTY_STATE_ERROR_REMEDY_MESSAGE } from '../../../../../utils/shared';
 import { SpanListColumnsSelector } from './SpanListColumnsSelector';
 import { reportAppInteraction, USER_EVENTS_PAGES, USER_EVENTS_ACTIONS } from 'utils/analytics';
@@ -200,7 +205,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
       }
     }
   }
-  
+
   public onChange = (columns: string[]) => {
     const variable = getSpanListColumnsVariable(this);
     if (variable.getValue() !== columns) {
@@ -210,7 +215,7 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
         USER_EVENTS_PAGES.analyse_traces,
         USER_EVENTS_ACTIONS.analyse_traces.span_list_columns_changed,
         {
-          columns
+          columns,
         }
       );
     }
@@ -228,12 +233,14 @@ export class SpanListScene extends SceneObjectBase<SpanListSceneState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.description}>View a list of spans for the current set of filters.</div>
-        <SpanListColumnsSelector
-          options={attributes?.map(x => toOption(x)) ?? []}
-          value={variable.getValue()}
-          onChange={model.onChange}
-        />
+        <div className={styles.header}>
+          <div className={styles.description}>View a list of spans for the current set of filters.</div>
+          <SpanListColumnsSelector
+            options={attributes?.map((x) => toOption(x)) ?? []}
+            value={variable.getValue()}
+            onChange={model.onChange}
+          />
+        </div>
         <panel.Component model={panel} />
       </div>
     );
@@ -282,6 +289,12 @@ const getStyles = (theme: GrafanaTheme2) => {
     description: css({
       fontSize: theme.typography.h6.fontSize,
       padding: `${theme.spacing(1)} 0 ${theme.spacing(2)} 0`,
+    }),
+    header: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: '10px',
     }),
   };
 };
