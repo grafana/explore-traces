@@ -33,7 +33,7 @@ To use Traces Drilldown, you need:
 To access Traces Drilldown:
 
 1. Open your Grafana stack in a web browser.
-1. In the main menu, select **Explore** > **Traces**.
+1. In the main menu, select **Drilldown** > **Traces**.
 
 ### Grafana
 
